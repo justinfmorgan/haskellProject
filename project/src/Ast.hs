@@ -1,8 +1,27 @@
 module Ast where
 
 -- | the abstract syntax tree for the language
-data Ast -- ...
---         deriving (Eq,Show)  -- helpful to use this during testing
+data Ast = ValBool Bool
+         | And Ast Ast | Or Ast Ast | Not Ast
+         
+         | ValFloat Float -- added
+         | ValString String -- added
+         | ValChar Character -- added
+         | List [Ast] -- added
+
+         | ValInt Integer
+         | Plus Ast Ast | Minus Ast Ast | Mult Ast Ast | Div Ast Ast
+
+         | Nil
+         | Cons Ast Ast
+
+         | If Ast Ast Ast
+         | Let String Ast Ast
+
+         | Var String
+         | Lam String Ast
+         | App Ast Ast
+           deriving (Eq,Show) -- helpful to use this during testing
 --         deriving Eq 
 
 instance Show Ast where
