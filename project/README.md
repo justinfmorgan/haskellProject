@@ -14,29 +14,29 @@ Our add-ons (for now) will be:
 	10pt Add runtime warnings to the monad, and flag appropriate conditions which are not errors, but cause concern (e.g., you defined a variable or function but then didn't use it, as in the Ok monad presented in lecture).
 ## Plan
 Files to Complete:
-Ast.hs
-	Data Ast => Alex
-	instance show => Noah
-	showfullyParen => Noah
-	showPretty => Noah
-Check.hs
-	Data WarningMsg => Justin
-	Check => Justin
-Eval.hs
-	Data Val => Alex
-	Instance show Val = > Noah
-	Run => Justin
-Exec.hs
-	Exec => Alex
-	Warn => Alex
-Parser
-	Parser! => Mix of everyone 
-LangMonad => Will be done as someone needs it for their part
-	Data LangMonad
-	runLangMonad
-	Functor
+Ast.hs ->
+	Data Ast => Alex |
+	instance show => Noah |
+	showfullyParen => Noah |
+	showPretty => Noah |
+Check.hs ->
+	Data WarningMsg => Justin |
+	Check => Justin |
+Eval.hs -> 
+	Data Val => Alex | 
+	Instance show Val = > Noah |
+	Run => Justin |
+Exec.hs ->
+	Exec => Alex | 
+	Warn => Alex |
+Parser |
+	Parser! => Mix of everyone |
+LangMonad => Will be done as someone needs it for their part |
+	Data LangMonad |
+	runLangMonad |
+	Functor |
 	Monad
-We will meet up to work on the project and discuss as we each work on our separate parts
-We will begin with the vanilla features and then work on our add-ons
-Justin will work on testing primarily while Alex and Noah will work on the vanilla project unless issues pop up to switch things around
-
+===>>>>
+We will meet up to work on the project and discuss as we each work on our separate parts. 
+We will begin with the vanilla features and then work on our add-ons. 
+Justin will work on testing primarily while Alex and Noah will work on the vanilla project unless issues pop up to switch things around. 
