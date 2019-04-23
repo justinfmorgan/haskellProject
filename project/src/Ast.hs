@@ -5,8 +5,7 @@ data Ast = ValBool Bool
          | And Ast Ast | Or Ast Ast | Not Ast
          
          | ValFloat Float -- added
-         | ValString String -- added
-         | ValChar Character -- added
+         | ValChar Char -- added
          | List [Ast] -- added
 
          | ValInt Integer
@@ -21,7 +20,7 @@ data Ast = ValBool Bool
          | Var String
          | Lam String Ast
          | App Ast Ast
-           deriving (Eq,Show) -- helpful to use this during testing
+           deriving Eq -- helpful to use this during testing
 --         deriving Eq 
 
 instance Show Ast where
