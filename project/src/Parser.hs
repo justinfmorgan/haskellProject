@@ -5,27 +5,92 @@ import ParserMonad
 import Data.Char --added
 
 {- What must be added into the parser:
-         ValFloat Float
-         ValChar Char
-         List [Ast]
+         ValFloat Float            ValChar Char           List [Ast]
+         Separator Ast Ast         Equal Ast Ast          NotEqual Ast Ast
+         LessThan Ast Ast          LessThanOrEqual Ast Ast 
+         GreaterThan Ast Ast       GreatThanOrEqual Ast Ast
+         Concat Ast Ast            DivFloat Ast Ast 
+         Modulus Ast Ast -- only for integers         FloatExp Ast Ast          IntExp Ast Ast
+         ListIndex Ast Ast -- left -> list, right -> integer    list !! integer
+         Print Ast
+
 		 ignoring comments
 -}
+--highest precedence -> integers, floats, chars, lists, variables, let, if then else, lambda
 
-charParser:: Parser Char
-charParser = 
-  do head <- sat isAlpha
-     return head
+{-
+   ==    Equals                     -- equality operators are overloaded for all types except functions                  
+    /=    Not-equal                                                     
+    <     Less-than                  -- these four operators only need to compare integers and floats,  
+    <=    Less-than-or-equal                              
+    >=    Greater-than-or-equal              
+    >     Greater-than 
+-}
+
+types:: Parser Ast
+types = parseChar <|> vars <|> ints <|> floatParser
+eqEpr:: Parser Ast
+eqEpr = withInfix types [("==", Equal)] 
+notEqEpr:: Parser Ast
+notEqEpr = withInfix types [("/=", NotEqual)] 
+greatTEpr:: Parser Ast
+greatTEpr = withInfix types [(">", GreaterThan)] 
+greatTEqEpr:: Parser Ast
+greatTEqEpr = withInfix types [(">=", GreaterThanOrEqual)] 
+lessTEpr:: Parser Ast
+lessTEpr = withInfix types [("<", LessThan)] 
+lessTEqEpr:: Parser Ast
+lessTEqEpr = withInfix types [("<=", LessThanOrEqual)] 
+
+{-
+    *     Multiplication             -- overloaded for integers and floats                          
+    /     Floating-Point Division           --TODO Division Fix     
+    //    Integer Division   
+-}
+
+floatExpEpr:: Parser Ast -- symbol ^ R associative
+floatExpEpr = undefined
+intExpEpr:: Parser Ast  -- symbol ** R associate
+intExpEpr = undefined
+
+modEpr:: Parser Ast             -- only for integers
+modEpr = withInfix ints [("%", Modulus)]
+
+divFloatEpr:: Parser Ast
+
+pri:: Parser Ast
+pri = do token $ literal "print"
+         token $ literal "("
+         printed <- parser
+         token $ literal ")"
+         return printed
+         `mapParser` (\ i -> Print i)
+
+sep:: Ast -> Parser Ast --lowest in precedence TODO
+sep left  = do s <- (token $ literal ";")
+               exp <- beforeSep
+               let res = left `Separator` exp
+               (sep res) <|> return res
+
+sepEpr:: Parser Ast
+sepEpr = do l <- beforeSep
+            sep l
+
+floatParser:: Parser Ast
+floatParser = undefined
 
 parseChar:: Parser Ast
-parseChar = do s <- token $ charParser
-               return (ValChar s)
-{-
+parseChar = do s <- token (literal "'")
+               a <- isAlpha
+               b <- token (literal "'")
+               return (ValChar a)
+
 parseFloat:: Parser Ast  --check this
 parseFloat = do s <- intParser
                 a <- literal (".")
                 b <- natParser
                 return (ValFloat (s++a++b))
- -}
+ 
 p = parse parser
 
 p' x = case parse parser x of
@@ -152,7 +217,7 @@ notExp = do s <- token $ (literal "!")
             return (Not a)
 
 atoms:: Parser Ast
-atoms = ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
+atoms = pri <|> charParser <|> floatParser <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
 
 -- *LangParser> parse atoms "111"
 -- Just (111,"")
