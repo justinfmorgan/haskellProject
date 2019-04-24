@@ -36,7 +36,7 @@ notEqEpr = withInfix types [("/=", NotEqual)]
 greatTEpr:: Parser Ast
 greatTEpr = withInfix types [(">", GreaterThan)] 
 greatTEqEpr:: Parser Ast
-greatTEqEpr = withInfix types [(">=", GreaterThanOrEqual)] 
+greatTEqEpr = withInfix types [(">=", GreatThanOrEqual)] 
 lessTEpr:: Parser Ast
 lessTEpr = withInfix types [("<", LessThan)] 
 lessTEqEpr:: Parser Ast
@@ -57,6 +57,8 @@ modEpr:: Parser Ast             -- only for integers
 modEpr = withInfix ints [("%", Modulus)]
 
 divFloatEpr:: Parser Ast
+divFloatEpr = undefined
+
 
 pri:: Parser Ast
 pri = do token $ literal "print"
@@ -65,7 +67,7 @@ pri = do token $ literal "print"
          token $ literal ")"
          return printed
          `mapParser` (\ i -> Print i)
-
+{- 
 sep:: Ast -> Parser Ast --lowest in precedence TODO
 sep left  = do s <- (token $ literal ";")
                exp <- beforeSep
@@ -75,21 +77,22 @@ sep left  = do s <- (token $ literal ";")
 sepEpr:: Parser Ast
 sepEpr = do l <- beforeSep
             sep l
-
+-}
 floatParser:: Parser Ast
 floatParser = undefined
 
 parseChar:: Parser Ast
 parseChar = do s <- token (literal "'")
-               a <- isAlpha
+               a <- sat isAlpha
                b <- token (literal "'")
                return (ValChar a)
 
 parseFloat:: Parser Ast  --check this
-parseFloat = do s <- intParser
-                a <- literal (".")
-                b <- natParser
-                return (ValFloat (s++a++b))
+parseFloat = undefined
+--parseFloat = do s <- intParser
+--                a <- literal (".")
+--                b <- natParser
+--                return (ValFloat (s)) --TODO
  
 p = parse parser
 
@@ -217,7 +220,7 @@ notExp = do s <- token $ (literal "!")
             return (Not a)
 
 atoms:: Parser Ast
-atoms = pri <|> charParser <|> floatParser <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
+atoms = pri <|> parseChar <|> floatParser <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
 
 -- *LangParser> parse atoms "111"
 -- Just (111,"")
