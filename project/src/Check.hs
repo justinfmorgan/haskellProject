@@ -4,6 +4,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 
 import Ast
+import EnvUnsafe
 
 -- here you can preform static checks
 
@@ -23,7 +24,7 @@ data WarningMsg = UndefinedVarUse String  -- ^ This is the Warning for use of Un
 -- | perform static checking on the Ast
 -- the output a set of warning on that input Ast
 check :: Ast -> Set WarningMsg
-check t = ()
+check = undefined
 
 -- collect all the vars that appear in the expression that are not bound
 freeVars :: Ast -> Set String
