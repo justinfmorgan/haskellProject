@@ -11,7 +11,7 @@ import Ast
 
 data Val = I Integer | B Bool | F Float | C Char | S String
          | Ls [Val]
-         | Fun (Val ->  Val) -- FIXME since this is a functional language, one thing that can be returned is a function
+         | Fun (Val ->  Val) -- FIXME!!!! since this is a functional language, one thing that can be returned is a function
 
 
 instance Show Val where
