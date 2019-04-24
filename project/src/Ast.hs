@@ -90,7 +90,7 @@ showPretty (ValInt i) _         =  if i < 0
                                    else show i
 showPretty (ValBool True) _     =  "true"
 showPretty (ValBool False)  _   = "false"
-showPretty (ValFloat i)         = if i < 0
+showPretty (ValFloat i) _       = if i < 0
                                   then  "(" ++ show i ++ ")"
                                   else show i
 showPretty (ValChar c) _        = show c
@@ -99,21 +99,21 @@ showPretty (List [x]) _         = undefined
 showPretty Nil _ = "[]"
 showPretty (Var s) _ = s
 
-showPretty (Lam v bod) i        = parenthesize' 1 i $ "\\ " ++ v ++ " -> " ++ (showPretty bod 1)
-showPretty (Let v a bod) i      = parenthesize' 1 i $  "let " ++ v ++ " = " ++ (showPretty a 1) ++ " in " ++ (showPretty bod 1)
-showPretty (If b t e) i         = parenthesize' 1 i $  "if " ++ (showPretty b 1) ++ " then " ++ (showPretty t 1) ++ " else " ++ (showPretty e 1)
+showPretty (Lam v bod) i        = parenthesize 1 i $ "\\ " ++ v ++ " -> " ++ (showPretty bod 1)
+showPretty (Let v a bod) i      = parenthesize 1 i $  "let " ++ v ++ " = " ++ (showPretty a 1) ++ " in " ++ (showPretty bod 1)
+showPretty (If b t e) i         = parenthesize 1 i $  "if " ++ (showPretty b 1) ++ " then " ++ (showPretty t 1) ++ " else " ++ (showPretty e 1)
 
-showPretty (App l r) i          = parenthesize' 2 i $ (showPretty l 2) ++ " " ++ (showPretty r 3)
-showPretty (Cons l r) i         = parenthesize' 4 i $ (showPretty l 5) ++ " : " ++ (showPretty r 4)
+showPretty (App l r) i          = parenthesize 2 i $ (showPretty l 2) ++ " " ++ (showPretty r 3)
+showPretty (Cons l r) i         = parenthesize 4 i $ (showPretty l 5) ++ " : " ++ (showPretty r 4)
 
-showPretty (Assign v b)       d = parenthesize' d 6 (v ++ " := " ++  (showPretty b 6) )
-showPretty (l `Separator` r)  d = parenthesize' d 8 ((showPretty l 8) ++ " ; " ++  (showPretty r 7) ) -- binds most weakly
-showPretty (Or l r) i           = parenthesize' 6 i $ (showPretty l 6) ++ " || " ++ (showPretty r 7)
-showPretty (l 'LessThan l r) i  = parenthesize' 6 i $ (showPretty l 6) ++ " < " ++ (showPretty r 7)
-showPretty (And l r) i          = parenthesize' 8 i $ (showPretty l 8) ++ " && " ++ (showPretty r 9)
-showPretty (Minus l r) i        = parenthesize' 10 i $ (showPretty l 10) ++ " - " ++ (showPretty r 11)
-showPretty (Plus l r) i         = parenthesize' 10 i $ (showPretty l 10) ++ " + " ++ (showPretty r 11)
-showPretty (Mult l r) i         = parenthesize' 12 i $ (showPretty l 12) ++ " * " ++ (showPretty r 13)
-showPretty (Div l r) i          = parenthesize' 12 i $ (showPretty l 12) ++ " / " ++ (showPretty r 13)
 
-showPretty (Not l ) i           = parenthesize' 14 i $  " ! " ++ (showPretty l 14)
+showPretty (l `Separator` r) d  = parenthesize d 8 ((showPretty l 8) ++ " ; " ++  (showPretty r 7) ) -- binds most weakly
+showPretty (Or l r) i           = parenthesize 6 i $ (showPretty l 6) ++ " || " ++ (showPretty r 7)
+showPretty (l `LessThan`r) i    = parenthesize 6 i $ (showPretty l 6) ++ " < " ++ (showPretty r 7)
+showPretty (And l r) i          = parenthesize 8 i $ (showPretty l 8) ++ " && " ++ (showPretty r 9)
+showPretty (Minus l r) i        = parenthesize 10 i $ (showPretty l 10) ++ " - " ++ (showPretty r 11)
+showPretty (Plus l r) i         = parenthesize 10 i $ (showPretty l 10) ++ " + " ++ (showPretty r 11)
+showPretty (Mult l r) i         = parenthesize 12 i $ (showPretty l 12) ++ " * " ++ (showPretty r 13)
+showPretty (Div l r) i          = parenthesize 12 i $ (showPretty l 12) ++ " / " ++ (showPretty r 13)
+
+showPretty (Not l ) i           = parenthesize 14 i $  " ! " ++ (showPretty l 14)
