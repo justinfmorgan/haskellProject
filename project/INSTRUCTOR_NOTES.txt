@@ -1,0 +1,3 @@
+# instructor notes
+## M1
+We are recomend that you talk to Mark if you plan to implement "runtime warnings".  The feature is harder then origionally intended, and it is less useful since printing is required.
