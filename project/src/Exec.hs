@@ -7,7 +7,7 @@ import Ast
 import Eval
 import Parser
 import Check
-
+import ParserMonad
 
 
 data LangOut = 
@@ -24,14 +24,14 @@ data LangOut =
 ---run output => (Either String Val, [String]) 
 -- | execute the program as a string and get the result
 exec :: String -> LangOut
-exec = undefined
-exec s = case (parse parser) s of
+exec s = case parse parser s  of
   Just (ast,"") -> case run ast of
-  					Left a [b] -> RuntimeError a [b]
-  					Right val [b] => Ok val [b]
+  					(Left a, [b]) -> RuntimeError a [b]
+  					(Right val, [b]) -> Ok val [b]
                     -- Ok v -> Ok v [s]
                     -- RuntimeError e -> RuntimeError e [s]
-  _  -> ParseError
+  					_  -> ParseError
+  Nothing -> ParseError
 
 -- | perform static checking on the program string, may be empty if there is a parse error
 warn :: String -> (Set WarningMsg) 
