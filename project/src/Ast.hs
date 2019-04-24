@@ -77,14 +77,7 @@ showFullyParen (Div l r) = "(" ++ (showFullyParen l) ++ " // " ++ (showFullyPare
 showFullyParen (If b t e) = "(if " ++ (showFullyParen b) ++ " then " ++ (showFullyParen t) ++ " else " ++ (showFullyParen e) ++ ")"
 showFullyParen (Let v a bod) = "(let " ++ v ++ " = " ++ (showFullyParen a) ++ " in " ++ (showFullyParen bod) ++ ")"
 showFullyParen (Lam v bod) = "(\\ " ++ v ++ " -> " ++ (showFullyParen bod) ++ ")"
-showFullyParen (App f a) showPretty (LiteralInt i)     _ = show i
-showPretty (Var s)            _ = s
-showPretty (l `Mult` r)       d = parenthesize d 1 ((showPretty l 1) ++ " * " ++  (showPretty r 0))
-showPretty (l `Plus` r)       d = parenthesize d 3 ((showPretty l 3) ++ " + " ++  (showPretty r 2))
-showPretty (l `Sub` r)        d = parenthesize d 3 ((showPretty l 3) ++ " - " ++  (showPretty r 2))
-showPretty (Assign v b)       d = parenthesize d 6 (v ++ " := " ++  (showPretty b 6) )
-showPretty (l `Separator` r)  d = parenthesize d 8 ((showPretty l 8) ++ " ; " ++  (showPretty r 7) ) -- binds most weakly
-= "( " ++ (showFullyParen f)  ++ " " ++ (showFullyParen a) ++ ")"
+showFullyParen (App f a) = "( " ++ (showFullyParen f)  ++ " " ++ (showFullyParen a) ++ ")"
 showFullyParen (Var s) = "( " ++ s ++ ")"
 showFullyParen (Cons h t) = "(" ++ (showFullyParen h)  ++ " : " ++ (showFullyParen t) ++ ")"
 showFullyParen Nil = "( [] )"

@@ -11,15 +11,15 @@ import Data.Char --added
          GreaterThan Ast Ast       GreatThanOrEqual Ast Ast
          Concat Ast Ast            DivFloat Ast Ast 
          Modulus Ast Ast -- only for integers         FloatExp Ast Ast          IntExp Ast Ast
-         ListIndex Ast Ast -- left -> list, right -> integer    list !! integer
+         ListIndex Ast Ast -- left -> list, right -> integer    list !! integ/er
          Print Ast
 
-		 ignoring comments
+		 ignoring comments!!!!!
 -}
 --highest precedence -> integers, floats, chars, lists, variables, let, if then else, lambda
 
 {-
-   ==    Equals                     -- equality operators are overloaded for all types except functions                  
+    ==    Equals                     -- equality operators are overloaded for all types except functions                  
     /=    Not-equal                                                     
     <     Less-than                  -- these four operators only need to compare integers and floats,  
     <=    Less-than-or-equal                              
@@ -27,19 +27,44 @@ import Data.Char --added
     >     Greater-than 
 -}
 
+listEpr:: Parser Ast
+listEpr = do a <- token (literal "[")           --most likely a FIXME
+             head <- (sat isAlpha <|> digit)  
+             tail <- rep (sat isAlpha <|> digit )
+             end <- token (literal "]")
+             return (List [head, tail])
+
+concatEpr:: Parser Ast
+concatEpr = do a <- parser --FIXME
+               b <- token (literal "++")
+               c <- parser --FIXME
+               return (Concat a c)
+
+listIndex:: Parser Ast
+listIndex = do a <- listEpr
+               b <- token (literal "!!")
+               c <- ints
+               return (ListIndex a c)
+
 types:: Parser Ast
-types = parseChar <|> vars <|> ints <|> floatParser
-eqEpr:: Parser Ast
+types = parseChar <|> vars <|> ints <|> floatParser     --is this even right???
+
+eqEpr:: Parser Ast              --FIXME check
 eqEpr = withInfix types [("==", Equal)] 
-notEqEpr:: Parser Ast
+
+notEqEpr:: Parser Ast           --FIXME check
 notEqEpr = withInfix types [("/=", NotEqual)] 
-greatTEpr:: Parser Ast
+
+greatTEpr:: Parser Ast          --FIXME check
 greatTEpr = withInfix types [(">", GreaterThan)] 
-greatTEqEpr:: Parser Ast
+
+greatTEqEpr:: Parser Ast        --FIXME check
 greatTEqEpr = withInfix types [(">=", GreatThanOrEqual)] 
-lessTEpr:: Parser Ast
+
+lessTEpr:: Parser Ast           --FIXME check
 lessTEpr = withInfix types [("<", LessThan)] 
-lessTEqEpr:: Parser Ast
+
+lessTEqEpr:: Parser Ast             --FIXME check
 lessTEqEpr = withInfix types [("<=", LessThanOrEqual)] 
 
 {-
@@ -49,14 +74,21 @@ lessTEqEpr = withInfix types [("<=", LessThanOrEqual)]
 -}
 
 floatExpEpr:: Parser Ast -- symbol ^ R associative
-floatExpEpr = undefined
-intExpEpr:: Parser Ast  -- symbol ** R associate
-intExpEpr = undefined
+floatExpEpr = a <- orExpr               --FIXME WHAT GOES INTO IT
+             (do token (literal "^")
+                 c <- consEpr
+                 return (Cons a c)) <|> (return a) -- FIXME not return (Cons a c)
 
-modEpr:: Parser Ast             -- only for integers
+intExpEpr:: Parser Ast  -- symbol ** R associate
+intExpEpr = a <- orExpr             --FIXME WHAT GOES INTO IT
+             (do token (literal "**")
+                 c <- consEpr
+                 return (Cons a c)) <|> (return a)              --FIXME not return (Cons a c) FIXME
+
+modEpr:: Parser Ast             -- only for integers FIXME
 modEpr = withInfix ints [("%", Modulus)]
 
-divFloatEpr:: Parser Ast
+divFloatEpr:: Parser Ast        --TODO
 divFloatEpr = undefined
 
 
@@ -68,7 +100,7 @@ pri = do token $ literal "print"
          return printed
          `mapParser` (\ i -> Print i)
 {- 
-sep:: Ast -> Parser Ast --lowest in precedence TODO
+sep:: Ast -> Parser Ast --lowest in precedence          FIXME (what goes into it?)
 sep left  = do s <- (token $ literal ";")
                exp <- beforeSep
                let res = left `Separator` exp
@@ -78,13 +110,13 @@ sepEpr:: Parser Ast
 sepEpr = do l <- beforeSep
             sep l
 -}
-floatParser:: Parser Ast
+floatParser:: Parser Ast                --TODO
 floatParser = undefined
 
-parseChar:: Parser Ast
-parseChar = do s <- token (literal "'")
+parseChar:: Parser Ast                      --FIXME
+parseChar = do --s <- token (literal "'")
                a <- sat isAlpha
-               b <- token (literal "'")
+               --b <- token (literal "'")
                return (ValChar a)
 
 parseFloat:: Parser Ast  --check this
