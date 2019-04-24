@@ -23,6 +23,8 @@ Alex Fatyga, Noah Malhi, Justin Morgan
 *	Data WarningMsg => Justin 
 *	Check => Justin 
 * Eval.hs -> 
+*	Eval => All
+*   std.lib => All
 *	Data Val => Alex  
 *	Instance show Val = > Noah 
 *	Run => Justin 
