@@ -57,7 +57,7 @@ showFullyParen (Separator a b) = "(" ++ (showFullyParen a) ++ " ; " ++ (showFull
 showFullyParen (Equal a b) = "(" ++ (showFullyParen a) ++ " == " ++ (showFullyParen b) ++ ")"
 showFullyParen (NotEqual a b) = "(" ++ (showFullyParen a) ++ " /= " ++ (showFullyParen b) ++ ")"
 showFullyParen (LessThan a b) = "(" ++ (showFullyParen a) ++ " < " ++ (showFullyParen b) ++ ")"
-showFullyParen (LessThanOrEqual a b) = "(" ++ (showFullyParen a) ++ " <= " ++ (showFullyParen b) ")""
+showFullyParen (LessThanOrEqual a b) = "(" ++ (showFullyParen a) ++ " <= " ++ (showFullyParen b) ")"
 showFullyParen (GreaterThan a b) = "(" ++ (showFullyParen a) ++ " > " ++ (showFullyParen b) ++ ")"
 showFullyParen (GreatThanOrEqual a b) = "(" ++ (showFullyParen a) ++ " >= " ++ (showFullyParen b) ")"
 showFullyParen (ValFloat i) = "(" ++ i ++ ")"
