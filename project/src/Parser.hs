@@ -27,17 +27,38 @@ import Data.Char --added
     >     Greater-than 
 -}
 
+--tailEpr:: Parser (Ast, Ast) --String -> Ast --parse commas
+{-tailEpr = do a <- types --token (literal ",")
+             (do token (literal ",")
+                 tail <- tailEpr
+                 return ( List [a,tail])) <|> token (literal "]")
+                 return (List [a])
+-}
 listEpr:: Parser Ast
-listEpr = do a <- token (literal "[")           --most likely a FIXME
-             head <- (sat isAlpha <|> digit)  
-             tail <- rep (sat isAlpha <|> digit )
-             end <- token (literal "]")
-             return (List [head, tail])
+listEpr = undefined --biggest wtf of the parser i think TODO as hell
+{-
+ listEpr = do `elem` "["
+             head <- types
+             (do token (literal ",")
+                 tail <- listEpr
+                 return (List [head, tail]) 
+                )   
 
+                --a <- token (literal "[")           --FIXME
+             b <- rep
+
+            -- head <- types ---(sat isAlpha <|> digit)
+
+--             (do --token (literal ",")
+             c <- tailEpr
+             return []
+--             return (List [c])
+  --               return (List [head,c])) <|> (return List [head])
+-}
 concatEpr:: Parser Ast
-concatEpr = do a <- parser --FIXME
+concatEpr = do a <- parser --FIXME -> figure out precedence
                b <- token (literal "++")
-               c <- parser --FIXME
+               c <- parser --FIXME -> figure out precedence
                return (Concat a c)
 
 listIndex:: Parser Ast
@@ -74,16 +95,16 @@ lessTEqEpr = withInfix types [("<=", LessThanOrEqual)]
 -}
 
 floatExpEpr:: Parser Ast -- symbol ^ R associative
-floatExpEpr = a <- orExpr               --FIXME WHAT GOES INTO IT
-             (do token (literal "^")
-                 c <- consEpr
-                 return (Cons a c)) <|> (return a) -- FIXME not return (Cons a c)
+floatExpEpr = do a <- orExpr               --FIXME WHAT GOES INTO IT
+                 (do token (literal "^")
+                     c <- consEpr
+                     return (Cons a c)) <|> (return a) -- FIXME not return (Cons a c)
 
 intExpEpr:: Parser Ast  -- symbol ** R associate
-intExpEpr = a <- orExpr             --FIXME WHAT GOES INTO IT
-             (do token (literal "**")
-                 c <- consEpr
-                 return (Cons a c)) <|> (return a)              --FIXME not return (Cons a c) FIXME
+intExpEpr = do a <- orExpr             --FIXME WHAT GOES INTO IT
+               (do token (literal "**")
+                   c <- consEpr
+                   return (Cons a c)) <|> (return a)              --FIXME not return (Cons a c) FIXME
 
 modEpr:: Parser Ast             -- only for integers FIXME
 modEpr = withInfix ints [("%", Modulus)]
@@ -119,7 +140,7 @@ parseChar = do --s <- token (literal "'")
                --b <- token (literal "'")
                return (ValChar a)
 
-parseFloat:: Parser Ast  --check this
+parseFloat:: Parser Ast  --yee idk
 parseFloat = undefined
 --parseFloat = do s <- intParser
 --                a <- literal (".")
