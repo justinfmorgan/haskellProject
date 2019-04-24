@@ -15,7 +15,10 @@ data Val = I Integer | B Bool | F Float | C Char | S String
 
 
 instance Show Val where
-  show = undefined
+  show (I i) = show i
+  show (B b) = show b
+  show (Ls ls) = show ls
+  show (Fun _) = "\\ x -> ?" -- no good way to show a function
 
 len' []  = 0
 len' (a: b) = 1 + len' b
