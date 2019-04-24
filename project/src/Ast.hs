@@ -1,5 +1,7 @@
 module Ast where
 
+import HelpShow
+
 -- | the abstract syntax tree for the language
 data Ast = ValBool Bool
          | And Ast Ast | Or Ast Ast | Not Ast
@@ -57,12 +59,12 @@ showFullyParen (Separator a b) = "(" ++ (showFullyParen a) ++ " ; " ++ (showFull
 showFullyParen (Equal a b) = "(" ++ (showFullyParen a) ++ " == " ++ (showFullyParen b) ++ ")"
 showFullyParen (NotEqual a b) = "(" ++ (showFullyParen a) ++ " /= " ++ (showFullyParen b) ++ ")"
 showFullyParen (LessThan a b) = "(" ++ (showFullyParen a) ++ " < " ++ (showFullyParen b) ++ ")"
-showFullyParen (LessThanOrEqual a b) = "(" ++ (showFullyParen a) ++ " <= " ++ (showFullyParen b) ")"
+showFullyParen (LessThanOrEqual a b) = "(" ++ (showFullyParen a) ++ " <= " ++ (showFullyParen b) ++ ")"
 showFullyParen (GreaterThan a b) = "(" ++ (showFullyParen a) ++ " > " ++ (showFullyParen b) ++ ")"
-showFullyParen (GreatThanOrEqual a b) = "(" ++ (showFullyParen a) ++ " >= " ++ (showFullyParen b) ")"
-showFullyParen (ValFloat i) = "(" ++ i ++ ")"
-showFullyParen (ValChar i) = "(" ++ i ++ ")"
-showFullyParen (List i) = "(" ++ "[" ++ (showFullyParen i) ++ "]" ++ ")"
+showFullyParen (GreatThanOrEqual a b) = "(" ++ (showFullyParen a) ++ " >= " ++ (showFullyParen b) ++ ")"
+showFullyParen (ValFloat i) = "(" ++ show i ++ ")"
+showFullyParen (ValChar i) = "(" ++ show i ++ ")"
+showFullyParen (List [i]) = "(" ++ "[" ++ (showFullyParen i) ++ "]" ++ ")"
 showFullyParen (ValBool True) = "(" ++ "true" ++ ")"
 showFullyParen (ValBool False) = "(" ++ "false" ++ ")"
 showFullyParen (And l r) = "(" ++ (showFullyParen l) ++ " && " ++ (showFullyParen r) ++ ")"
