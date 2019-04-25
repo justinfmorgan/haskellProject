@@ -5,120 +5,27 @@ import ParserMonad
 import Data.Char --added
 
 {- What must be added into the parser:
-         ValFloat Float            ValChar Char           List [Ast]
-         Separator Ast Ast         Equal Ast Ast          NotEqual Ast Ast
-         LessThan Ast Ast          LessThanOrEqual Ast Ast 
-         GreaterThan Ast Ast       GreatThanOrEqual Ast Ast
-         Concat Ast Ast            DivFloat Ast Ast 
-         Modulus Ast Ast -- only for integers         FloatExp Ast Ast          IntExp Ast Ast
-         ListIndex Ast Ast -- left -> list, right -> integer    list !! integ/er
-         Print Ast
-
+         ValFloat Float            ValChar Char         Separator Ast Ast         Equal Ast Ast          NotEqual Ast Ast
+         LessThan Ast Ast          LessThanOrEqual Ast Ast          GreaterThan Ast Ast       GreatThanOrEqual Ast Ast
+         Concat Ast Ast            DivFloat Ast Ast          Modulus Ast Ast -- only for integers         FloatExp Ast Ast          
+         IntExp Ast Ast         ListIndex Ast Ast          Print Ast
 		 ignoring comments!!!!!
 -}
---highest precedence -> integers, floats, chars, lists, variables, let, if then else, lambda
 
-{-
-    ==    Equals                     -- equality operators are overloaded for all types except functions                  
-    /=    Not-equal                                                     
-    <     Less-than                  -- these four operators only need to compare integers and floats,  
-    <=    Less-than-or-equal                              
-    >=    Greater-than-or-equal              
-    >     Greater-than 
--}
-
-concatEpr:: Parser Ast
-concatEpr = do a <- parser --FIXME -> figure out precedence
-               b <- token (literal "++")
-               c <- parser --FIXME -> figure out precedence
-               return (Concat a c)
-
-listIndex:: Parser Ast
-listIndex = do a <- consEpr
-               b <- token (literal "!!")
-               c <- ints
-               return (ListIndex a c)
-
-types:: Parser Ast
-types = parseChar <|> vars <|> ints <|> floatParser     --is this even right???
-
-eqEpr:: Parser Ast              --FIXME check
-eqEpr = withInfix types [("==", Equal)] 
-
-notEqEpr:: Parser Ast           --FIXME check
-notEqEpr = withInfix types [("/=", NotEqual)] 
-
-greatTEpr:: Parser Ast          --FIXME check
-greatTEpr = withInfix types [(">", GreaterThan)] 
-
-greatTEqEpr:: Parser Ast        --FIXME check
-greatTEqEpr = withInfix types [(">=", GreatThanOrEqual)] 
-
-lessTEpr:: Parser Ast           --FIXME check
-lessTEpr = withInfix types [("<", LessThan)] 
-
-lessTEqEpr:: Parser Ast             --FIXME check
-lessTEqEpr = withInfix types [("<=", LessThanOrEqual)] 
-
-{-
-    *     Multiplication             -- overloaded for integers and floats                          
-    /     Floating-Point Division           --TODO Division Fix     
-    //    Integer Division   
--}
-
-floatExpEpr:: Parser Ast -- symbol ^ R associative
-floatExpEpr = do a <- orExpr               --FIXME WHAT GOES INTO IT
-                 (do token (literal "^")
-                     c <- consEpr
-                     return (Cons a c)) <|> (return a) -- FIXME not return (Cons a c)
-
-intExpEpr:: Parser Ast  -- symbol ** R associate
-intExpEpr = do a <- orExpr             --FIXME WHAT GOES INTO IT
-               (do token (literal "**")
-                   c <- consEpr
-                   return (Cons a c)) <|> (return a)              --FIXME not return (Cons a c) FIXME
-
-modEpr:: Parser Ast             -- only for integers FIXME
-modEpr = withInfix ints [("%", Modulus)]
-
-divFloatEpr:: Parser Ast        --TODO
-divFloatEpr = undefined
-
-
-pri:: Parser Ast
-pri = do token $ literal "print"
-         token $ literal "("
-         printed <- parser
-         token $ literal ")"
-         return printed
-         `mapParser` (\ i -> Print i)
-{- 
 sep:: Ast -> Parser Ast --lowest in precedence          FIXME (what goes into it?)
 sep left  = do s <- (token $ literal ";")
-               exp <- beforeSep
+               exp <- apps
                let res = left `Separator` exp
                (sep res) <|> return res
 
 sepEpr:: Parser Ast
-sepEpr = do l <- beforeSep
+sepEpr = do l <- apps
             sep l
--}
-floatParser:: Parser Ast                --TODO
-floatParser = undefined
 
-parseChar:: Parser Ast                      --FIXME
-parseChar = do --s <- token (literal "'")
-               a <- sat isAlpha
-               --b <- token (literal "'")
-               return (ValChar a)
 
-parseFloat:: Parser Ast  --yee idk
-parseFloat = undefined
---parseFloat = do s <- intParser
---                a <- literal (".")
---                b <- natParser
---                return (ValFloat (s)) --TODO
- 
+ignoreComments:: Parser Ast
+ignoreComments = token $ literal "--"
+
 p = parse parser
 
 p' x = case parse parser x of
@@ -136,6 +43,168 @@ keywords = ["if","then","else", "let", "in", "true","false"]
 
 bracket = ["["]
 
+
+apps :: Parser Ast
+apps = withInfix orExpr [("",App)] -- TODO does this work??? the tokens eat up all the spaces so we split on the empty string
+
+--apps:: Parser Ast
+--apps = do l <- beforeApps
+  --        parseApp l
+
+parseApp:: Ast -> Parser Ast --like multiplication 
+parseApp left = do s <- token (literal "")
+                   right <- beforeApps
+                   let res = (App left right)
+                   parseApp res <|> return res  
+
+beforeApps:: Parser Ast
+beforeApps = orExpr --beforeCons
+
+
+ --right associate don't use withInfix!!! withInfix beforeCons [(":",Cons)]
+
+-- *LangParser> parse cons "1 : 4: true"
+-- Just (1 : 4 : true,"")
+
+orExpr :: Parser Ast
+orExpr = withInfix andExpr [("||", Or)]
+
+
+-- *LangParser> parse orExpr "true || false && 7"
+-- Just (true || false && 7,"")
+-- *LangParser> parse orExpr "true || false || 7"
+-- Just (true || false || 7,"")
+-- *LangParser> parse orExpr "true"
+-- Just (true,"")
+
+andExpr :: Parser Ast
+andExpr = withInfix beforeAnd [("&&", And)] -- can this work with just addSubExpr here?? TODO
+
+
+-- *LangParser> parse andExpr "false"
+-- Just (false,"")
+-- *LangParser> parse andExpr "false && false"
+-- Just (false && false,"")
+
+
+beforeAnd:: Parser Ast
+beforeAnd = greatTEpr <|> greatTEqEpr <|> lessTEpr <|> lessTEqEpr <|> eqEpr <|> notEqEpr 
+
+eqEpr:: Parser Ast              
+eqEpr = withInfix beforeEqsStuff [("==", Equal)] 
+
+notEqEpr:: Parser Ast          
+notEqEpr = withInfix beforeEqsStuff [("/=", NotEqual)] 
+
+greatTEpr:: Parser Ast          
+greatTEpr = withInfix beforeEqsStuff [(">", GreaterThan)] 
+
+greatTEqEpr:: Parser Ast        
+greatTEqEpr = withInfix beforeEqsStuff [(">=", GreatThanOrEqual)] 
+
+lessTEpr:: Parser Ast          
+lessTEpr = withInfix beforeEqsStuff [("<", LessThan)] 
+
+lessTEqEpr:: Parser Ast             
+lessTEqEpr = withInfix beforeEqsStuff [("<=", LessThanOrEqual)] 
+
+beforeEqsStuff:: Parser Ast
+beforeEqsStuff = concatEpr <|> consEpr <|> addSubExpr
+
+concatEpr:: Parser Ast
+concatEpr = do a <- consEpr --FIXME hardcore
+               b <- token (literal "++")
+               c <- consEpr --FIXME -> figure out precedence
+               return (Concat a c)
+
+consEpr:: Parser Ast            --2 ways: a:b:[] [a,b]
+consEpr = do a <- token addSubExpr      --TODO doublecheck this
+             (do token (literal ":")
+                 c <- consEpr
+                 return (Cons a c)) <|> (return a)
+
+addSubExpr :: Parser Ast
+addSubExpr = withInfix beforeAddSub [("+", Plus), ("-", Minus)] --overloaded for floats and ints
+
+beforeAddSub:: Parser Ast
+beforeAddSub = multDivExpr <|> beforeMult
+
+-- *LangParser> parse addSubExpr "1+2+3+4"
+-- Just (1 + 2 + 3 + 4,"")
+-- *LangParser> parse addSubExpr "1-2-3-4"
+-- Just (1 - 2 - 3 - 4,"")
+
+multDivExpr :: Parser Ast
+multDivExpr = withInfix beforeMult [("*", Mult), ("/", Div)]    --div for fp
+
+modEpr:: Parser Ast             -- only for integers FIXME
+modEpr = withInfix beforeMult [("%", Modulus)]
+
+divIntEpr:: Parser Ast        --TODO
+divIntEpr = beforeMult
+
+beforeMult:: Parser Ast
+beforeMult = floatExpEpr <|> intExpEpr
+
+floatExpEpr:: Parser Ast -- symbol ^ R associative
+floatExpEpr = do a <- listIndex               --FIXME WHAT GOES INTO IT
+                 (do token (literal "^")
+                     c <- floatExpEpr
+                     return (Cons a c)) <|> (return a) -- FIXME not return (Cons a c)
+
+intExpEpr:: Parser Ast  -- symbol ** R associate
+intExpEpr = do a <- listIndex             --FIXME WHAT GOES INTO IT
+               (do token (literal "**")
+                   c <- intExpEpr
+                   return (Cons a c)) <|> (return a)              --FIXME not return (Cons a c) FIXME
+
+beforeExp:: Parser Ast
+beforeExp = listIndex <|> beforeLI
+
+
+beforeLI:: Parser Ast
+beforeLI = pri <|> notExp <|> atoms
+
+
+listIndex:: Parser Ast          --left associative not right!!!!
+listIndex = withInfix beforeLI [("!!", ListIndex)]
+--listIndex = do a <- consEpr
+  --             b <- token (literal "!!")
+    --           c <- ints
+      --         return (ListIndex a c)
+
+pri:: Parser Ast
+pri = do token $ literal "print"        --should it get parser or atoms????
+         token $ literal "("
+         printed <- parser
+         token $ literal ")"
+         return printed
+         `mapParser` (\ i -> Print i)
+
+notExp :: Parser Ast
+notExp = do s <- token $ (literal "!")
+            a <- atoms
+            return (Not a)
+
+atoms:: Parser Ast
+atoms = parseChar {-<|> floatParser-} <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
+
+floatParser:: Parser Ast                --TODO
+floatParser = undefined
+
+parseChar:: Parser Ast                      --FIXME
+parseChar = do --s <- token (literal "'")
+               a <- sat isAlpha
+               --b <- token (literal "'")
+               return (ValChar a)
+
+parseFloat:: Parser Ast  --yee idk
+parseFloat = undefined
+--parseFloat = do s <- intParser
+--                a <- literal (".")
+--                b <- natParser
+--                return (ValFloat (s)) --TODO
+ 
 vars :: Parser Ast
 vars = do s <- token $ varParser
           if s `elem` keywords
@@ -146,9 +215,6 @@ ints :: Parser Ast
 ints = do s <- token $ intParser
           return $ ValInt s
 
---bools :: Parser Ast
---bools = do s <- token $ (literal "true") | (literal "false")
-  --         return 
 
 bools :: Parser Ast
 bools = 
@@ -164,90 +230,6 @@ nil = do s <- token (literal "[")
          a <- spaces
          b <- token (literal "]")
          return Nil
-
-apps :: Parser Ast
-apps = withInfix beforeApps [("",App)] -- the tokens eat up all the spaces so we split on the empty string
-
---apps:: Parser Ast
---apps = do l <- beforeApps
-  --        parseApp l
-
-parseApp:: Ast -> Parser Ast --like multiplication 
-parseApp left = do s <- token (literal "")
-                   right <- beforeApps
-                   let res = (App left right)
-                   parseApp res <|> return res  
-
-beforeApps:: Parser Ast
-beforeApps = consEpr <|> orExpr --beforeCons
-
-consEpr:: Parser Ast            --2 ways: a:b:[] [a,b]
-consEpr = do a <- token orExpr
-             (do token (literal ":")
-                 c <- consEpr
-                 return (Cons a c)) <|> (return a)
-
- --right associate don't use withInfix!!! withInfix beforeCons [(":",Cons)]
-
--- *LangParser> parse cons "1 : 4: true"
--- Just (1 : 4 : true,"")
-
-beforeCons:: Parser Ast
-beforeCons = orExpr <|> beforeOr
-
-orExpr :: Parser Ast
-orExpr = withInfix andExpr [("||", Or)]
-
---orExpr = do a <- orExpr
-  --          b <- token (literal "||")
-    --        c <- token (literal ":")
-      --      if (c == ":") then consEpr else return a
-
--- *LangParser> parse orExpr "true || false && 7"
--- Just (true || false && 7,"")
--- *LangParser> parse orExpr "true || false || 7"
--- Just (true || false || 7,"")
--- *LangParser> parse orExpr "true"
--- Just (true,"")
-
-beforeOr:: Parser Ast
-beforeOr = andExpr <|> beforeAnd
-
-andExpr :: Parser Ast
-andExpr = withInfix beforeAnd [("&&", And)] -- addSubExpr before
-
-beforeAnd:: Parser Ast
-beforeAnd = addSubExpr <|> beforeAddSub
-
--- *LangParser> parse andExpr "false"
--- Just (false,"")
--- *LangParser> parse andExpr "false && false"
--- Just (false && false,"")
-
-addSubExpr :: Parser Ast
-addSubExpr = withInfix beforeAddSub [("+", Plus), ("-", Minus)]
-
-beforeAddSub:: Parser Ast
-beforeAddSub = multDivExpr <|> beforeMult
-
--- *LangParser> parse addSubExpr "1+2+3+4"
--- Just (1 + 2 + 3 + 4,"")
--- *LangParser> parse addSubExpr "1-2-3-4"
--- Just (1 - 2 - 3 - 4,"")
-
-multDivExpr :: Parser Ast
-multDivExpr = withInfix beforeMult [("*", Mult), ("/", Div)]
-
-beforeMult:: Parser Ast
-beforeMult = notExp <|> atoms
-
-notExp :: Parser Ast
-notExp = do s <- token $ (literal "!")
-            a <- beforeMult
-            return (Not a)
-
-atoms:: Parser Ast
-atoms = pri <|> parseChar <|> floatParser <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
 
 -- *LangParser> parse atoms "111"
 -- Just (111,"")
@@ -297,4 +279,4 @@ parens = do token $ literal "("
             return a
 
 parser :: Parser Ast
-parser = apps -- <|> consEpr <|> orExpr <|> andExpr <|> addSubExpr <|> multDivExpr <|> notExp <|> atoms
+parser = sepEpr <|> apps <|> orExpr <|> andExpr <|> greatTEpr <|> greatTEqEpr <|> lessTEpr <|> lessTEqEpr <|> eqEpr <|> notEqEpr <|> beforeEqsStuff

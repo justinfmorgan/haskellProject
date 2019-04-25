@@ -34,15 +34,15 @@ data Ast = ValBool Bool
          | Var String
          | Lam String Ast
          | App Ast Ast
-           deriving Eq -- helpful to use this during testing
+           deriving (Show,Eq) -- helpful to use this during testing
 
 --         deriving Eq 
 --highest precedence -> integers, floats, chars, lists, variables, let, if then else, lambda
 
 
-instance Show Ast where
-  -- display the ast in a readable way
-  show ast = showPretty ast 0
+--instance Show Ast where
+--  -- display the ast in a readable way
+  --show ast = showPretty ast 0
 
 -- | output the fully parenthesized statement
 showFullyParen :: Ast  -- ^ The Ast to show
