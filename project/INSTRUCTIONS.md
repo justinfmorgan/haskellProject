@@ -14,6 +14,10 @@
   * Completion is worth 5pts/100.
 * Final Deadline: 5/3/19
   * Completion is worth 90pts/100.
+
+## Notes
+* In Check.hs, `deriving (Show,Eq)` should have been `deriving (Show,Eq,Ord)`
+  
 ## Getting Started
 * Come up with a language name/team name among your group
 * Follow this [Link](https://classroom.github.com/g/potVpRHi) to create/Join a group repo.  Even if you are working alone.
@@ -93,7 +97,7 @@ in increasing order, L associative except as noted, for arithmetic,relational,
     ^     Floating-Point Exponentiation             -- R associative
     **    Integer Exponential                       -- R associative
   <hr> 
-    !!    List indexing operator     -- R associative, left operand must be list, right must be integer
+    !!    List indexing operator     -- L associative, left operand must be list, right must be integer
   <hr> 
     -- prefix operators and functions
     not    Boolean not
