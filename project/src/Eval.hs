@@ -10,7 +10,7 @@ import EnvUnsafe
 -- the goal of the program is to return a value, what values are possible?
 --data Val -- ...
 
-data Val = I Integer | B Bool | F Float | C Char | S String
+data Val = I Integer | B Bool | F Float | C Char 
          | Ls [Val]
          | Fun (Val -> Unsafe Val) --FIXME since this is a functional language, one thing that can be returned is a function
 
@@ -20,7 +20,6 @@ instance Show Val where
   show (B b) = show b
   show (F f) = show f
   show (C c) = show c
-  show (S s) = show s
   show (Ls ls) = show ls
   show (Fun _) = "\\ x -> ?" -- no good way to show a function
 
@@ -51,11 +50,31 @@ evalInt a =
       I i -> return i
       _   -> err "it's not int!!!"
 
+evalChar:: Ast -> EnvUnsafe Env Char
+evalChar a =
+  do a' <- eval a
+     case a' of
+      C i -> return i
+      _   -> err "it's not a char!!!"
+
+evalFloat:: Ast -> EnvUnsafe Env Float
+evalFloat a =
+  do a' <- eval a
+     case a' of
+      F i -> return i
+      _   -> err "it's not a float!!!"
+
 evalBool :: Ast -> EnvUnsafe Env Bool
 evalBool a = do a' <- eval a
                 case a' of
                   B b -> return b
                   _ -> err "It's not bool!"
+
+--evalList:: Ast -> EnvUnsafe Env Ls [Val]
+--evalList a = do a' <- eval a
+--                case a' of
+--                  Ls [b] -> return [b]
+--                  _ -> err "It's not bool!"
 
 evalFun :: Ast -> EnvUnsafe Env (Val -> Unsafe Val)
 evalFun a = do a' <- eval a
@@ -81,6 +100,10 @@ local changeEnv comp  = EnvUnsafe (\e -> runEnvUnsafe comp e ) --check later bec
          | Print Ast          | ValFloat Float -- added         | ValChar Char -- added
 -}
 
+--indexInto [] _ = err "empty list"
+--indexInto (head:tail) 1 = eval head
+--indexInto (head:tail) x = eval $ indexInto tail (x - 1)
+
 eval :: Ast -> EnvUnsafe Env Val
 eval (ValFloat i) = return $ F i
 --eval (Separator a b) = undefined
@@ -89,12 +112,28 @@ eval (Separator l r) =
        y <- eval r
        return (y)   
 eval (Concat a b) = undefined
-eval (DivFloat a b) = undefined
+--    do a' <- evalList a
+--       b' <- evalList b
+--       case (a') of
+--        x -> case (b') of
+--             y -> 
+--             _ ->   
+--        _ -> 
 eval (IntExp a b) = undefined
+--  do l' <- evalInt l
+--     r' <- evalInt r
+--     return $ I $ l' ^ r'    
 eval (FloatExp a b) = undefined
+--  do l' <- evalFloat l
+--     r' <- evalFloat r
+--     return $ F $ l' ^ r'
 eval (Print a) = undefined
-eval (Modulus a b) = undefined
+eval (Modulus a b) = undefined  --for ints and floats
 eval (ListIndex a b) = undefined
+--do a' <- eval a
+--   b' <- evalInt b 
+--   length <- len a'
+--   if length < b' then err "List is not big enough" else indexInto a' b' --FIXME double check this
 eval (Equal a b) = do a' <- evalBool a
                       b' <- evalBool b
                       return (B (a' == b'))
@@ -128,11 +167,16 @@ eval (Minus l r) =      --change to work for floats and ints
   do l' <- evalInt l
      r' <- evalInt r
      return $ I $ l' - r'
-eval (Div l r) = do l' <- evalInt l 		--should be for floats
+eval (Div l r) = do l' <- evalInt l 		--should be for ints
                     r' <- evalInt r
                     case r' of
                       0 -> err "Dividing by zero error"
                       x -> return $ I $ l' `div` r'
+eval (DivFloat l r) = undefined --do l' <- evalFloat l         --should be for ints
+--                         r' <- evalFloat r
+--                         case r' of
+--                           0 -> err "Dividing by zero error"
+--                           x -> return $ F $ l' `div` r'
 eval (ValBool a) = return $ B a
 eval (Not a) = do a' <- (evalBool a)
                   return $ B $ a'

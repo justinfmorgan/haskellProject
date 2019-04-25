@@ -111,6 +111,6 @@ showPretty (And l r) i               = parenthesize 8 i $ (showPretty l 8) ++ " 
 showPretty (Minus l r) i             = parenthesize 10 i $ (showPretty l 10) ++ " - " ++ (showPretty r 11)
 showPretty (Plus l r) i              = parenthesize 10 i $ (showPretty l 10) ++ " + " ++ (showPretty r 11)
 showPretty (Mult l r) i              = parenthesize 12 i $ (showPretty l 12) ++ " * " ++ (showPretty r 13)
-showPretty (Div l r) i               = parenthesize 12 i $ (showPretty l 12) ++ " / " ++ (showPretty r 13)
+showPretty (Div l r) i               = parenthesize 12 i $ (showPretty l 12) ++ " // " ++ (showPretty r 13)
 showPretty (DivFloat l r) i          = parenthesize 12 i $ (showPretty l 12) ++ " / " ++ (showPretty r 13)
 showPretty (Not l ) i                = parenthesize 14 i $  " ! " ++ (showPretty l 14)
