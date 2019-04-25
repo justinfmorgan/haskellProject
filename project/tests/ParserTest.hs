@@ -1,4 +1,4 @@
-module LangParserTest where
+module ParserTest where
 
 import Test.Tasty (testGroup)
 import Test.Tasty.HUnit (assertEqual, assertBool, testCase)
@@ -7,8 +7,9 @@ import Test.Tasty.QuickCheck			--unknown for needed
 
 import ParserMonad (parse)
 
-import Lang (showFullyParen, showPretty, Ast(..))
-import LangParser (parser)
+import Ast (showFullyParen, showPretty, Ast(..))
+
+import Parser (parser)
 
 
 --TODO: move the generator to a shared place
@@ -43,7 +44,7 @@ arbitrarySizedIf m = do b <- arbitrarySizedAst (m `div` 3)
                         e <- arbitrarySizedAst (m `div` 3)
                         return $ If b t e
 
-parserTest = testGroup
+tests = testGroup
       "parser Test"
       [
       testProperty "parse should return the same AST when fully parenthisized" $ ((\ x -> Just (x , "") == (parse parser $ showFullyParen x)) :: Ast -> Bool),
