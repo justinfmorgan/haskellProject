@@ -26,12 +26,13 @@ data LangOut =
 exec :: String -> LangOut
 exec s = case parse parser s  of
   Just (ast,"") -> case run ast of
-  					(Left a, [b]) -> RuntimeError a [b]
-  					(Right val, [b]) -> Ok val [b]
+                        (Left a, [b]) -> RuntimeError a [b]
+                        (Right val, [b]) -> Ok val [b]
                     -- Ok v -> Ok v [s]
                     -- RuntimeError e -> RuntimeError e [s]
-  					_  -> ParseError
-  Nothing -> ParseError
+                        _  -> ParseError
+  _ -> ParseError
+  --Nothing -> ParseError
 
 -- | perform static checking on the program string, may be empty if there is a parse error
 warn :: String -> (Set WarningMsg) 

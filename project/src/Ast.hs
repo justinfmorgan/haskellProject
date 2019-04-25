@@ -8,7 +8,7 @@ data Ast = ValBool Bool
          
          | ValFloat Float -- added
          | ValChar Char -- added
-         | List [Ast] -- added
+--         | List [Ast] -- added
 
          | ValInt Integer
          | Plus Ast Ast | Minus Ast Ast | Mult Ast Ast | Div Ast Ast
@@ -64,7 +64,6 @@ showFullyParen (GreaterThan a b) = "(" ++ (showFullyParen a) ++ " > " ++ (showFu
 showFullyParen (GreatThanOrEqual a b) = "(" ++ (showFullyParen a) ++ " >= " ++ (showFullyParen b) ++ ")"
 showFullyParen (ValFloat i) = "(" ++ show i ++ ")"
 showFullyParen (ValChar i) = "(" ++ show i ++ ")"
-showFullyParen (List [i]) = "(" ++ "[" ++ (showFullyParen i) ++ "]" ++ ")"
 showFullyParen (ValBool True) = "(" ++ "true" ++ ")"
 showFullyParen (ValBool False) = "(" ++ "false" ++ ")"
 showFullyParen (And l r) = "(" ++ (showFullyParen l) ++ " && " ++ (showFullyParen r) ++ ")"
@@ -94,7 +93,6 @@ showPretty (ValFloat i) _            = if i < 0
                                        then  "(" ++ show i ++ ")"
                                        else show i
 showPretty (ValChar c) _             = show c
-showPretty (List [x]) _              = undefined
 showPretty Nil _                     = "[]"
 showPretty (Var s) _                 = s
 showPretty (Lam v bod) i             = parenthesize 1 i $ "\\ " ++ v ++ " -> " ++ (showPretty bod 1)

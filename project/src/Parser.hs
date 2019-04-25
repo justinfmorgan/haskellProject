@@ -27,34 +27,6 @@ import Data.Char --added
     >     Greater-than 
 -}
 
---tailEpr:: Parser (Ast, Ast) --String -> Ast --parse commas
-{-tailEpr = do a <- types --token (literal ",")
-             (do token (literal ",")
-                 tail <- tailEpr
-                 return ( List [a,tail])) <|> token (literal "]")
-                 return (List [a])
--}
-listEpr:: Parser Ast
-listEpr = undefined --biggest wtf of the parser i think TODO as hell
-{-
- listEpr = do `elem` "["
-             head <- types
-             (do token (literal ",")
-                 tail <- listEpr
-                 return (List [head, tail]) 
-                )   
-
-                --a <- token (literal "[")           --FIXME
-             b <- rep
-
-            -- head <- types ---(sat isAlpha <|> digit)
-
---             (do --token (literal ",")
-             c <- tailEpr
-             return []
---             return (List [c])
-  --               return (List [head,c])) <|> (return List [head])
--}
 concatEpr:: Parser Ast
 concatEpr = do a <- parser --FIXME -> figure out precedence
                b <- token (literal "++")
@@ -62,7 +34,7 @@ concatEpr = do a <- parser --FIXME -> figure out precedence
                return (Concat a c)
 
 listIndex:: Parser Ast
-listIndex = do a <- listEpr
+listIndex = do a <- consEpr
                b <- token (literal "!!")
                c <- ints
                return (ListIndex a c)
@@ -162,6 +134,8 @@ test x = do print x
 
 keywords = ["if","then","else", "let", "in", "true","false"]
 
+bracket = ["["]
+
 vars :: Parser Ast
 vars = do s <- token $ varParser
           if s `elem` keywords
@@ -207,8 +181,8 @@ parseApp left = do s <- token (literal "")
 beforeApps:: Parser Ast
 beforeApps = consEpr <|> orExpr --beforeCons
 
-consEpr:: Parser Ast
-consEpr = do a <- orExpr
+consEpr:: Parser Ast            --2 ways: a:b:[] [a,b]
+consEpr = do a <- token orExpr
              (do token (literal ":")
                  c <- consEpr
                  return (Cons a c)) <|> (return a)
