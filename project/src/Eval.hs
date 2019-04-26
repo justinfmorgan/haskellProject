@@ -23,8 +23,9 @@ instance Show Val where
   show (Ls ls) = show ls
   show (Fun _) = "\\ x -> ?" -- no good way to show a function
 
+len' ::[a] -> Integer
 len' []  = 0
-len' (a: b) = 1 + len' b
+len' (a:b) = 1 + len' b
 
 stdLib = Map.fromList
   [("tail", Fun $ \ v -> case v of Ls (_:ls) -> Ok $ Ls ls
@@ -70,11 +71,11 @@ evalBool a = do a' <- eval a
                   B b -> return b
                   _ -> err "It's not bool!"
 
---evalList:: Ast -> EnvUnsafe Env Ls [Val]
---evalList a = do a' <- eval a
---                case a' of
---                  Ls [b] -> return [b]
---                  _ -> err "It's not bool!"
+evalList:: Ast -> EnvUnsafe Env  [Val]
+evalList a = do a' <- eval a
+                case a' of
+                  Ls [b] -> return [b]
+                  _ -> err "It's not bool!"
 
 evalFun :: Ast -> EnvUnsafe Env (Val -> Unsafe Val)
 evalFun a = do a' <- eval a
@@ -101,55 +102,58 @@ local changeEnv comp  = EnvUnsafe (\e -> runEnvUnsafe comp e ) --check later bec
 -}
 
 --indexInto [] _ = err "empty list"
---indexInto (head:tail) 1 = eval head
---indexInto (head:tail) x = eval $ indexInto tail (x - 1)
+indexInto:: Val -> Integer -> EnvUnsafe Env  Val
+indexInto (Ls (head:tail)) 1 = case (head) of 
+                                    Ls a -> return (Ls a)
+                                    I a -> return (I a)
+                                    B a -> return (B a)
+                                    F a -> return (F a)
+                                    C a -> return (C a)
+                                    Fun a -> return (Fun a) -- unnecessary? probably who knows
+indexInto (Ls (head:tail)) x = indexInto (Ls tail) (x - 1)
+indexInto _ _ = undefined
 
 eval :: Ast -> EnvUnsafe Env Val
 eval (ValFloat i) = return $ F i
---eval (Separator a b) = undefined
 eval (Separator l r) = 
     do x <- eval l
        y <- eval r
        return (y)   
-eval (Concat a b) = undefined
---    do a' <- evalList a
---       b' <- evalList b
---       case (a') of
---        x -> case (b') of
---             y -> 
---             _ ->   
---        _ -> 
-eval (IntExp a b) = undefined
---  do l' <- evalInt l
---     r' <- evalInt r
---     return $ I $ l' ^ r'    
-eval (FloatExp a b) = undefined
---  do l' <- evalFloat l
---     r' <- evalFloat r
---     return $ F $ l' ^ r'
+eval (Concat a b) =
+    do a' <- evalList a
+       b' <- evalList b
+       return $ Ls $ a' ++ b'
+eval (IntExp a b) =
+  do l' <- evalInt a
+     r' <- evalInt b
+     return $ I $ l' ^ r'    
+eval (FloatExp a b) =
+  do l' <- evalFloat a
+     r' <- evalFloat b
+     return $ F $ l' ** r'
 eval (Print a) = undefined
 eval (Modulus a b) = undefined  --for ints and floats
-eval (ListIndex a b) = undefined
---do a' <- eval a
---   b' <- evalInt b 
---   length <- len a'
---   if length < b' then err "List is not big enough" else indexInto a' b' --FIXME double check this
+eval (ListIndex a b) = --undefined
+    do a' <- evalList a
+       b' <- evalInt b 
+       let length = len' a'
+       if length < b' then err "List is not big enough" else (indexInto (Ls a') b') --indexInto a' b' --FIXME double check this
 eval (Equal a b) = do a' <- evalBool a
                       b' <- evalBool b
                       return (B (a' == b'))
 eval (NotEqual a b) = do a' <- evalBool a
                          b' <- evalBool b
                          return (B (a' /= b'))  
-eval (LessThan a b) = do a' <- evalBool a
+eval (LessThan a b) = do a' <- evalBool a               --FIXME
                          b' <- evalBool b
                          return (B (a' < b'))
-eval (LessThanOrEqual a b) = do a' <- evalBool a
+eval (LessThanOrEqual a b) = do a' <- evalBool a               --FIXME
                                 b' <- evalBool b
                                 return (B (a' <= b'))                         
-eval (GreaterThan a b) = do a' <- evalBool a
+eval (GreaterThan a b) = do a' <- evalBool a               --FIXME
                             b' <- evalBool b
                             return (B (a' > b'))                                                
-eval (GreatThanOrEqual a b) = do a' <- evalBool a
+eval (GreatThanOrEqual a b) = do a' <- evalBool a               --FIXME
                                  b' <- evalBool b
                                  return (B (a' >= b'))  
 eval (ValChar i) = return $ C i
@@ -167,16 +171,16 @@ eval (Minus l r) =      --change to work for floats and ints
   do l' <- evalInt l
      r' <- evalInt r
      return $ I $ l' - r'
-eval (Div l r) = do l' <- evalInt l 		--should be for ints
+eval (Div l r) = do l' <- evalInt l         --should be for ints
                     r' <- evalInt r
                     case r' of
                       0 -> err "Dividing by zero error"
                       x -> return $ I $ l' `div` r'
-eval (DivFloat l r) = undefined --do l' <- evalFloat l         --should be for ints
---                         r' <- evalFloat r
---                         case r' of
---                           0 -> err "Dividing by zero error"
---                           x -> return $ F $ l' `div` r'
+eval (DivFloat l r) = do l' <- evalFloat l         --should be for floats
+                         r' <- evalFloat r
+                         case r' of
+                           0 -> err "Dividing by zero error"
+                           x -> return $ F $ l' / r'
 eval (ValBool a) = return $ B a
 eval (Not a) = do a' <- (evalBool a)
                   return $ B $ a'
