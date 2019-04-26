@@ -13,8 +13,8 @@ testSuite =
   testGroup
     "allTests"
     [
-    CheckTest.tests,
-    EvalTest.tests,
+    --CheckTest.tests,
+    --EvalTest.tests,
     ParserTest.tests
     -- ...
     ]
