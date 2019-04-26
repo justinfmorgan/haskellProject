@@ -8,12 +8,10 @@ import Ast
 import EnvUnsafe
 
 -- the goal of the program is to return a value, what values are possible?
---data Val -- ...
 
 data Val = I Integer | B Bool | F Float | C Char 
          | Ls [Val]
          | Fun (Val -> Unsafe Val) --FIXME since this is a functional language, one thing that can be returned is a function
-
 
 instance Show Val where
   show (I i) = show i
@@ -32,10 +30,7 @@ stdLib = Map.fromList
                                    _         -> Error "can only call tail on a non empty list"),
    ("head", Fun $ \ v -> case v of  Ls (a:_) -> Ok a
                                     _        -> Error "can only call head on a non empty list"), 
-                                  --Ls ((B a): _)   -> Ok $ (B a)
-                                  -- Ls ((I a): _)   -> Ok $ (I a)
-                                   --Ls ((Fun a): _) -> Ok $ (Fun a) 
-                                   --Ls ((Ls (a:b)): _) -> Ok $ (a)
+                                  
                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> Ok $ I (len' ls)
                                     _ -> Error "not a list"
@@ -49,7 +44,7 @@ evalInt a =
   do a' <- eval a
      case a' of
       I i -> return i
-      _   -> err "it's not int!!!"
+      _   -> err "it's not an int!!!"
 
 evalChar:: Ast -> EnvUnsafe Env Char
 evalChar a =
@@ -75,7 +70,7 @@ evalList:: Ast -> EnvUnsafe Env  [Val]
 evalList a = do a' <- eval a
                 case a' of
                   Ls [b] -> return [b]
-                  _ -> err "It's not bool!"
+                  _ -> err "It's not a list!"
 
 evalFun :: Ast -> EnvUnsafe Env (Val -> Unsafe Val)
 evalFun a = do a' <- eval a
@@ -87,19 +82,10 @@ getVar :: String -> EnvUnsafe Env Val
 getVar v = do s <- getEnv
               case (Map.lookup v s) of 
                   Just i -> return i
-                  Nothing -> return (I 0)  --potentially an issue?
+                  Nothing -> return (I 0) 
 
 local :: (r -> r) -> EnvUnsafe Env Val-> EnvUnsafe Env Val
 local changeEnv comp  = EnvUnsafe (\e -> runEnvUnsafe comp e ) --check later because who knows
-
-{-
-         | Separator Ast Ast  --- all added        | Equal Ast Ast | NotEqual Ast Ast
-         | LessThan Ast Ast | LessThanOrEqual Ast Ast          | GreaterThan Ast Ast | GreatThanOrEqual Ast Ast
-         | Concat Ast Ast         | DivFloat Ast Ast          | Modulus Ast Ast -- only for integers
-         | FloatExp Ast Ast         | IntExp Ast Ast
-         | ListIndex Ast Ast -- left -> list, right -> integer
-         | Print Ast          | ValFloat Float -- added         | ValChar Char -- added
--}
 
 --indexInto [] _ = err "empty list"
 indexInto:: Val -> Integer -> EnvUnsafe Env  Val
@@ -112,6 +98,9 @@ indexInto (Ls (head:tail)) 1 = case (head) of
                                     Fun a -> return (Fun a) -- unnecessary? probably who knows
 indexInto (Ls (head:tail)) x = indexInto (Ls tail) (x - 1)
 indexInto _ _ = undefined
+
+printThis :: x -> PrinterMonad x ()
+printThis x = PrinterMonad [x] ()
 
 eval :: Ast -> EnvUnsafe Env Val
 eval (ValFloat i) = return $ F i
@@ -131,7 +120,10 @@ eval (FloatExp a b) =
   do l' <- evalFloat a
      r' <- evalFloat b
      return $ F $ l' ** r'
-eval (Print a) = undefined
+eval (Print x) = do
+    x' <- eval x
+    printThis x'
+    return (x')
 eval (Modulus a b) = undefined  --for ints and floats
 eval (ListIndex a b) = --undefined
     do a' <- evalList a
