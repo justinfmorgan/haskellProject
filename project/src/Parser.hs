@@ -105,12 +105,12 @@ equalities:: Parser Ast
 equalities = withInfix beforeEqsStuff [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
 
 beforeEqsStuff:: Parser Ast
-beforeEqsStuff = concatEpr <|> consEpr <|> addSubExpr
+beforeEqsStuff = concatEpr <|> bothListTypes <|> addSubExpr
 
 concatEpr:: Parser Ast
-concatEpr = do a <- consEpr 
+concatEpr = do a <- bothListTypes 
                b <- token (literal "++")
-               c <- consEpr
+               c <- bothListTypes
                return (Concat a c)
 
 consEpr:: Parser Ast            --2 ways: a:b:[] [a,b]
@@ -118,6 +118,22 @@ consEpr = do a <- token addSubExpr      --TODO doublecheck this, FIXME add for b
              (do token (literal ":")
                  c <- consEpr
                  return (Cons a c)) <|> (return a)
+
+bothListTypes:: Parser Ast
+bothListTypes = consEpr <|> consCommmas
+
+commas:: Parser Ast
+commas = do a <- token addSubExpr
+            b <- token ((literal ",") <||>  (literal "]"))
+            case b of
+                Left _ -> do b <- commas
+                             return (Cons a b)
+                Right _-> return (Cons a Nil)
+            
+consCommmas:: Parser Ast 
+consCommmas = do token (literal "[")
+                 a <- token commas
+                 return a
 
 addSubExpr :: Parser Ast
 addSubExpr = withInfix beforeAddSub [("+", Plus), ("-", Minus)] --overloaded for floats and ints
@@ -173,17 +189,13 @@ notExp = do s <- token $ (literal "!")
 atoms:: Parser Ast
 atoms = parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
 
-parseChar:: Parser Ast                      --FIXME
+parseChar:: Parser Ast                      --FIXME needs to work for just a not a space !
 parseChar = do --s <- token (literal "'")
                a <- sat isAlpha
                b <- literal " "
                --b <- token (literal "'")
                return (ValChar a)
 
-
- 
---float:: Integer -> String -> Integer -> Float
---float a dot b = a ++ dot ++ b
 parseFloat:: Parser Ast
 parseFloat = do a <- floatParse
                 return (ValFloat a)
