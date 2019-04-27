@@ -60,6 +60,13 @@ evalFloat a =
       F i -> return i
       _   -> err "it's not a float!!!"
 
+--evalIntOrFloat :: Ast -> EnvUnsafe Env b
+--evalIntOrFloat a = 
+ -- do a' <- eval a
+   --  case a' of
+    --  F f -> return f
+    --  I i -> return i
+     -- _   -> err "it's not a float or int!!!"    
 evalBool :: Ast -> EnvUnsafe Env Bool
 evalBool a = do a' <- eval a
                 case a' of
@@ -99,8 +106,8 @@ indexInto (Ls (head:tail)) 1 = case (head) of
 indexInto (Ls (head:tail)) x = indexInto (Ls tail) (x - 1)
 indexInto _ _ = undefined
 
-printThis :: x -> PrinterMonad x ()
-printThis x = PrinterMonad [x] ()
+--printThis :: x -> PrinterMonad x ()
+--printThis x = PrinterMonad [x] ()
 
 eval :: Ast -> EnvUnsafe Env Val
 eval (ValFloat i) = return $ F i
@@ -120,10 +127,10 @@ eval (FloatExp a b) =
   do l' <- evalFloat a
      r' <- evalFloat b
      return $ F $ l' ** r'
-eval (Print x) = do
-    x' <- eval x
-    printThis x'
-    return (x')
+eval (Print x) = undefined --do
+--    x' <- eval x
+--    printThis x'
+--    return (x')
 eval (Modulus a b) = undefined  --for ints and floats
 eval (ListIndex a b) = --undefined
     do a' <- evalList a

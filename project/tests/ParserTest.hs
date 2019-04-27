@@ -2,7 +2,7 @@ module ParserTest where
 
 import Test.Tasty (testGroup)
 import Test.Tasty.HUnit (assertEqual, assertBool, testCase)
-import Test.Tasty.QuickCheck			--unknown for needed
+import Test.Tasty.QuickCheck    --unknown if needed
 
 
 import ParserMonad (parse)

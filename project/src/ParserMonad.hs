@@ -144,11 +144,37 @@ rep pa =  do res <- (some pa) <||> (return [])
 digit :: Parser Char
 digit = sat isDigit
 
+isDot:: Char -> Bool
+isDot '.' = True
+isDot _ = False
+
+
+dot:: Parser Char
+dot = sat isDot 
+
+numDigits:: [Char] -> Float
+numDigits [] = 0
+numDigits (x:xs) = 1 + numDigits xs
+
+valToMult:: Float -> Float
+valToMult 1 = 10
+valToMult 2 = 100
+valToMult 3 = 1000
+valToMult x = 10 * (valToMult (x-1))
+
+floatParse:: Parser Float
+floatParse = do digits <- some digit
+                dot
+                b <- some digit
+                let c = numDigits b
+                return $ (read (digits++b)) / (valToMult c)
+
 
 -- parse natural numbers, like "123", or "000230000"
 natParser :: Parser Integer
 natParser =  do digits <- some digit
                 return $ read digits
+
 
 intParser  :: Parser Integer
 intParser = do r <- (literal "-") <||> natParser

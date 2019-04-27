@@ -22,7 +22,6 @@ sepEpr:: Parser Ast
 sepEpr = do l <- apps
             sep l
 
-
 ignoreComments:: Parser ()
 ignoreComments = do token $ literal "--" 
                     return ()
@@ -53,7 +52,6 @@ keywords = ["if","then","else", "let", "in", "true","false"]
 
 bracket = ["["]
 
-
 apps :: Parser Ast
 apps = withInfix orExpr [("",App)] -- the tokens eat up all the spaces so we split on the empty string
 
@@ -70,7 +68,6 @@ parseApp left = do s <- token (literal "")
 beforeApps:: Parser Ast
 beforeApps = orExpr --beforeCons
 
-
  --right associate don't use withInfix!!! withInfix beforeCons [(":",Cons)]
 
 -- *LangParser> parse cons "1 : 4: true"
@@ -78,7 +75,6 @@ beforeApps = orExpr --beforeCons
 
 orExpr :: Parser Ast
 orExpr = withInfix andExpr [("||", Or)]
-
 
 -- *LangParser> parse orExpr "true || false && 7"
 -- Just (true || false && 7,"")
@@ -175,7 +171,7 @@ notExp = do s <- token $ (literal "!")
             return (Not a)
 
 atoms:: Parser Ast
-atoms = parseChar {-<|> floatParser-} <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
+atoms = parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
 
 parseChar:: Parser Ast                      --FIXME
 parseChar = do --s <- token (literal "'")
@@ -184,13 +180,14 @@ parseChar = do --s <- token (literal "'")
                --b <- token (literal "'")
                return (ValChar a)
 
-floatParser:: Parser Ast  --TODO
-floatParser = undefined
---floatParser = do s <- intParser
---                 a <- literal (".")
---                 b <- natParser
---                 return (ValFloat (s))
+
  
+--float:: Integer -> String -> Integer -> Float
+--float a dot b = a ++ dot ++ b
+parseFloat:: Parser Ast
+parseFloat = do a <- floatParse
+                return (ValFloat a)
+
 vars :: Parser Ast
 vars = do s <- token $ varParser
           if s `elem` keywords
@@ -249,4 +246,4 @@ parens = do token $ literal "("
             return a
 
 parser :: Parser Ast
-parser = sepEpr <|> apps <|> orExpr <|> andExpr {- <|> greatTEpr <|> greatTEqEpr <|> lessTEpr <|> lessTEqEpr -} <|> equalities <|> eqEpr <|> notEqEpr <|> beforeEqsStuff
+parser = sepEpr <|> apps <|> orExpr <|> andExpr <|> equalities <|> eqEpr <|> notEqEpr <|> beforeEqsStuff
