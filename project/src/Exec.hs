@@ -13,7 +13,7 @@ import ParserMonad
 data LangOut = 
     ParseError -- ^ retuned when the string could not be parsed
   | RuntimeError String [String]
-  -- ^ retuned when there is a runtime error
+  -- ^ returned when there is a runtime error
   -- first String is the error message
   -- this list of Strings is what is printed before the error was encountered 
   | Ok Val [String]
@@ -28,8 +28,6 @@ exec s = case parse parser s  of
   Just (ast,"") -> case run ast of
                         (Left a, [b]) -> RuntimeError a [b]
                         (Right val, [b]) -> Ok val [b]
-                    -- Ok v -> Ok v [s]
-                    -- RuntimeError e -> RuntimeError e [s]
                         _  -> ParseError
   _ -> ParseError
   --Nothing -> ParseError

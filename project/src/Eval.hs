@@ -132,11 +132,11 @@ eval (Print x) = undefined --do
 --    printThis x'
 --    return (x')
 eval (Modulus a b) = undefined  --for ints and floats
-eval (ListIndex a b) = --undefined
+eval (ListIndex a b) =
     do a' <- evalList a
        b' <- evalInt b 
        let length = len' a'
-       if length < b' then err "List is not big enough" else (indexInto (Ls a') b') --indexInto a' b' --FIXME double check this
+       if length < b' then err "List is not big enough" else (indexInto (Ls a') b') 
 eval (Equal a b) = do a' <- evalBool a
                       b' <- evalBool b
                       return (B (a' == b'))
