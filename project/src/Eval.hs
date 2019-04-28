@@ -225,10 +225,18 @@ eval (App e1 e2) = do e1' <- (evalFun e1)
                       case (e1' e2') of
                          Ok a -> return a
                          _ -> err "error did not apply"
-
+{-
+-- THIS NEEDS TO BE FIXED!!!!
 -- | helper function that runs with the default environment (for example, the stdLib in week 10)
 -- return either the error string or the value, along with everything that was printed
 run :: Ast  -- ^ run this Ast
       -> (Either String Val, [String])  -- ^ (error message or result value, all the printings)
-run a = runEnvUnsafe (eval a) stdLib
+run a = runEnvUnsafe (eval a) -}
+
+-- | helper function that runs with the default environment (for example, the stdLib in week 10)
+-- return either the error string or the value, along with everything that was printed
+run :: Ast  -- ^ run this Ast
+      -> Unsafe a  -- ^ (error message or result value, all the printings)
+run a = runEnvUnsafe (eval a) 
+
 
