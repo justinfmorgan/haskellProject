@@ -96,7 +96,7 @@ showPretty (ValBool False)  _        = "false"
 showPretty (ValFloat i) _            = if i < 0
                                        then  "(" ++ show i ++ ")"
                                        else show i
-showPretty (ValChar c) _             = c
+showPretty (ValChar c) _             = show c
 showPretty (Let v a bod) i           = parenthesize 1 i  $  "let " ++ v ++ " = " ++ (showPretty a 1) ++ " in " ++ (showPretty bod 1)
 showPretty (If b t e) i              = parenthesize 1 i $  "if " ++ (showPretty b 1) ++ " then " ++ (showPretty t 1) ++ " else " ++ (showPretty e 1)
 showPretty (Lam v bod) i             = parenthesize 1 i  $ "\\ " ++ v ++ " -> " ++ (showPretty bod 100)
