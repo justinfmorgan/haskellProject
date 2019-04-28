@@ -14,6 +14,7 @@ import EnvUnsafe
 --   * use of undefined variable
 --   * defined but unused variable
 --   * type errors
+
 data WarningMsg = UndefinedVarUse String  -- ^ This is the Warning for use of Undefined variable name
                 | UnusedVar String
                 | TypeError String
