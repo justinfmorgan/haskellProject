@@ -28,6 +28,7 @@ len' (a:b) = 1 + len' b
 --fromEnum2::Enum a => a -> Integer
 --fromEnum2 x = x
 
+
 stdLib = Map.fromList
   [("tail", Fun $ \ v -> case v of Ls (_:ls) -> Ok $ Ls ls
                                    _         -> Error "can only call tail on a non empty list"),
@@ -44,7 +45,8 @@ stdLib = Map.fromList
    ("ord", undefined),-- Fun $ \ v -> case v of C a -> Ok $ I $ fromEnum2 a
             --                      _   -> Error "not a char"), ---char to int
    ("chr", undefined),  --int to char
-   ("float", undefined),    --int to float
+   ("float", Fun $ \ v -> case v of I a -> Ok $ F (fromIntegral a)
+                                    _   -> Error "not given an int"),    --int to float
    ("int", Fun $ \ v -> case v of F a -> Ok $ I (round a)
                                   _   -> Error "not given a float")   --float to int
    ]--Fun $ \ v -> case v of Ls [] -> Error "can only call len on a non empty list"
