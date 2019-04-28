@@ -53,7 +53,7 @@ keywords = ["if","then","else", "let", "in", "true","false"]
 bracket = ["["]
 
 apps :: Parser Ast
-apps = withInfix orExpr [("",App)] -- the tokens eat up all the spaces so we split on the empty string
+apps = withInfix beforeApps [("",App)] -- must get beforeapps before or it'll break
 
 --apps:: Parser Ast
 --apps = do l <- beforeApps
@@ -66,9 +66,7 @@ parseApp left = do s <- token (literal "")
                    parseApp res <|> return res  
 
 beforeApps:: Parser Ast
-beforeApps = orExpr --beforeCons
-
- --right associate don't use withInfix!!! withInfix beforeCons [(":",Cons)]
+beforeApps = orExpr <|> andExpr <|> equalities <|> concatEpr <|> bothListTypes -- don't mess with this!!
 
 -- *LangParser> parse cons "1 : 4: true"
 -- Just (1 : 4 : true,"")
@@ -84,28 +82,13 @@ orExpr = withInfix andExpr [("||", Or)]
 -- Just (true,"")
 
 andExpr :: Parser Ast
-andExpr = withInfix equalities [("&&", And)]
+andExpr = withInfix beforeAnd [("&&", And)]
 
-eqEpr:: Parser Ast              
-eqEpr = withInfix beforeEqsStuff [("==", Equal)] 
-
-notEqEpr:: Parser Ast          
-notEqEpr = withInfix beforeEqsStuff [("/=", NotEqual)] 
-
-greatTEpr:: Parser Ast          
-greatTEpr = withInfix beforeEqsStuff [(">", GreaterThan)] 
-
-greatTEqEpr:: Parser Ast        
-greatTEqEpr = withInfix beforeEqsStuff [(">=", GreatThanOrEqual)] 
-
-lessTEpr:: Parser Ast          
-lessTEpr = withInfix beforeEqsStuff [("<", LessThan)] 
+beforeAnd:: Parser Ast
+beforeAnd = equalities <|> concatEpr <|> bothListTypes <|> addSubExpr <|> multDivExpr --don't mess with what goes into and
 
 equalities:: Parser Ast             
-equalities = withInfix beforeEqsStuff [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
-
-beforeEqsStuff:: Parser Ast
-beforeEqsStuff = concatEpr <|> bothListTypes <|> addSubExpr
+equalities = withInfix concatEpr [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
 
 concatEpr:: Parser Ast
 concatEpr = do a <- bothListTypes 
@@ -114,7 +97,7 @@ concatEpr = do a <- bothListTypes
                return (Concat a c)
 
 consEpr:: Parser Ast            --2 ways: a:b:[] [a,b]
-consEpr = do a <- token addSubExpr      --TODO doublecheck this, FIXME add for brackets
+consEpr = do a <- token addSubExpr      --TODO doublecheck this
              (do token (literal ":")
                  c <- consEpr
                  return (Cons a c)) <|> (return a)
@@ -136,10 +119,10 @@ consCommmas = do token (literal "[")
                  return a
 
 addSubExpr :: Parser Ast
-addSubExpr = withInfix beforeAddSub [("+", Plus), ("-", Minus)] --overloaded for floats and ints
+addSubExpr = withInfix multDivExpr [("+", Plus), ("-", Minus)] --overloaded for floats and ints
 
-beforeAddSub:: Parser Ast
-beforeAddSub = multDivExpr <|> beforeMult -- <|> divFloatEpr
+--beforeAddSub:: Parser Ast
+--beforeAddSub = multDivExpr <|> beforeMult -- <|> divFloatEpr
 
 -- *LangParser> parse addSubExpr "1+2+3+4"
 -- Just (1 + 2 + 3 + 4,"")
@@ -164,19 +147,17 @@ intExpEpr = do a <- listIndex
                    c <- intExpEpr
                    return (IntExp a c)) <|> (return a)      
 
-beforeExp:: Parser Ast
-beforeExp = listIndex <|> beforeLI
 
 beforeLI:: Parser Ast
 beforeLI = pri <|> notExp <|> atoms
 
-listIndex:: Parser Ast          --left associative not right!!!!
+listIndex:: Parser Ast         
 listIndex = withInfix beforeLI [("!!", ListIndex)]
 
 pri:: Parser Ast
 pri = do token $ literal "print"        --should it get parser or atoms???? FIXME
          token $ literal "("
-         printed <- parser
+         printed <- atoms
          token $ literal ")"
          return printed
          `mapParser` (\ i -> Print i)
@@ -187,7 +168,7 @@ notExp = do s <- token $ (literal "!")
             return (Not a)
 
 atoms:: Parser Ast
-atoms = parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
+atoms = pri <|> parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
 
 parseChar:: Parser Ast                      --FIXME needs to work for just a not a space !
 parseChar = do --s <- token (literal "'")
@@ -258,4 +239,4 @@ parens = do token $ literal "("
             return a
 
 parser :: Parser Ast
-parser = sepEpr <|> apps <|> orExpr <|> andExpr <|> equalities <|> eqEpr <|> notEqEpr <|> beforeEqsStuff
+parser = sepEpr <|> apps <|> orExpr <|> andExpr <|> equalities <|> concatEpr <|> bothListTypes
