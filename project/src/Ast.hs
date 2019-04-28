@@ -81,6 +81,10 @@ showFullyParen (Var s) = "( " ++ s ++ ")"
 showFullyParen (Cons h t) = "(" ++ (showFullyParen h)  ++ " : " ++ (showFullyParen t) ++ ")"
 showFullyParen Nil = "( [] )"
 -- | provide a nice show with minimal parentheses
+
+--NEED TO CHECK PRECEDENCE AND LEFT RIGHT ASSOCIATIVITY
+
+-- | provide a nice show with minimal parentheses
 showPretty :: Ast  -- ^ The Ast to show
             -> Integer  -- ^ The precedence of the root expression, see the doc for 'HelpShow.parenthesize' for more detail
             -> String  -- ^ the minimally parenthesized string representing the input Ast
@@ -93,17 +97,24 @@ showPretty (ValFloat i) _            = if i < 0
                                        then  "(" ++ show i ++ ")"
                                        else show i
 showPretty (ValChar c) _             = show c
+--figure out show output of list
+--showPretty (List [x]) _              = undefined
 showPretty Nil _                     = "[]"
 showPretty (Var s) _                 = s
+showPretty (Print b)          _     = "print(" ++ showPretty b 100 ++ ")"  
 showPretty (Lam v bod) i             = parenthesize 1 i $ "\\ " ++ v ++ " -> " ++ (showPretty bod 1)
 showPretty (Let v a bod) i           = parenthesize 1 i $  "let " ++ v ++ " = " ++ (showPretty a 1) ++ " in " ++ (showPretty bod 1)
 showPretty (If b t e) i              = parenthesize 1 i $  "if " ++ (showPretty b 1) ++ " then " ++ (showPretty t 1) ++ " else " ++ (showPretty e 1)
 showPretty (App l r) i               = parenthesize 2 i $ (showPretty l 2) ++ " " ++ (showPretty r 3)
 showPretty (Cons l r) i              = parenthesize 4 i $ (showPretty l 5) ++ " : " ++ (showPretty r 4)
 showPretty (l `Separator` r) d       = parenthesize d 8 ((showPretty l 8) ++ " ; " ++  (showPretty r 7) ) -- binds most weakly
+--check list index
+showPretty (ListIndex l r) d         = parenthesize d 8 ((showPretty l 8) ++ " !! " ++ (showPretty r 7))
 showPretty (Or l r) i                = parenthesize 6 i $ (showPretty l 6) ++ " || " ++ (showPretty r 7)
 showPretty (l `Concat` r) d          = parenthesize d 8 $ (showPretty l 8) ++ " ++ " ++ (showPretty r 7)
 showPretty (l `LessThan` r) i        = parenthesize 6 i $ (showPretty l 6) ++ " < " ++ (showPretty r 7)
+showPretty (l `Equal` r) i           = parenthesize 6 i $ (showPretty l 6) ++ " == " ++ (showPretty r 7)
+showPretty (l `NotEqual` r) i        = parenthesize 6 i $ (showPretty l 6) ++ " /= " ++ (showPretty r 7)
 showPretty (l `GreaterThan` r) i     = parenthesize 6 i $ (showPretty l 6) ++ " > " ++ (showPretty r 7)
 showPretty (l `LessThanOrEqual` r) i = parenthesize 6 i $ (showPretty l 6) ++ " >= " ++ (showPretty r 7)
 showPretty (l `GreatThanOrEqual` r)i = parenthesize 6 i $ (showPretty l 6) ++ " <= " ++ (showPretty r 7)
@@ -111,6 +122,11 @@ showPretty (And l r) i               = parenthesize 8 i $ (showPretty l 8) ++ " 
 showPretty (Minus l r) i             = parenthesize 10 i $ (showPretty l 10) ++ " - " ++ (showPretty r 11)
 showPretty (Plus l r) i              = parenthesize 10 i $ (showPretty l 10) ++ " + " ++ (showPretty r 11)
 showPretty (Mult l r) i              = parenthesize 12 i $ (showPretty l 12) ++ " * " ++ (showPretty r 13)
-showPretty (Div l r) i               = parenthesize 12 i $ (showPretty l 12) ++ " // " ++ (showPretty r 13)
+showPretty (Div l r) i               = parenthesize 12 i $ (showPretty l 12) ++ " / " ++ (showPretty r 13)
+showPretty (Modulus l r) i           = parenthesize 12 i $ (showPretty l 12) ++ " % " ++ (showPretty r 13)
+--check these
+showPretty (FloatExp l r) i          = parenthesize 12 i $ (showPretty l 12) ++ " ** " ++ (showPretty r 13)
+showPretty (IntExp l r) i            = parenthesize 12 i $ (showPretty l 12) ++ " ^ " ++ (showPretty r 13)
+--
 showPretty (DivFloat l r) i          = parenthesize 12 i $ (showPretty l 12) ++ " / " ++ (showPretty r 13)
 showPretty (Not l ) i                = parenthesize 14 i $  " ! " ++ (showPretty l 14)
