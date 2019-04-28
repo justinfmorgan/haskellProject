@@ -45,7 +45,8 @@ stdLib = Map.fromList
             --                      _   -> Error "not a char"), ---char to int
    ("chr", undefined),  --int to char
    ("float", undefined),    --int to float
-   ("int", undefined)   --float to int
+   ("int", Fun $ \ v -> case v of F a -> Ok $ I (round a)
+                                  _   -> Error "not given a float")   --float to int
    ]--Fun $ \ v -> case v of Ls [] -> Error "can only call len on a non empty list"
              --                      Ls (ls:l) -> Ok $ Ls [ls] )]
 
