@@ -2,7 +2,7 @@ module Eval where
 
 import Data.Map (Map)
 import qualified Data.Map as Map
-
+--import Prelude (fromEnum, toEnum)
 import HelpShow
 import Ast
 import EnvUnsafe
@@ -25,6 +25,9 @@ len' ::[a] -> Integer
 len' []  = 0
 len' (a:b) = 1 + len' b
 
+--fromEnum2::Enum a => a -> Integer
+--fromEnum2 x = x
+
 stdLib = Map.fromList
   [("tail", Fun $ \ v -> case v of Ls (_:ls) -> Ok $ Ls ls
                                    _         -> Error "can only call tail on a non empty list"),
@@ -33,8 +36,17 @@ stdLib = Map.fromList
                                   
                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> Ok $ I (len' ls)
-                                    _ -> Error "not a list"
-   )]--Fun $ \ v -> case v of Ls [] -> Error "can only call len on a non empty list"
+                                    _ -> Error "not a list"),
+   ("elem", undefined),
+   ("map", undefined),
+   ("filter", undefined), --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
+                          --           I a -> Ok $ I $ v a),
+   ("ord", undefined),-- Fun $ \ v -> case v of C a -> Ok $ I $ fromEnum2 a
+            --                      _   -> Error "not a char"), ---char to int
+   ("chr", undefined),  --int to char
+   ("float", undefined),    --int to float
+   ("int", undefined)   --float to int
+   ]--Fun $ \ v -> case v of Ls [] -> Error "can only call len on a non empty list"
              --                      Ls (ls:l) -> Ok $ Ls [ls] )]
 
 type Env = Map String Val
