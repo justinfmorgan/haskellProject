@@ -15,9 +15,9 @@ data Ast = ValBool Bool
             --Alex div
          | Separator Ast Ast  --- all added Noah
 
-         | Equal Ast Ast | NotEqual Ast Ast --Alex
-         | LessThan Ast Ast | LessThanOrEqual Ast Ast --Alex  
-         | GreaterThan Ast Ast | GreatThanOrEqual Ast Ast    --Alex
+         | Equal Ast Ast | NotEqual Ast Ast --Alex Done
+         | LessThan Ast Ast | LessThanOrEqual Ast Ast --Alex  Done 
+         | GreaterThan Ast Ast | GreatThanOrEqual Ast Ast    --Alex Done
 
          | Concat Ast Ast  --Alex 
          | DivFloat Ast Ast  --Alex 
@@ -25,7 +25,7 @@ data Ast = ValBool Bool
          | FloatExp Ast Ast  --Noah
          | IntExp Ast Ast  --Noah
          | ListIndex Ast Ast -- left -> list, right -> integer --Alex
-         | Print Ast
+         | Print Ast --needs to be figured out first :(
 
          | Nil
          | Cons Ast Ast --Noah
