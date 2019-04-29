@@ -12,6 +12,7 @@ import EnvUnsafe
 data Val = I Integer | B Bool | F Float | C Char 
          | Ls [Val]
          | Fun (Val -> Unsafe Val) --FIXME since this is a functional language, one thing that can be returned is a function
+                                  -- FIXME This has to incorporate Writer piece, Fun (Val -> (Unsafe Val, [String]))
 
 instance Show Val where
   show (I i) = show i
@@ -20,7 +21,7 @@ instance Show Val where
   show (C c) = show c
   show (Ls ls) = show ls
   show (Fun _) = "\\ x -> ?" -- no good way to show a function
-
+  
 len' ::[a] -> Integer
 len' []  = 0
 len' (a:b) = 1 + len' b
@@ -231,10 +232,18 @@ eval (App e1 e2) = do e1' <- (evalFun e1)
                       case (e1' e2') of
                          Ok a -> return a
                          _ -> err "error did not apply"
-
+{-
+-- THIS NEEDS TO BE FIXED!!!!
 -- | helper function that runs with the default environment (for example, the stdLib in week 10)
 -- return either the error string or the value, along with everything that was printed
 run :: Ast  -- ^ run this Ast
       -> (Either String Val, [String])  -- ^ (error message or result value, all the printings)
-run a = undefined 
+run a = runEnvUnsafe (eval a) -}
+
+-- | helper function that runs with the default environment (for example, the stdLib in week 10)
+-- return either the error string or the value, along with everything that was printed
+run :: Ast  -- ^ run this Ast
+      -> Unsafe a  -- ^ (error message or result value, all the printings)
+run a = runEnvUnsafe (eval a) 
+
 
