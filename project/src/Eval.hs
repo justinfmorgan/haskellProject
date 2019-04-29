@@ -247,6 +247,6 @@ run a = runEnvUnsafe (eval a) -}
 -- return either the error string or the value, along with everything that was printed
 run :: Ast  -- ^ run this Ast
       -> Unsafe a  -- ^ (error message or result value, all the printings)
-run a = runEnvUnsafe (eval a) 
+run a = runEnvUnsafe (eval a) stdLib
 
 
