@@ -21,6 +21,9 @@ nfour = (ValInt (-4))
 
 zerof = (ValFloat 0.0)
 onef = (ValFloat 1.0)
+twof = (ValFloat 2.0)
+threef = (ValFloat 3.0)
+onetwof = (ValFloat 1.2)
 onefextra = (ValFloat 1.25)
 nonefextra = (ValFloat (-1.25))
 nonef = (ValFloat (-1.0))
@@ -87,14 +90,17 @@ evalTest = testGroup
               assertEqual "1 // -1 =? "   (-1)    (exec (Div one none))    
               assertEqual "4 // 2 =? "   2    (exec (Div four two))
               assertEqual "3 // -2 =? "   -1    (exec (Div three ntwo))
-              assertEqual "2 * -2 =? "   (-4) (exec (Mult two ntwo)),
+              assertEqual "2 * -2 =? "   (-4) (exec (Mult two ntwo))
+              assertEqual "1 % 4 =? "    (1) (exec (Modulus one four))
+              assertEqual "3 % 1 =?"      (0) (exec (Modulus three one)),
 
          testCase "Compound Arithmetic" $ ---TODO add compound with division
             do 
               assertEqual "2 + 4 * 3 =? "             14   (exec (Plus two (Mult four three)))
               assertEqual "(2 + -4) * 3 =? "          (-6) (exec (Mult (Plus two nfour) three))
               assertEqual "2 * 3 + 3 * 2 - 4 =? "     8    (exec (Sub (Plus (Mult two three) (Mult three two)) four))
-              assertEqual "2 * (3 + 3) * (2 - 4) =? " (-24) (exec (Mult (Mult two (Plus three three)) (Sub two four))),
+              assertEqual "2 * (3 + 3) * (2 - 4) =? " (-24) (exec (Mult (Mult two (Plus three three)) (Sub two four)))
+              assertEqual "2 % (3 + 2)=?"             (2) (exec (Modulus (Plus three two))),
 
          testCase "If Statements" $
             do 
@@ -151,7 +157,7 @@ evalTest = testGroup
               assertEqual "False /= True =? " True (exec (NotEqual false true))
               assertEqual "False /= False =?" False (exec (NotEqual false false)),
 
-          testCase "Greater Than Statements"
+          testCase "Greater Than Statements" $
             do
               assertEqual "1 > 1 =? "   False (exec (GreaterThan one one))  --Integers
               assertEqual "-1 > -1 =? " False (exec (GreaterThan none none))
@@ -172,7 +178,7 @@ evalTest = testGroup
               assertEqual "False > True =? " False (exec (GreaterThan false true))
               assertEqual "False > False =? " False (exec (GreaterThan false false)),
 
-          testCase "Greater Than Or Equal Statements"
+          testCase "Greater Than Or Equal Statements" $
             do
               assertEqual "1 >= 1 =? "   True (exec (GreatThanOrEqual one one))  --Integers
               assertEqual "-1 >= -1 =? " False (exec (GreatThanOrEqual none none))
@@ -193,7 +199,7 @@ evalTest = testGroup
               assertEqual "False >= True =? " False (exec (GreatThanOrEqual false true))
               assertEqual "False >= False =? " True (exec (GreatThanOrEqual false false)),
 
-          testCase "Less Than Statements"
+          testCase "Less Than Statements" $
             do
               assertEqual "1 < 1 =? "   False (exec (LessThan one one))  --Integers
               assertEqual "-1 < -1 =? " False (exec (LessThan none none))
@@ -214,7 +220,7 @@ evalTest = testGroup
               assertEqual "False < True =? " True (exec (LessThan false true))
               assertEqual "False < False =? " False (exec (LessThan false false)),
 
-          testCase "Less Than Or Equal Statements"
+          testCase "Less Than Or Equal Statements" $
             do
               assertEqual "1 <= 1 =? "   True (exec (LessThanOrEqual one one))  --Integers
               assertEqual "-1 <= -1 =? " True (exec (LessThanOrEqual none none))
@@ -235,12 +241,29 @@ evalTest = testGroup
               assertEqual "False <= True =? " True (exec (LessThanOrEqual false true))
               assertEqual "False <= False =? " True (exec (LessThanOrEqual false false)),
 
-          testCase "Concat Statements"
+          testCase "Concat Statements" $
             do
               assertEqual "[1] ++ [] =? " [1] (exec (Concat simpleList1 Nil))
               assertEqual "[] ++ [] =? " []   (exec (Concat Nil Nil))
-              assertEqual "[] ++ [1] =? " [1] (exec (Concat Nil simpleList1))
+              assertEqual "[] ++ [1] =? " [1] (exec (Concat Nil simpleList1)),
+          
+          testCase "Lists Statments" $
+            do 
+              assertEqual "Cons x Nil =?" [x] (simpleList1)
+              assertEqual "Cons 1 (Cons 1.0 (Cons true Nil)) =?" [1,1.0,True] (list3),
 
+          testCase "Exponenents Statements" $
+           do 
+            assertEqual "2 ** 4 =?" (16) (exec (IntExp two four))
+            assertEqual "4 ** 1 =?"  (4) (exec (IntExp four one))
+            assertEqual "3.0 ^ 1.0 =?" (3.0) (exec (FloatExp threef onef))
+            assertEqual "1.2 ^ 3.0 =?" (1.728) (exec (FloatExp onetwof threef))
+            
+         
+         -- testCase "Separator Statements" $
+           -- do
+             -- assertEqual "(3+2);(2+1) = ?" 
+          
 --          testCase "ListIndex"
   --          do
     --          assertEqual "[1] !! 1" 
