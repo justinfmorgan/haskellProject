@@ -222,18 +222,16 @@ letParser = do token $ literal "let"
                yee <- parser --in real life this would be an Ast parser
                token $ literal "in"
                body <- parser --in real life this would be an Ast parser
-               --let final = (name, nat, body)
                return (Let name yee body)
 
 letrecParser:: Parser Ast
 letrecParser = do token $ literal "letrec"
-               name <- varParser
-               token $ literal "="
-               yee <- parser --in real life this would be an Ast parser
-               token $ literal "in"
-               body <- parser --in real life this would be an Ast parser
-               --let final = (name, nat, body)
-               return (Letrec name yee body)
+                  name <- varParser
+                  token $ literal "="
+                  yee <- parser --in real life this would be an Ast parser
+                  token $ literal "in"
+                  body <- parser --in real life this would be an Ast parser
+                  return (Letrec name yee body)
 
 lambdaParser:: Parser Ast --working correctly!
 lambdaParser = do token $ (literal "\\")
@@ -246,8 +244,7 @@ dotmixinParser:: Parser Ast
 dotmixinParser = do a <- parser
                     token $ literal "."
                     b <- parser
-                    return (DotMixIn a b
-                      )
+                    return (DotMixIn a b)
 
 parens :: Parser Ast
 parens = do token $ literal "("
