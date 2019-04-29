@@ -92,7 +92,14 @@ evalTest = testGroup
               assertEqual "3 // -2 =? "   -1    (exec (Div three ntwo))
               assertEqual "2 * -2 =? "   (-4) (exec (Mult two ntwo))
               assertEqual "1 % 4 =? "    (1) (exec (Modulus one four))
-              assertEqual "3 % 1 =?"      (0) (exec (Modulus three one)),
+              assertEqual "3 % 1 =?"      (0) (exec (Modulus three one))
+              assertEqual "1.0 + 4.4 =? "    5.4    (exec (Plus onef fourfextra))
+              assertEqual "-1.25 + 1.0 =? "   (-0.25)    (exec (Plus nonefextra onef))
+              assertEqual "1.0 - 4.4 =? "    (-3.4) (exec (Sub onef fourfextra))
+              assertEqual "(-1.0) - (-4.4) =? " 3.4    (exec (Sub nonef nfourfextra))
+              assertEqual "2.0 * 3.0 =? "    6.0    (exec (Mult twof threef))
+              assertEqual "(1.0) / (-1.0) =? " (-1.0)   (exec (DivFloat onef nonef))
+              assertEqual "(-3.0) / 2.0 =? "    1.5    (exec (DivFloat nthreef twof)),
 
          testCase "Compound Arithmetic" $ ---TODO add compound with division
             do 
@@ -229,27 +236,43 @@ evalTest = testGroup
             do
               assertEqual "[1] ++ [] =? " [1] (exec (Concat simpleList1 Nil))
               assertEqual "[] ++ [] =? " []   (exec (Concat Nil Nil))
+              assertEqual "[1,2,3,4] ++ [1,2,3,4] =? " [1,2,3,4,1,2,3,4]   (exec (Concat list1 list1))
+              assertEqual "[True,False,True,False] ++ [1] =? " [True, False, True, False,1]   (exec (Concat list2 simpleList1))
+              assertEqual "[1,(1.0),True] ++ [(-4.4)] =? " [1,(1.0),True,(-4.4)]   (exec (Concat list3 simpleList5))
+              assertEqual "[False] ++ [1,2,3,4] =? " [False,1,2,3,4]   (exec (Concat simpleList7 list1))
               assertEqual "[] ++ [1] =? " [1] (exec (Concat Nil simpleList1)),
           
           testCase "Lists Statments" $
             do 
-              assertEqual "Cons x Nil =?" [x] (simpleList1)
-              assertEqual "Cons 1 (Cons 1.0 (Cons true Nil)) =?" [1,1.0,True] (list3),
+              assertEqual "Cons 1 Nil =?" [1] (simpleList1)
+              assertEqual "Cons 1 (Cons 1.0 (Cons True Nil)) =?" [1,1.0,True] (list3),
 
           testCase "Exponenents Statements" $
            do 
             assertEqual "2 ** 4 =?" (16) (exec (IntExp two four))
             assertEqual "4 ** 1 =?"  (4) (exec (IntExp four one))
             assertEqual "3.0 ^ 1.0 =?" (3.0) (exec (FloatExp threef onef))
-            assertEqual "1.2 ^ 3.0 =?" (1.728) (exec (FloatExp onetwof threef))
+            assertEqual "1.2 ^ 3.0 =?" (1.728) (exec (FloatExp onetwof threef)),
             
          
          -- testCase "Separator Statements" $
            -- do
              -- assertEqual "(3+2);(2+1) = ?" 
           
---          testCase "ListIndex"
-  --          do
-    --          assertEqual "[1] !! 1" 
+          testCase "ListIndex"
+            do
+              assertEqual "[1] !! 1 =?" Nil (exec (ListIndex simpleList1 one)) 
+              assertEqual "[1] !! 0 =?" 1 (exec (ListIndex simpleList1 zero))
+              assertEqual "[(-1)] !! 0 =?" (-1) (exec (ListIndex simpleList4 zero)) 
+              assertEqual "[True, False, True, False] !! 2 =?" (True) (exec (ListIndex list2 two)) 
+              assertEqual "[True, False, True, False] !! 3 =?" (False) (exec (ListIndex list2 three))
+              assertEqual "[1,2,3,4] !! 2 =?" (3) (exec (ListIndex list1 two)) 
+              assertEqual "[1,2,3,4] !! 0 =?" (1) (exec (ListIndex list1 zero))
+              assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 2 =?" (-4.4) (exec (ListIndex list4 two)) 
+              assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (-4) (exec (ListIndex list4 three)) 
+
+
+ 
+
     ]
 

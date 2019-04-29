@@ -19,12 +19,12 @@ data Ast = ValBool Bool
          | LessThan Ast Ast | LessThanOrEqual Ast Ast --Alex  Done 
          | GreaterThan Ast Ast | GreatThanOrEqual Ast Ast    --Alex Done
 
-         | Concat Ast Ast  --Alex 
-         | DivFloat Ast Ast  --Alex 
+         | Concat Ast Ast  --Alex Done
+         | DivFloat Ast Ast  --Alex Done
          | Modulus Ast Ast -- only for integers Noah Done
          | FloatExp Ast Ast  --Noah Done
          | IntExp Ast Ast  --Noah Done
-         | ListIndex Ast Ast -- left -> list, right -> integer --Alex
+         | ListIndex Ast Ast -- left -> list, right -> integer --Alex   Done??
          | Print Ast --needs to be figured out first :(
 
          | Nil
