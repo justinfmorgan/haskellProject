@@ -68,9 +68,11 @@ evalTest = testGroup
               assertEqual "T && T"      True    (exec (And true true))
               assertEqual "T && F"      False   (exec (And true false))
               assertEqual "F && F"      False   (exec (And false false))
+              assertEqual "F && T"      False   (exec (And false true))
               assertEqual "T || F"      True    (exec (Or true false))
               assertEqual "T || T"      True    (exec (Or true true))
               assertEqual "F || F"      False   (exec (Or false false))
+              assertEqual "F || T"      True    (exec (Or false true))
               assertEqual "!T"          False   (exec (Not true))
               assertEqual "!F"          True    (exec (Not false)),
 
@@ -110,7 +112,7 @@ evalTest = testGroup
 
          testCase "Compound Arithmetic" $ ---TODO add compound with division
             do 
-              assertEqual "2 + 4 * 3 =? "             14   (exec (Plus two (Mult four three)))
+              assertEqual "2 + 4 * 3  =? "             14   (exec (Plus two (Mult four three)))
               assertEqual "(2 + -4) * 3 =? "          (-6) (exec (Mult (Plus two nfour) three))
               assertEqual "2 * 3 + 3 * 2 - 4 =? "     8    (exec (Sub (Plus (Mult two three) (Mult three two)) four))
               assertEqual "2 * (3 + 3) * (2 - 4) =? " (-24) (exec (Mult (Mult two (Plus three three)) (Sub two four)))
