@@ -28,6 +28,10 @@ len' (a:b) = 1 + len' b
 --fromEnum2::Enum a => a -> Integer
 --fromEnum2 x = x
 
+--apply:: [Val] -> (Val->Unsafe Val) -> [Unsafe Val]
+
+--apply:: [a] -> (a -> b) -> [b]
+--apply (head:tail) f = [(f head)] ++ (apply f tail) 
 
 stdLib = Map.fromList
   [("tail", Fun $ \ v -> case v of Ls (_:ls) -> Ok $ Ls ls
@@ -39,7 +43,10 @@ stdLib = Map.fromList
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> Ok $ I (len' ls)
                                     _ -> Error "not a list"),
    ("elem", undefined),
-   ("map", undefined),
+   ("map", undefined --Fun $ \v -> case v of 
+             --               Fun (Fun a) -> case a of ->
+              --                              Ls (b) -> Ok $ Ls (b)
+                            ),
    ("filter", undefined), --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
                           --           I a -> Ok $ I $ v a),
    ("ord", undefined),-- Fun $ \ v -> case v of C a -> Ok $ I $ fromEnum2 a
