@@ -19,8 +19,16 @@ nthree = (ValInt (-3))
 four = (ValInt 4)
 nfour = (ValInt (-4))
 
-true = (Valbool True)
-false = (Valbool False)
+zerof = (ValFloat 0.0)
+onef = (ValFloat 1.0)
+onefextra = (ValFloat 1.25)
+nonefextra = (ValFloat (-1.25))
+nonef = (ValFloat (-1.0))
+fourfextra (ValFloat 4.4)
+nfourfextra (ValFloat (-4.4))
+
+true = (ValBool True)
+false = (ValBool False)
 
 
 evalTest = testGroup
@@ -77,6 +85,51 @@ evalTest = testGroup
             do 
               assertEqual "let x = 4 in x * 2 =? "                   8  (exec (Let "x" four (Mult (Var "x") two)))
               assertEqual "let x = 4 * -2 in x - 2 =? "              (-10)  (exec (Let "x" (Mult four ntwo) (Sub (Var "x") two)))
-              assertEqual "let x = 2 in let y = x + 1 in y * 2 =? "  6  (exec (Let "x" two (Let "y" (Plus (Var "x") one)  (Mult (Var "y") two))))
+              assertEqual "let x = 2 in let y = x + 1 in y * 2 =? "  6  (exec (Let "x" two (Let "y" (Plus (Var "x") one)  (Mult (Var "y") two)))),
+
+          testCase "Equal Statements" $
+            do
+              assertEqual "1 == 1 =? "   True (exec (Equal one one))  --Integers
+              assertEqual "-1 == -1 =? " True (exec (Equal none none))
+              assertEqual "-1 == -4 =? " False (exec (Equal none nfour))
+              assertEqual "-1 == 3 =? "  False (exec (Equal none three))
+              assertEqual "1 == -1 =? "  False (exec (Equal one none))
+              assertEqual "1 == -4 =? "  False (exec (Equal one nfour))
+              assertEqual "3 == 3 =? "   True  (exec (Equal three three))
+              assertEqual "1.0 == 1.0 =? "   True (exec (Equal onef onef))  --Floats
+              assertEqual "1.0 == 1.25 =? "  False (exec (Equal onef onefextra)) 
+              assertEqual "-1.0 == 1.0 =? "  False (exec (Equal nonef onef)) 
+              assertEqual "1.0 == -4.4 =? "  False (exec (Equal onef nfourfextra)) 
+              assertEqual "1.0 == -1.0 =? "  False (exec (Equal onef nonef)) 
+              assertEqual "1.25 == 1.25 =? " True  (exec (Equal onefextra onefextra)) 
+              assertEqual "-4.4 == -4.4 =? " True  (exec (Equal nfourfextra nfourfextra))  
+              assertEqual "True == True" True (exec (Equal true true))
+              assertEqual "True == False" False (exec (Equal true false))
+              assertEqual "False == True" False (exec (Equal false true))
+              assertEqual "False == False" True (exec (Equal false false)),
+
+          testCase "Not Equal Statements" $
+            do
+              assertEqual "1 /= 1 =? "   False (exec (NotEqual one one))  --Integers
+              assertEqual "-1 /= -1 =? " False (exec (NotEqual none none))
+              assertEqual "-1 /= -4 =? " True (exec (NotEqual none nfour))
+              assertEqual "-1 /= 3 =? "  True (exec (NotEqual none three))
+              assertEqual "1 /= -1 =? "  True (exec (NotEqual one none))
+              assertEqual "1 /= -4 =? "  True (exec (NotEqual one nfour))
+              assertEqual "3 /= 3 =? "   False  (exec (NotEqual three three))
+              assertEqual "1.0 /= 1.0 =? "   True (exec (NotEqual onef onef))  --Floats
+              assertEqual "1.0 /= 1.25 =? "  False (exec (NotEqual onef onefextra)) 
+              assertEqual "-1.0 /= 1.0 =? "  False (exec (NotEqual nonef onef)) 
+              assertEqual "1.0 /= -4.4 =? "  False (exec (NotEqual onef nfourfextra)) 
+              assertEqual "1.0 /= -1.0 =? "  False (exec (NotEqual onef nonef)) 
+              assertEqual "1.25 /= 1.25 =? " True  (exec (NotEqual onefextra onefextra)) 
+              assertEqual "-4.4 /= -4.4 =? " True  (exec (NotEqual nfourfextra nfourfextra))  
+              assertEqual "True /= True" False (exec (NotEqual true true))
+              assertEqual "True /= False" True (exec (NotEqual true false))
+              assertEqual "False /= True" True (exec (NotEqual false true))
+              assertEqual "False /= False" False (exec (NotEqual false false))
+
+
+
     ]
 
