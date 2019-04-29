@@ -58,8 +58,6 @@ do
   test1
   foldTestCase testRest
 
-evalTest = 
-
 evalTest = testGroup
       "Eval Test"
       [
@@ -280,7 +278,7 @@ evalTest = testGroup
               assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 2 =?" (-4.4) (exec (ListIndex list4 two)) 
               assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (-4) (exec (ListIndex list4 three)),
 
-          testCase "eval test" $ foldTestCase $
+          testCase "Var App Lam Test" $ foldTestCase $
           [assertEqual testStr res (eval formula) | (Res testStr formula res) <- evalRes]
 
     ]
