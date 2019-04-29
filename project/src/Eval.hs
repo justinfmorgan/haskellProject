@@ -246,7 +246,7 @@ run a = runEnvUnsafe (eval a) -}
 -- | helper function that runs with the default environment (for example, the stdLib in week 10)
 -- return either the error string or the value, along with everything that was printed
 run :: Ast  -- ^ run this Ast
-      -> Unsafe a  -- ^ (error message or result value, all the printings)
+      -> Unsafe Val  -- ^ (error message or result value, all the printings)
 run a = runEnvUnsafe (eval a) stdLib
 
 

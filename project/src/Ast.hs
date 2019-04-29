@@ -3,7 +3,7 @@ module Ast where
 import HelpShow
 
 -- | the abstract syntax tree for the language
-data Ast = ValBool Bool
+data Ast = ValBool Bool -- Added
          | And Ast Ast | Or Ast Ast | Not Ast
          
          | ValFloat Float -- added
@@ -41,6 +41,18 @@ data Ast = ValBool Bool
 --         deriving Eq 
 --highest precedence -> integers, floats, chars, lists, variables, let, if then else, lambda
 
+
+-- makes a free var from a string
+mkFreeVar :: String -> Ast
+mkFreeVar = Var
+
+-- applies the 2nd term to the first
+mkApp  ::  Ast -> Ast -> Ast
+mkApp = App
+
+-- creates a lambda out of a term and the name of a free var
+bindToLam :: String -> Ast -> Ast
+bindToLam = Lam
 
 --instance Show Ast where
 --  -- display the ast in a readable way
