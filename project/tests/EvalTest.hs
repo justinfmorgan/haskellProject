@@ -103,7 +103,7 @@ evalTest = testGroup
               assertEqual "(1.0) / (-1.0) =? " (-1.0)   (exec (DivFloat onef nonef))
               assertEqual "(-3.0) / 2.0 =? "    1.5    (exec (DivFloat nthreef twof)),
 
-         testCase "Compound Arithmetic" $ ---TODO add compound with division
+         testCase "Compound Arithmetic" $ ---TODO add compound with division and floats
             do 
               assertEqual "2 + 4 * 3  =? "             14   (exec (Plus two (Mult four three)))
               assertEqual "(2 + -4) * 3 =? "          (-6) (exec (Mult (Plus two nfour) three))

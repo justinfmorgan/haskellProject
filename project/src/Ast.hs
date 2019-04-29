@@ -36,6 +36,10 @@ data Ast = ValBool Bool
          | Var String  --Justin 
          | Lam String Ast  --Justin
          | App Ast Ast  --Justin
+            --mixins
+         | DotMixIn Ast Ast -- f . g instead of \x -> f (g x) TODO add to evaltest, eval
+         | Letrec String Ast Ast --TODO add to evaltest, eval
+
            deriving (Show,Eq) -- helpful to use this during testing
 
 --         deriving Eq 
@@ -50,6 +54,8 @@ data Ast = ValBool Bool
 showFullyParen :: Ast  -- ^ The Ast to show
                 -> String  -- ^ the fully parenthesized string representing the input Ast
 showFullyParen (ValInt i) = "(" ++ show i ++ ")"
+showFullyParen (DotMixIn a b) = "(" ++ (showFullyParen a) ++ " . " ++ (showFullyParen b) ++ ")"
+showFullyParen (Letrec a b c) = "(letrec" ++ a ++ " = " ++ (showFullyParen b) ++ " in " ++ (showFullyParen c) ++ ")"  
 showFullyParen (Concat a b) = "(" ++ (showFullyParen a) ++ " ++ " ++ (showFullyParen b) ++ ")"
 showFullyParen (DivFloat a b) = "(" ++ (showFullyParen a) ++ " / " ++ (showFullyParen b) ++ ")"
 showFullyParen (Modulus a b) = "(" ++ (showFullyParen a) ++ " % " ++ (showFullyParen b) ++ ")"
@@ -102,8 +108,9 @@ showPretty (ValChar c) _             = show c
 showPretty (Let v a bod) i           = parenthesize 1 i  $  "let " ++ v ++ " = " ++ (showPretty a 1) ++ " in " ++ (showPretty bod 1)
 showPretty (If b t e) i              = parenthesize 1 i $  "if " ++ (showPretty b 1) ++ " then " ++ (showPretty t 1) ++ " else " ++ (showPretty e 1)
 showPretty (Lam v bod) i             = parenthesize 1 i  $ "\\ " ++ v ++ " -> " ++ (showPretty bod 100)
+showPretty (Letrec v a bod) i        = parenthesize 1 i  $  "let " ++ v ++ " = " ++ (showPretty a 1) ++ " in " ++ (showPretty bod 1)
+showPretty (DotMixIn a b) i          = parenthesize 1 i $ (showPretty a 1) ++ " . " ++ (showPretty b 1) 
 
---showPretty (List [x]) _              = undefined
 showPretty Nil _                     = "[]"
 showPretty (Var s) _                 = s
 showPretty (Not l ) i                = parenthesize 23 i $  " ! " ++ (showPretty l 23)
