@@ -263,10 +263,12 @@ evalTest = testGroup
             assertEqual "3.0 ^ 1.0 =?" (3.0) (exec (FloatExp threef onef))
             assertEqual "1.2 ^ 3.0 =?" (1.728) (exec (FloatExp onetwof threef)),
             
-         
-         -- testCase "Separator Statements" $
-           -- do
-             -- assertEqual "(3+2);(2+1) = ?" 
+
+          testCase "Separator Statements" $
+          do
+           assertEqual "(3 + 2);(2 + 1) = ?" (2+1) (exec (Separator (Plus three two) (Plus two one)))
+           assertEqual "(4 - 1);(4 + (2 * 3)) =?" (4 + (2 * 3)) (exec (Seperator (Minus four one)(Plus four (Mult two three)))),
+        
           
           testCase "ListIndex" $
             do
