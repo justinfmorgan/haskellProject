@@ -172,11 +172,7 @@ evalTest = testGroup
               assertEqual "1.0 > -4.4 =? "  True (exec (GreaterThan onef nfourfextra)) 
               assertEqual "1.0 > -1.0 =? "  True (exec (GreaterThan onef nonef)) 
               assertEqual "1.25 > 1.25 =? " False  (exec (GreaterThan onefextra onefextra)) 
-              assertEqual "-4.4 > -4.4 =? " False  (exec (GreaterThan nfourfextra nfourfextra))  
-              assertEqual "True > True =? " False (exec (GreaterThan true true))
-              assertEqual "True > False =? " True (exec (GreaterThan true false))
-              assertEqual "False > True =? " False (exec (GreaterThan false true))
-              assertEqual "False > False =? " False (exec (GreaterThan false false)),
+              assertEqual "-4.4 > -4.4 =? " False  (exec (GreaterThan nfourfextra nfourfextra)),
 
           testCase "Greater Than Or Equal Statements" $
             do
@@ -193,11 +189,7 @@ evalTest = testGroup
               assertEqual "1.0 >= -4.4 =? "  True (exec (GreatThanOrEqual onef nfourfextra)) 
               assertEqual "1.0 >= -1.0 =? "  True (exec (GreatThanOrEqual onef nonef)) 
               assertEqual "1.25 >= 1.25 =? " True  (exec (GreatThanOrEqual onefextra onefextra)) 
-              assertEqual "-4.4 >= -4.4 =? " True  (exec (GreatThanOrEqual nfourfextra nfourfextra))  
-              assertEqual "True >= True =? " True (exec (GreatThanOrEqual true true))
-              assertEqual "True >= False =? " True (exec (GreatThanOrEqual true false))
-              assertEqual "False >= True =? " False (exec (GreatThanOrEqual false true))
-              assertEqual "False >= False =? " True (exec (GreatThanOrEqual false false)),
+              assertEqual "-4.4 >= -4.4 =? " True  (exec (GreatThanOrEqual nfourfextra nfourfextra)),
 
           testCase "Less Than Statements" $
             do
@@ -214,11 +206,7 @@ evalTest = testGroup
               assertEqual "1.0 < -4.4 =? "  False (exec (LessThan onef nfourfextra)) 
               assertEqual "1.0 < -1.0 =? "  False (exec (LessThan onef nonef)) 
               assertEqual "1.25 < 1.25 =? " False  (exec (LessThan onefextra onefextra)) 
-              assertEqual "-4.4 < -4.4 =? " False  (exec (LessThan nfourfextra nfourfextra))  
-              assertEqual "True < True =? " False (exec (LessThan true true))
-              assertEqual "True < False =? " False (exec (LessThan true false))
-              assertEqual "False < True =? " True (exec (LessThan false true))
-              assertEqual "False < False =? " False (exec (LessThan false false)),
+              assertEqual "-4.4 < -4.4 =? " False  (exec (LessThan nfourfextra nfourfextra)),
 
           testCase "Less Than Or Equal Statements" $
             do
@@ -235,11 +223,7 @@ evalTest = testGroup
               assertEqual "1.0 <= -4.4 =? "  False (exec (LessThanOrEqual onef nfourfextra)) 
               assertEqual "1.0 <= -1.0 =? "  False (exec (LessThanOrEqual onef nonef)) 
               assertEqual "1.25 <= 1.25 =? " True  (exec (LessThanOrEqual onefextra onefextra)) 
-              assertEqual "-4.4 <= -4.4 =? " True  (exec (LessThanOrEqual nfourfextra nfourfextra))  
-              assertEqual "True <= True =? " True (exec (LessThanOrEqual true true))
-              assertEqual "True <= False =? " False (exec (LessThanOrEqual true false))
-              assertEqual "False <= True =? " True (exec (LessThanOrEqual false true))
-              assertEqual "False <= False =? " True (exec (LessThanOrEqual false false)),
+              assertEqual "-4.4 <= -4.4 =? " True  (exec (LessThanOrEqual nfourfextra nfourfextra)),
 
           testCase "Concat Statements" $
             do
