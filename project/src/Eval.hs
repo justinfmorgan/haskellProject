@@ -119,7 +119,7 @@ local changeEnv comp  = EnvUnsafe (\e -> runEnvUnsafe comp e ) --check later bec
 
 --indexInto [] _ = err "empty list"
 indexInto:: Val -> Integer -> EnvUnsafe Env  Val
-indexInto (Ls (head:tail)) 1 = case (head) of 
+indexInto (Ls (head:tail)) 0 = case (head) of 
                                     Ls a -> return (Ls a)
                                     I a -> return (I a)
                                     B a -> return (B a)
@@ -228,6 +228,8 @@ eval (If a b c) = do a' <- (evalBool a)
 eval (Let v val bod) = 
   do val' <- eval val
      local (Map.insert v val') (eval bod)
+eval (Letrec v val bod) = undefined --TODO
+eval (DotMixIn a b) =  undefined--(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --FIXME
 eval (Lam x bod) = do env <- getEnv
                       return $ Fun $ \ v -> runEnvUnsafe (eval bod) (Map.insert x v env)
 eval (App e1 e2) = do e1' <- (evalFun e1)

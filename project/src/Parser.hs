@@ -168,7 +168,7 @@ notExp = do s <- token $ (literal "!")
             return (Not a)
 
 atoms:: Parser Ast
-atoms = pri <|> parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letParser <|>  lambdaParser <|> vars
+atoms = pri <|> parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letrecParser <|> letParser <|>  dotmixinParser <|> lambdaParser <|> vars
 
 parseChar:: Parser Ast                      --FIXME needs to work for just a not a space !
 parseChar = do --s <- token (literal "'")
@@ -225,12 +225,29 @@ letParser = do token $ literal "let"
                --let final = (name, nat, body)
                return (Let name yee body)
 
+letrecParser:: Parser Ast
+letrecParser = do token $ literal "letrec"
+               name <- varParser
+               token $ literal "="
+               yee <- parser --in real life this would be an Ast parser
+               token $ literal "in"
+               body <- parser --in real life this would be an Ast parser
+               --let final = (name, nat, body)
+               return (Letrec name yee body)
+
 lambdaParser:: Parser Ast --working correctly!
 lambdaParser = do token $ (literal "\\")
                   s <- varParser
                   token $ (literal "->")
                   t <- parser
                   return (Lam s t) 
+
+dotmixinParser:: Parser Ast
+dotmixinParser = do a <- parser
+                    token $ literal "."
+                    b <- parser
+                    return (DotMixIn a b
+                      )
 
 parens :: Parser Ast
 parens = do token $ literal "("
