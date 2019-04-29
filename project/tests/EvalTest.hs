@@ -30,6 +30,23 @@ nfourfextra (ValFloat (-4.4))
 true = (ValBool True)
 false = (ValBool False)
 
+char1 = (ValChar 'a')
+char2 = (ValChar 'b')
+char1 = (ValChar '3')
+char1 = (ValChar '4')
+
+simpleList1 = (Cons one Nil)
+simpleList2 = (Cons two Nil)
+simpleList3 = Nil
+simpleList4 = (Cons none Nil)
+simpleList5 = (Cons nfourfextra Nil)
+simpleList6 = (Cons true Nil)
+simpleList7 = (Cons false Nil)
+
+list1 = (Cons one (Cons two (Cons three (Cons four Nil))))
+list2 = (Cons true (Cons false (Cons true (Cons false Nil))))
+list3 = (Cons one (Cons onef (Cons true Nil)))
+list4 = (Cons nonef (Cons onefextra (Cons nfourfextra (Cons nfour Nil))))
 
 evalTest = testGroup
       "Eval Test"
@@ -65,9 +82,14 @@ evalTest = testGroup
               assertEqual "2 - 4 =? "    (-2) (exec (Sub two four))
               assertEqual "2 - (-4) =? " 6    (exec (Sub two nfour))
               assertEqual "3 * 2 =? "    6    (exec (Mult three two))
+              assertEqual "1 // 2 =? "   0    (exec (Div one two))
+              assertEqual "-2 // 2 =? "   (-1)    (exec (Div ntwo two))
+              assertEqual "1 // -1 =? "   (-1)    (exec (Div one none))    
+              assertEqual "4 // 2 =? "   2    (exec (Div four two))
+              assertEqual "3 // -2 =? "   -1    (exec (Div three ntwo))
               assertEqual "2 * -2 =? "   (-4) (exec (Mult two ntwo)),
 
-         testCase "Compound Arithmetic" $
+         testCase "Compound Arithmetic" $ ---TODO add compound with division
             do 
               assertEqual "2 + 4 * 3 =? "             14   (exec (Plus two (Mult four three)))
               assertEqual "(2 + -4) * 3 =? "          (-6) (exec (Mult (Plus two nfour) three))
@@ -211,7 +233,16 @@ evalTest = testGroup
               assertEqual "True <= True =? " True (exec (LessThanOrEqual true true))
               assertEqual "True <= False =? " False (exec (LessThanOrEqual true false))
               assertEqual "False <= True =? " True (exec (LessThanOrEqual false true))
-              assertEqual "False <= False =? " True (exec (LessThanOrEqual false false))
+              assertEqual "False <= False =? " True (exec (LessThanOrEqual false false)),
 
+          testCase "Concat Statements"
+            do
+              assertEqual "[1] ++ [] =? " [1] (exec (Concat simpleList1 Nil))
+              assertEqual "[] ++ [] =? " []   (exec (Concat Nil Nil))
+              assertEqual "[] ++ [1] =? " [1] (exec (Concat Nil simpleList1))
+
+--          testCase "ListIndex"
+  --          do
+    --          assertEqual "[1] !! 1" 
     ]
 

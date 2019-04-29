@@ -12,7 +12,7 @@ data Ast = ValBool Bool
 
          | ValInt Integer
          | Plus Ast Ast | Minus Ast Ast | Mult Ast Ast | Div Ast Ast --Done except div, must add float for plus, minus, mult
-            --Alex div
+            --Alex div 
          | Separator Ast Ast  --- all added Noah
 
          | Equal Ast Ast | NotEqual Ast Ast --Alex Done
