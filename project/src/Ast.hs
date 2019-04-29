@@ -11,29 +11,31 @@ data Ast = ValBool Bool
 --         | List [Ast] -- added
 
          | ValInt Integer
-         | Plus Ast Ast | Minus Ast Ast | Mult Ast Ast | Div Ast Ast
+         | Plus Ast Ast | Minus Ast Ast | Mult Ast Ast | Div Ast Ast --Done except div, must add float for plus, minus, mult
+            --Alex div 
+         | Separator Ast Ast  --- all added Noah Unsure
 
-         | Separator Ast Ast  --- all added
-         | Equal Ast Ast | NotEqual Ast Ast
-         | LessThan Ast Ast | LessThanOrEqual Ast Ast 
-         | GreaterThan Ast Ast | GreatThanOrEqual Ast Ast
-         | Concat Ast Ast
-         | DivFloat Ast Ast 
-         | Modulus Ast Ast -- only for integers
-         | FloatExp Ast Ast
-         | IntExp Ast Ast
-         | ListIndex Ast Ast -- left -> list, right -> integer
-         | Print Ast
+         | Equal Ast Ast | NotEqual Ast Ast --Alex Done
+         | LessThan Ast Ast | LessThanOrEqual Ast Ast --Alex  Done 
+         | GreaterThan Ast Ast | GreatThanOrEqual Ast Ast    --Alex Done
+
+         | Concat Ast Ast  --Alex Done
+         | DivFloat Ast Ast  --Alex Done
+         | Modulus Ast Ast -- only for integers Noah Done
+         | FloatExp Ast Ast  --Noah Done
+         | IntExp Ast Ast  --Noah Done
+         | ListIndex Ast Ast -- left -> list, right -> integer --Alex   Done??
+         | Print Ast --needs to be figured out first :(
 
          | Nil
-         | Cons Ast Ast
+         | Cons Ast Ast --Noah  -- Kinda done not sure
 
-         | If Ast Ast Ast
-         | Let String Ast Ast
+         | If Ast Ast Ast   --done
+         | Let String Ast Ast --done
 
-         | Var String
-         | Lam String Ast
-         | App Ast Ast
+         | Var String  --Justin 
+         | Lam String Ast  --Justin
+         | App Ast Ast  --Justin
            deriving (Show,Eq) -- helpful to use this during testing
 
 --         deriving Eq 
