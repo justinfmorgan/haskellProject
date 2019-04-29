@@ -6,6 +6,7 @@ import Test.Tasty.HUnit (assertEqual, assertBool, testCase)
 
 import Ast
 import Eval
+import Examples (evalRes, Res(..))
 
 -- provide tests that show your run/eval works
 
@@ -51,6 +52,14 @@ list2 = (Cons true (Cons false (Cons true (Cons false Nil))))
 list3 = (Cons one (Cons onef (Cons true Nil)))
 list4 = (Cons nonef (Cons onefextra (Cons nfourfextra (Cons nfour Nil))))
 
+foldTestCase [] = return ()
+foldTestCase (test1:testRest) = 
+do 
+  test1
+  foldTestCase testRest
+
+evalTest = 
+
 evalTest = testGroup
       "Eval Test"
       [
@@ -70,14 +79,12 @@ evalTest = testGroup
 
          testCase "Compound Bools" $
             do
-              assertEqual "T && T && (!False)"      True    (exec (And true true))
-              assertEqual "T && F"                  False   (exec (And true false))
-              assertEqual "F && F"      False   (exec (And false false))
-              assertEqual "T || F"      True    (exec (Or true false))
-              assertEqual "T || T"      True    (exec (Or true true))
-              assertEqual "F || F"      False   (exec (Or false false))
-              assertEqual "!T"          False   (exec (Not true))
-              assertEqual "!F"          True    (exec (Not false)), 
+              assertEqual "T && (T && (!F))"      True    (exec (And true (And true (Not false))))
+              assertEqual "T || (F || (!T))"      True    (exec (Or true (Or false (Not true))))
+              assertEqual "F && (!T) && (!F)"     False   (exec (And false (And (Not true) (Not false))))
+              assertEqual "F || ((!T) && T)"      False   (exec (Or false (And (Not true) true)))
+              assertEqual "T && (F || T) && (!F) && (T &&  (!F))"
+                                                  True    (exec (And (And (And true (Or false true)) (Not false)) (And true (Not false)))),
 
 
          testCase "Basic Arithmetic" $
@@ -261,7 +268,7 @@ evalTest = testGroup
            -- do
              -- assertEqual "(3+2);(2+1) = ?" 
           
-          testCase "ListIndex"
+          testCase "ListIndex" $
             do
               assertEqual "[1] !! 1 =?" Nil (exec (ListIndex simpleList1 one)) 
               assertEqual "[1] !! 0 =?" 1 (exec (ListIndex simpleList1 zero))
@@ -271,9 +278,10 @@ evalTest = testGroup
               assertEqual "[1,2,3,4] !! 2 =?" (3) (exec (ListIndex list1 two)) 
               assertEqual "[1,2,3,4] !! 0 =?" (1) (exec (ListIndex list1 zero))
               assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 2 =?" (-4.4) (exec (ListIndex list4 two)) 
-              assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (-4) (exec (ListIndex list4 three)) 
+              assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (-4) (exec (ListIndex list4 three)),
 
-
+          testCase "eval test" $ foldTestCase $
+          [assertEqual testStr res (eval formula) | (Res testStr formula res) <- evalRes]
 
     ]
 
