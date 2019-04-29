@@ -154,7 +154,10 @@ eval (Print x) = undefined --do
 --    x' <- eval x
 --    printThis x'
 --    return (x')
-eval (Modulus a b) = undefined  --for ints and floats
+eval (Modulus a b) =   --for ints
+  do l' <- evalInt a
+     r' <- evalInt b
+     return $ I $ l' `mod` r' 
 eval (ListIndex a b) =
     do a' <- evalList a
        b' <- evalInt b 
