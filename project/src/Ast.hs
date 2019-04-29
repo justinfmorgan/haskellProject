@@ -13,7 +13,7 @@ data Ast = ValBool Bool -- Added
          | ValInt Integer
          | Plus Ast Ast | Minus Ast Ast | Mult Ast Ast | Div Ast Ast --Done except div, must add float for plus, minus, mult
             --Alex div 
-         | Separator Ast Ast  --- all added Noah Unsure
+         | Separator Ast Ast  --- all added Noah Done i think
 
          | Equal Ast Ast | NotEqual Ast Ast --Alex Done
          | LessThan Ast Ast | LessThanOrEqual Ast Ast --Alex  Done 
@@ -28,7 +28,7 @@ data Ast = ValBool Bool -- Added
          | Print Ast --needs to be figured out first :(
 
          | Nil
-         | Cons Ast Ast --Noah  -- Kinda done not sure
+         | Cons Ast Ast --Noah  -- done
 
          | If Ast Ast Ast   --done
          | Let String Ast Ast --done
