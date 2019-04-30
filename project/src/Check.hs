@@ -8,7 +8,6 @@ import EnvUnsafe
 
 -- here you can preform static checks
 
-
 -- | The data type for all the static check warning
 -- Some example include:
 --   * use of undefined variable
@@ -30,7 +29,6 @@ data WarningMsg = UndefinedVarUse String  -- ^ This is the Warning for use of Un
 
   -}
 
-
 -- | perform static checking on the Ast
 -- the output a set of warning on that input Ast/
 check :: Ast -> Set WarningMsg
@@ -38,11 +36,12 @@ check (Var a) = Set.map f (freeVars (Var a))
 check (ValBool a) = Set.empty
 check (ValInt a) = Set.empty
 check (ValFloat a) = Set.empty
-check (And a b) = undefined
-check (Or a b) = undefined
-check (Not a) = undefined
+check (Nil) = Set.empty
 check (ValChar a) = Set.empty
-check (Plus a b) = undefined
+{-check (And a b) = undefined
+check (Or a b) = undefined
+check (Not a) = undefined-}
+{-check (Plus a b) = undefined
 check (Minus a b) = undefined
 check (Mult a b) = undefined
 check (Div a b) = undefined
@@ -61,24 +60,21 @@ check (IntExp a b) = undefined
 check (FloatExp a b) = undefined
 check (ListIndex a b) = undefined
 check (Print a) = undefined
-check (Nil) = Set.empty
 check (If a b c) = undefined
 check (Let str b c) = undefined
 check (DotMixIn a b) = undefined
-check (Letrec str b c) = undefined
+check (Letrec str b c) = undefined -}
 check (Lam a b) = Set.union ( Set.map f (freeVars (Lam a b)) ) (Set.map  f2 (difference (boundVars (Lam a b)) (used (Lam a b)) ))
 check (App a b) = Set.union ( Set.map f (freeVars (App a b)) ) (Set.map  f2 (difference (boundVars (App a b)) (used (App a b)) ))
---check (Lam str b ) | (isClosed (Lam str b) == False) = UndefinedVarUse "unused variable" --FIXME should say what variable is not used
---				   | 
---check (App a b) | (isClosed (App a b) == False) = UndefinedVarUse "unused variable" --FIXME should say what variable is not used
---				| 
--- collect all the vars that appear in the expression that are not boun
+check x = (Set.map f2 (difference (boundVars x) (used x )))
 
+{- unused
 finalUnused:: Ast -> Set WarningMsg
 finalUnused x = Set.map  f2 (difference (boundVars x) (used x) )
 
 unusedBoundVars:: Set String -> Set String -> Set String
 unusedBoundVars x y = difference x y
+-}
 
 boundVars :: Ast -> Set String --gets all the boundvars now must figure out which of these aren't used
 boundVars (Lam v bod) = Set.insert v $ boundVars bod
