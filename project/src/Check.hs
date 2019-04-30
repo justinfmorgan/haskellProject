@@ -67,7 +67,7 @@ check (Let str b c) = undefined
 check (DotMixIn a b) = undefined
 check (Letrec str b c) = undefined
 check (Lam a b) = Set.union ( Set.map f (freeVars (Lam a b)) ) (Set.map  f2 (difference (boundVars (Lam a b)) (used (Lam a b)) ))
-check (App a b) = Set.union ( Set.map f (freeVars (App a b)) ) (Set.map  f2 (difference (boundVars (Lam a b)) (used (App a b)) ))
+check (App a b) = Set.union ( Set.map f (freeVars (App a b)) ) (Set.map  f2 (difference (boundVars (App a b)) (used (App a b)) ))
 --check (Lam str b ) | (isClosed (Lam str b) == False) = UndefinedVarUse "unused variable" --FIXME should say what variable is not used
 --				   | 
 --check (App a b) | (isClosed (App a b) == False) = UndefinedVarUse "unused variable" --FIXME should say what variable is not used
