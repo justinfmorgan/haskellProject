@@ -15,8 +15,8 @@ import EnvUnsafe
 --   * defined but unused variable
 --   * type errors
 
-data WarningMsg = UndefinedVarUse String  -- ^ This is the Warning for use of Undefined variable name
-                | UnusedVar String
+data WarningMsg = UndefinedVarUse String  -- ^ This is the Warning for use of Undefined variable name => unbound 
+                | UnusedVar String -- => bound but not 
                 | TypeError String --types don't match => Noah
   -- ...
   deriving (Show,Eq)
