@@ -21,6 +21,14 @@ instance Show Val where
   show (Ls ls) = show ls
   show (Fun _) = "\\ x -> ?" -- no good way to show a function
 
+instance Eq Val where
+  (I x) == (I y) = (x == y)
+  (B x) == (B y) = (x == y)
+  (F x) == (F y) = (x == y)
+  (C x) == (C y) = (x == y)
+  (Ls xs) == (Ls ys) = (xs == ys)
+  (Fun x) == (Fun y) = (x == y)
+
 len' ::[a] -> Integer
 len' []  = 0
 len' (a:b) = 1 + len' b

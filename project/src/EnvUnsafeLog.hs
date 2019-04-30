@@ -4,7 +4,12 @@ import Control.Monad(ap)
 
 --This monad will form the plumbing for the evaluation function
 
-data Unsafe a = Error String | Ok a deriving (Show, Eq)
+data Unsafe a = Error String | Ok a deriving Show
+
+instance Eq a => Eq (Unsafe a) where
+  (Error x) == (Error y) = (x == y)
+  (Ok x) == (Ok y) = (x == y)
+  _ == _ = False
 
 data EnvUnsafeLog envType resType = EnvUnsafeLog (envType -> (Unsafe resType, [String]))
 
