@@ -21,6 +21,14 @@ instance Show Val where
   show (Ls ls) = show ls
   show (Fun _) = "\\ x -> ?" -- no good way to show a function
 
+instance Eq Val where
+  (I x) == (I y) = (x == y)
+  (B x) == (B y) = (x == y)
+  (F x) == (F y) = (x == y)
+  (C x) == (C y) = (x == y)
+  (Ls xs) == (Ls ys) = (xs == ys)
+  _ == _ = False
+
 len' ::[a] -> Integer
 len' []  = 0
 len' (a:b) = 1 + len' b
@@ -36,14 +44,15 @@ len' (a:b) = 1 + len' b
 toInteger2:: a -> Integer
 toInteger2 = undefined
 
---filter':: [Val] -> (Val -> Unsafe Val) -> [Val]
-filter' fcn [] = []
-filter' fcn (x:xs) | (fcn x) = [x] ++ (filter' fcn xs) 
-                   | otherwise = filter' fcn xs
-elem':: Val -> Val -> Bool
+
+{-elem':: Val -> Val -> Bool
 elem' a (Ls []) = False
 elem' a (Ls (x:xs)) | (a == x)  = True
-               | otherwise = elem' a xs
+                    | otherwise = elem' a xs
+-}
+-- filter':: [Val] -> (Val -> Unsafe Val) -> [Val]
+-- filter' [] fcn = []
+-- filter' (x:xs) fcn | (fcn x) = [x] ++ (filter' xs fcn) 
 
 stdLib = Map.fromList
   [("tail", Fun $ \ v -> case v of Ls (_:ls) -> Ok $ Ls ls
@@ -52,12 +61,12 @@ stdLib = Map.fromList
                                     _        -> Error "can only call head on a non empty list"),                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> Ok $ I (len' ls)
                                     _ -> Error "not a list"),
-   ("elem", Fun $ \ v -> case v of 
-                              Fun a -> Error "not given a value"
-                              v' -> Ok $ Fun $ \ list -> case list of
-                                                            Ls [ls] -> Ok $ B (elem' v' [ls])   
+   ("elem", undefined),--Fun $ \ v -> case v of 
+                       --       Fun a -> Error "not given a value"
+                         --     v' -> Ok $ Fun $ \ list -> case list of
+                           --                                 Ls [ls] -> Ok $ B (elem' v' [ls])   
                                                              --helper function here list ls w/ v'
-                                                            _ -> Error "not given a list"), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
+                             --                               _ -> Error "not given a list"), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
    ("map", undefined --Fun $ \v -> case v of 
              --               Fun (Fun a) -> case a of ->
               --                              Ls (b) -> Ok $ Ls (b)
@@ -221,7 +230,7 @@ eval (Div l r) = do l' <- evalInt l         --should be for ints
                     r' <- evalInt r
                     case r' of
                       0 -> err "Dividing by zero error"
-                      x -> return $ I $ l' `div` r'
+                      x -> return $ I $ l' `div` r'   --FIXME!
 eval (DivFloat l r) = do l' <- evalFloat l         --should be for floats
                          r' <- evalFloat r
                          case r' of
@@ -229,7 +238,9 @@ eval (DivFloat l r) = do l' <- evalFloat l         --should be for floats
                            x -> return $ F $ l' / r'
 eval (ValBool a) = return $ B a
 eval (Not a) = do a' <- (evalBool a)
-                  return $ B $ a'
+                  case (a') of
+                          True -> return $ B False
+                          False -> return $ B True
 eval (And a b) = do a' <- evalBool a
                     b' <- evalBool b
                     return (B (a' && b'))

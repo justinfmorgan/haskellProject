@@ -30,7 +30,7 @@ arbitrarySizedAst m | otherwise = do l <- arbitrarySizedAst (m `div` 2)
                                                        Plus l r, Minus l r, Mult l r, Div l r,
                                                        Separator l r, Equal l r, NotEqual l r, LessThan l r, LessThanOrEqual l r,
                                                        GreaterThan l r, GreatThanOrEqual l r, Concat l r, DivFloat l r,
-                                                       Modulus l r, FloatExp l r, IntExp l r, ListIndex l r, Print l r,
+                                                       Modulus l r, FloatExp l r, IntExp l r, ListIndex l r, Print l,
                                                        Cons l r,
                                                        ifast,
                                                        Let str l r,
@@ -46,8 +46,6 @@ arbitrarySizedIf m = do b <- arbitrarySizedAst (m `div` 3)
                         t <- arbitrarySizedAst (m `div` 3)
                         e <- arbitrarySizedAst (m `div` 3)
                         return $ If b t e
-
-sample (arbitrarySizedAst 10)
 
 parserTest = testGroup
       "parser Test"

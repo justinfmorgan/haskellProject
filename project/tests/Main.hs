@@ -21,8 +21,8 @@ testSuite =
   testGroup
     "allTests"
     [
-    --CheckTest.tests,
-    --EvalTest.tests,
-    ParserTest.tests
+    --CheckTest.checktest,
+    EvalTest.evalTest
+    --ParserTest.parserTest
     -- ...
     ]
