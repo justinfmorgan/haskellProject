@@ -44,13 +44,15 @@ len' (a:b) = 1 + len' b
 toInteger2:: a -> Integer
 toInteger2 = undefined
 
+filter':: [Val] -> (Val -> Unsafe Val) -> [Val]
+filter' [] fcn = []
+filter' (x:xs) fcn | (fcn x) = [x] ++ (filter' xs fcn) 
+
 stdLib = Map.fromList
   [("tail", Fun $ \ v -> case v of Ls (_:ls) -> Ok $ Ls ls
                                    _         -> Error "can only call tail on a non empty list"),
    ("head", Fun $ \ v -> case v of  Ls (a:_) -> Ok a
-                                    _        -> Error "can only call head on a non empty list"), 
-                                  
-                                   
+                                    _        -> Error "can only call head on a non empty list"),                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> Ok $ I (len' ls)
                                     _ -> Error "not a list"),
    ("elem", undefined), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
@@ -58,10 +60,12 @@ stdLib = Map.fromList
              --               Fun (Fun a) -> case a of ->
               --                              Ls (b) -> Ok $ Ls (b)
                             ),
-   ("filter", undefined--Fun $ \v -> Fun a -> Error "no"
-               ----           v' -> Ok $ Fun $ \ list -> case list of
-                  --                                        Ls [ls] -> --helper function here list ls w/ v'
-
+   ("filter", undefined--Fun $ \ v -> case v of 
+                       --       Fun a -> Error "no"
+                         --     v' -> Ok $ Fun $ \ list -> case list of
+                           --                                 Ls [ls] -> Ok $ Ls (filter' [ls] v') --helper function here list ls w/ v'
+                             --                               _ -> Error "not given a list"
+                           -- _ -> Error "error"
    ), --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
                           --           I a -> Ok $ I $ v a),
    ("ord", Fun $ \ v -> case v of C a -> Ok $ I (toInteger2 a)
