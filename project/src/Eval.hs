@@ -159,8 +159,9 @@ indexInto (Ls (head:tail)) 0 = case (head) of
 indexInto (Ls (head:tail)) x = indexInto (Ls tail) (x - 1)
 indexInto _ _ = undefined
 
-printThis :: String -> EnvUnsafeLog Env Val -> EnvUnsafeLog Env Val
-printThis x = undefined
+printThis :: String -> EnvUnsafeLog Env Val -> EnvUnsafeLog Env Val --TODO
+printThis x = undefined 
+
 {-
 case eu e of
       (Error s, log) -> (Error s, log)
@@ -208,59 +209,18 @@ eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and
 eval (NotEqual a b) = do a' <- eval a
                          b' <- eval b
                          return (B (a' /= b'))  
-eval (LessThan l r) = 
-  do a <- eval l
-     b <- eval r
-     case (a) of
-      F f1 -> case (b) of
-                  F f2 -> return $ B $ f1 < f2
-                  I i2 -> err "can not compare float with an integer"
-                  _    -> err "can only compare floats and ints"
-      I i1 -> case (b) of
-                  F f2 -> err "can not compare an integer with a float" 
-                  I i2 -> return $ B $ i1 < i2
-                  _    -> err "can only compare floats and ints"
-      _    -> err "can only compare floats and ints"    
-eval (LessThanOrEqual l r) = 
-  do a <- eval l
-     b <- eval r
-     case (a) of
-      F f1 -> case (b) of
-                  F f2 -> return $ B $ f1 <= f2
-                  I i2 -> err "can not compare float with an integer"
-                  _    -> err "can only compare floats and ints"
-      I i1 -> case (b) of
-                  F f2 -> err "can not compare an integer with a float" 
-                  I i2 -> return $ B $ i1 <= i2
-                  _    -> err "can only compare floats and ints"
-      _    -> err "can only compare floats and ints"                         
-eval (GreaterThan l r) = 
-  do a <- eval l
-     b <- eval r
-     case (a) of
-      F f1 -> case (b) of
-                  F f2 -> return $ B $ f1 > f2
-                  I i2 -> err "can not compare float with an integer"
-                  _    -> err "can only compare floats and ints"
-      I i1 -> case (b) of
-                  F f2 -> err "can not compare an integer with a float" 
-                  I i2 -> return $ B $ i1 > i2
-                  _    -> err "can only compare floats and ints"
-      _    -> err "can only compare floats and ints"                                                
-eval (GreatThanOrEqual l r) = 
-  do a <- eval l
-     b <- eval r
-     case (a) of
-      F f1 -> case (b) of
-                  F f2 -> return $ B $ f1 >= f2
-                  I i2 -> err "can not compare float with an integer"
-                  _    -> err "can only compare floats and ints"
-      I i1 -> case (b) of
-                  F f2 -> err "can not compare an integer with a float" 
-                  I i2 -> return $ B $ i1 >= i2
-                  _    -> err "can only compare floats and ints"
-      _    -> err "can only compare floats and ints"  
-                            --   return (B (a' >= b'))  
+eval (LessThan l r) = do a' <- eval l
+                         b' <- eval r
+                         return (B (a' < b')) 
+eval (LessThanOrEqual l r) = do a' <- eval l
+                                b' <- eval r
+                                return (B (a' <= b'))  
+eval (GreaterThan l r) = do a' <- eval l
+                            b' <- eval r
+                            return (B (a' > b'))                                  
+eval (GreatThanOrEqual l r) = do a' <- eval l
+                                 b' <- eval r
+                                 return (B (a' >= b')) 
 eval (ValChar i) = return $ C i
 eval (ValInt i) = return $ I i
 eval (Nil) = return $ Ls []
