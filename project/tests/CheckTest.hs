@@ -10,7 +10,7 @@ import Check
 
 -- provide tests that show your check works
 
-tests = testGroup "CheckTest" 
+checktest = testGroup "CheckTest" 
   [
  -- error "no tests yet!"
   		testCase "UndefinedVarUse" $

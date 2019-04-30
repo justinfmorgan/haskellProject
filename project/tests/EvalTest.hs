@@ -285,10 +285,11 @@ evalTest = testGroup
               assertEqual "[1,2,3,4] !! 2 =?" (Ok (I 3) []) (exec (ListIndex list1 two)) 
               assertEqual "[1,2,3,4] !! 0 =?" (Ok (I 1) []) (exec (ListIndex list1 zero))
               assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 2 =?" (Ok (F (-4.4)) []) (exec (ListIndex list4 two)) 
-              assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (Ok (I (-4)) []) (exec (ListIndex list4 three))
-{-
-          --testCase "Var App Lam Test" $ foldTestCase $
-          --[assertEqual testStr res (exec formula) | (Res testStr formula res) <- evalRes]-}
+              assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (Ok (I (-4)) []) (exec (ListIndex list4 three)),
+
+          testCase "Var App Lam Test" $
+            do
+              
 
     ]
 
