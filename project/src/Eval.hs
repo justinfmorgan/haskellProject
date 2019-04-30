@@ -87,8 +87,7 @@ stdLib = Map.fromList
                                     _   -> Error "not given an int"),    --int to float
    ("int", Fun $ \ v -> case v of F a -> Ok $ I (truncate a)
                                   _   -> Error "not given a float")   --float to int
-   ]--Fun $ \ v -> case v of Ls [] -> Error "can only call len on a non empty list"
-             --                      Ls (ls:l) -> Ok $ Ls [ls] )]
+   ]
 
 type Env = Map String Val
 
@@ -159,9 +158,18 @@ indexInto (Ls (head:tail)) 0 = case (head) of
 indexInto (Ls (head:tail)) x = indexInto (Ls tail) (x - 1)
 indexInto _ _ = undefined
 
---printThis :: x -> PrinterMonad x ()
---printThis x = PrinterMonad [x] ()
+printThis :: String -> EnvUnsafeLog Env Val -> EnvUnsafeLog Env Val
+printThis x = undefined
+{-
+case eu e of
+      (Error s, log) -> (Error s, log)
+      (Ok a, log) ->
 
+  EnvUnsafeLog $ \ e -> 
+    case e of
+      ((Ok a), log) -> ((Ok $ a), log ++ x)
+      ((Error s), log) -> ((Error s), log ++ x)
+-}
 eval :: Ast -> EnvUnsafeLog Env Val
 eval (ValFloat i) = return $ F i
 eval (Separator l r) = 

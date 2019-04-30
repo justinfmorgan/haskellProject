@@ -31,7 +31,7 @@ exec :: Ast -> LangOut
 exec ast = case run ast of
            (Left a, b) -> RuntimeError a b
            (Right val, b) -> Ok val b
-           _                -> ParseError
+          -- _                -> ParseError
   --Nothing -> ParseError
 
 -- | perform static checking on the program string, may be empty if there is a parse error
