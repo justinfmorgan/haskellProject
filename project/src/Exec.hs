@@ -24,6 +24,7 @@ data LangOut =
 
 instance Eq LangOut where
    (Ok v1 xs) == (Ok v2 ys) = (v1 == v2) && (xs == ys)
+   _ == _ = False -- FIX THIS!!!
           
 ---run output => (Either String Val, [String]) 
 -- | execute the program as a string and get the result

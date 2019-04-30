@@ -29,6 +29,14 @@ instance Eq Val where
   (Ls xs) == (Ls ys) = (xs == ys)
   _ == _ = False
 
+instance Ord Val where
+  (I x) <= (I y) = (x <= y)
+  (B x) <= (B y) = (x <= y)
+  (F x) <= (F y) = (x <= y)
+  (C x) <= (C y) = (x <= y)
+  (Ls xs) <= (Ls ys) = (xs <= ys)
+  _ <= _ = False
+
 len' ::[a] -> Integer
 len' []  = 0
 len' (a:b) = 1 + len' b
@@ -201,23 +209,23 @@ eval (ListIndex a b) =
        b' <- evalInt b 
        let length = len' a'
        if length < b' then err "List is not big enough" else (indexInto (Ls a') b') 
-eval (Equal a b) = do a' <- evalBool a
-                      b' <- evalBool b
+eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and not evalBool?!?!
+                      b' <- eval b
                       return (B (a' == b'))
-eval (NotEqual a b) = do a' <- evalBool a
-                         b' <- evalBool b
+eval (NotEqual a b) = do a' <- eval a
+                         b' <- eval b
                          return (B (a' /= b'))  
-eval (LessThan a b) = do a' <- evalBool a               --FIXME
-                         b' <- evalBool b
+eval (LessThan a b) = do a' <- eval a               --FIXME
+                         b' <- eval b
                          return (B (a' < b'))
-eval (LessThanOrEqual a b) = do a' <- evalBool a               --FIXME
-                                b' <- evalBool b
+eval (LessThanOrEqual a b) = do a' <- eval a               --FIXME
+                                b' <- eval b
                                 return (B (a' <= b'))                         
-eval (GreaterThan a b) = do a' <- evalBool a               --FIXME
-                            b' <- evalBool b
+eval (GreaterThan a b) = do a' <- eval a               --FIXME
+                            b' <- eval b
                             return (B (a' > b'))                                                
-eval (GreatThanOrEqual a b) = do a' <- evalBool a               --FIXME
-                                 b' <- evalBool b
+eval (GreatThanOrEqual a b) = do a' <- eval a               --FIXME
+                                 b' <- eval b
                                  return (B (a' >= b'))  
 eval (ValChar i) = return $ C i
 eval (ValInt i) = return $ I i

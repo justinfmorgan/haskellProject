@@ -95,7 +95,7 @@ evalTest = testGroup
               assertEqual "-2 // 2 =? "   (Ok (I (-1)) [])    (exec (Div ntwo two))
               assertEqual "1 // -1 =? "   (Ok (I (-1)) [])    (exec (Div one none))    
               assertEqual "4 // 2 =? "   (Ok (I 2) [])    (exec (Div four two))
-              assertEqual "3 // (-1) =? "   (Ok (I (-3)) [])    (exec (Div three ntwo))
+              assertEqual "3 // (-1) =? "   (Ok (I (-3)) [])    (exec (Div three none))
               assertEqual "2 * -2 =? "   (Ok (I (-4)) []) (exec (Mult two ntwo))
               assertEqual "1 % 4 =? "    (Ok (I 1) []) (exec (Modulus one four))
               assertEqual "3 % 1 =?"      (Ok (I 0) []) (exec (Modulus three one))
@@ -190,7 +190,7 @@ evalTest = testGroup
           testCase "Greater Than Or Equal Statements" $
             do
               assertEqual "1 >= 1 =? "   (Ok (B True) []) (exec (GreatThanOrEqual one one))  --Integers
-              assertEqual "-1 >= -1 =? " (Ok (B False) []) (exec (GreatThanOrEqual none none))
+              assertEqual "-1 >= -1 =? " (Ok (B True) []) (exec (GreatThanOrEqual none none))
               assertEqual "-1 >= -4 =? " (Ok (B True) []) (exec (GreatThanOrEqual none nfour))
               assertEqual "-1 >= 3 =? "  (Ok (B False) []) (exec (GreatThanOrEqual none three))
               assertEqual "1 >= -1 =? "  (Ok (B True) []) (exec (GreatThanOrEqual one none))
@@ -198,7 +198,7 @@ evalTest = testGroup
               assertEqual "3 >= 3 =? "   (Ok (B True) [])  (exec (GreatThanOrEqual three three))
               assertEqual "1.0 >= 1.0 =? "   (Ok (B True) []) (exec (GreatThanOrEqual onef onef))  --Floats
               assertEqual "1.0 >= 1.25 =? "  (Ok (B False) []) (exec (GreatThanOrEqual onef onefextra)) 
-              assertEqual "-1.0 >= 1.0 =? "  (Ok (B True) []) (exec (GreatThanOrEqual nonef onef)) 
+              assertEqual "-1.0 >= 1.0 =? "  (Ok (B False) []) (exec (GreatThanOrEqual nonef onef)) 
               assertEqual "1.0 >= -4.4 =? "  (Ok (B True) []) (exec (GreatThanOrEqual onef nfourfextra)) 
               assertEqual "1.0 >= -1.0 =? "  (Ok (B True) []) (exec (GreatThanOrEqual onef nonef)) 
               assertEqual "1.25 >= 1.25 =? " (Ok (B True) [])  (exec (GreatThanOrEqual onefextra onefextra)) 
