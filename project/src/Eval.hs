@@ -50,16 +50,16 @@ stdLib = Map.fromList
              --               Fun (Fun a) -> case a of ->
               --                              Ls (b) -> Ok $ Ls (b)
                             ),
-   ("filter", Fun $ \v -> Fun a -> Error "no"
-                          v' -> Ok $ Fun $ \ list -> case list of
-                                                          Ls [ls] -> --helper function here list ls w/ v'
+   ("filter", undefined--Fun $ \v -> Fun a -> Error "no"
+               ----           v' -> Ok $ Fun $ \ list -> case list of
+                  --                                        Ls [ls] -> --helper function here list ls w/ v'
 
    ), --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
                           --           I a -> Ok $ I $ v a),
    ("ord", Fun $ \ v -> case v of C a -> Ok $ I (toInteger2 a)
                                   _   -> Error "not given a char"),    --char to int
-   ("chr", Fun $ \ v -> case v of I a -> Ok $ C (fromIntegral a)
-                                  _   -> Error "not given an int"),    --int to char
+   ("chr", undefined),--Fun $ \ v -> case v of I a -> Ok $ C (fromIntegral a)
+             --                     _   -> Error "not given an int"),    --int to char
    ("float", Fun $ \ v -> case v of I a -> Ok $ F (fromIntegral a)
                                     _   -> Error "not given an int"),    --int to float
    ("int", Fun $ \ v -> case v of F a -> Ok $ I (truncate a)
@@ -237,8 +237,9 @@ eval (Let v val bod) =
      local (Map.insert v val') (eval bod)
 eval (Letrec v val bod) = undefined --TODO
 eval (DotMixIn a b) =  undefined--(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --FIXME
-eval (Lam x bod) = do env <- getEnv
-                      return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)
+-- eval (Lam x bod) = do env <- getEnv
+--                       return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)
+eval (Lam x bod) = undefined
 eval (App e1 e2) = do e1' <- (evalFun e1)
                       e2' <- eval e2 --apply e1' onto e2', check to see if its broken or not -> return a val
                       case (e1' e2') of
@@ -257,7 +258,7 @@ run a = runEnvUnsafeLog (eval a) -}
 run :: Ast  -- ^ run this Ast
       -> (Either String Val, [String])  -- ^ (error message or result value, all the printings)
 run a = case runEnvUnsafeLog (eval a) stdLib of
-        (Error s,log) -> (Left s, log) -- FIX THIS NOW!
-        Ok a    -> (Right a, [" "])
+        (Error s,log) -> (Left s, log)
+        (Ok a, log)   -> (Right a, log)
 
 

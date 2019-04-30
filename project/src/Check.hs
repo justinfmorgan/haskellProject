@@ -37,7 +37,7 @@ check (Var a) = Set.singleton (UndefinedVarUse "unused variable") --FIXME
 --check (Lam str b ) | (isClosed (Lam str b) == False) = UndefinedVarUse "unused variable" --FIXME should say what variable is not used
 --				   | 
 --check (App a b) | (isClosed (App a b) == False) = UndefinedVarUse "unused variable" --FIXME should say what variable is not used
-				| 
+--				| 
 -- collect all the vars that appear in the expression that are not bound
 freeVars :: Ast -> Set String
 freeVars (Var s) = Set.singleton s
