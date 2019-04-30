@@ -16,7 +16,7 @@ instance Arbitrary Ast where
     arbitrary = sized arbitrarySizedAst
 
 arbitrarySizedAst ::  Int -> Gen Ast
-arbitrarySizedAst m | m < 1 = do i <- arbitrary
+arbitrarySizedAst m | m < 1 = do i <- elements [0..999]
                                  b <- arbitrary
                                  f <- arbitrary
                                  c <- arbitrary

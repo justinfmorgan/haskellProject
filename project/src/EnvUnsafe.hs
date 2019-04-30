@@ -6,7 +6,7 @@ import Control.Monad(ap)
 
 data Unsafe a = Error String | Ok a deriving (Show, Eq)
 
-data EnvUnsafe e a = EnvUnsafe (e -> Unsafe a )
+data EnvUnsafe e a = EnvUnsafe (e -> Unsafe a)
 
 -- function that just runs the function contained in EnvUnsafe
 runEnvUnsafe ::  (EnvUnsafe e a) -> e -> Unsafe a

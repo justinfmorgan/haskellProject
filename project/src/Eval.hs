@@ -5,7 +5,7 @@ import qualified Data.Map as Map
 --import Prelude (fromEnum, toEnum)
 import HelpShow
 import Ast
-import EnvUnsafe
+import EnvUnsafeLog
 
 -- the goal of the program is to return a value, what values are possible?
 
@@ -21,7 +21,7 @@ instance Show Val where
   show (C c) = show c
   show (Ls ls) = show ls
   show (Fun _) = "\\ x -> ?" -- no good way to show a function
-  
+
 len' ::[a] -> Integer
 len' []  = 0
 len' (a:b) = 1 + len' b
@@ -62,63 +62,63 @@ stdLib = Map.fromList
 
 type Env = Map String Val
 
-evalInt :: Ast -> EnvUnsafe Env Integer
+evalInt :: Ast -> EnvUnsafeLog Env Integer
 evalInt a =
   do a' <- eval a
      case a' of
       I i -> return i
       _   -> err "it's not an int!!!"
 
-evalChar:: Ast -> EnvUnsafe Env Char
+evalChar:: Ast -> EnvUnsafeLog Env Char
 evalChar a =
   do a' <- eval a
      case a' of
       C i -> return i
       _   -> err "it's not a char!!!"
 
-evalFloat:: Ast -> EnvUnsafe Env Float
+evalFloat:: Ast -> EnvUnsafeLog Env Float
 evalFloat a =
   do a' <- eval a
      case a' of
       F i -> return i
       _   -> err "it's not a float!!!"
 
---evalIntOrFloat :: Ast -> EnvUnsafe Env b
+--evalIntOrFloat :: Ast -> EnvUnsafeLog Env b
 --evalIntOrFloat a = 
  -- do a' <- eval a
    --  case a' of
     --  F f -> return f
     --  I i -> return i
      -- _   -> err "it's not a float or int!!!"    
-evalBool :: Ast -> EnvUnsafe Env Bool
+evalBool :: Ast -> EnvUnsafeLog Env Bool
 evalBool a = do a' <- eval a
                 case a' of
                   B b -> return b
                   _ -> err "It's not bool!"
 
-evalList:: Ast -> EnvUnsafe Env  [Val]
+evalList:: Ast -> EnvUnsafeLog Env  [Val]
 evalList a = do a' <- eval a
                 case a' of
                   Ls [b] -> return [b]
                   _ -> err "It's not a list!"
 
-evalFun :: Ast -> EnvUnsafe Env (Val -> Unsafe Val)
+evalFun :: Ast -> EnvUnsafeLog Env (Val -> Unsafe Val)
 evalFun a = do a' <- eval a
                case a' of
                 Fun a -> return a
                 _ -> err "not a function"
 
-getVar :: String -> EnvUnsafe Env Val
+getVar :: String -> EnvUnsafeLog Env Val
 getVar v = do s <- getEnv
               case (Map.lookup v s) of 
                   Just i -> return i
                   Nothing -> return (I 0) 
 
-local :: (r -> r) -> EnvUnsafe Env Val-> EnvUnsafe Env Val
-local changeEnv comp  = EnvUnsafe (\e -> runEnvUnsafe comp e ) --check later because who knows
+local :: (r -> r) -> EnvUnsafeLog Env Val-> EnvUnsafeLog Env Val
+local changeEnv comp  = EnvUnsafeLog (\e -> runEnvUnsafeLog comp e ) --check later because who knows
 
 --indexInto [] _ = err "empty list"
-indexInto:: Val -> Integer -> EnvUnsafe Env  Val
+indexInto:: Val -> Integer -> EnvUnsafeLog Env  Val
 indexInto (Ls (head:tail)) 0 = case (head) of 
                                     Ls a -> return (Ls a)
                                     I a -> return (I a)
@@ -132,7 +132,7 @@ indexInto _ _ = undefined
 --printThis :: x -> PrinterMonad x ()
 --printThis x = PrinterMonad [x] ()
 
-eval :: Ast -> EnvUnsafe Env Val
+eval :: Ast -> EnvUnsafeLog Env Val
 eval (ValFloat i) = return $ F i
 eval (Separator l r) = 
     do x <- eval l
@@ -231,7 +231,7 @@ eval (Let v val bod) =
 eval (Letrec v val bod) = undefined --TODO
 eval (DotMixIn a b) =  undefined--(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --FIXME
 eval (Lam x bod) = do env <- getEnv
-                      return $ Fun $ \ v -> runEnvUnsafe (eval bod) (Map.insert x v env)
+                      return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)
 eval (App e1 e2) = do e1' <- (evalFun e1)
                       e2' <- eval e2 --apply e1' onto e2', check to see if its broken or not -> return a val
                       case (e1' e2') of
@@ -243,12 +243,14 @@ eval (App e1 e2) = do e1' <- (evalFun e1)
 -- return either the error string or the value, along with everything that was printed
 run :: Ast  -- ^ run this Ast
       -> (Either String Val, [String])  -- ^ (error message or result value, all the printings)
-run a = runEnvUnsafe (eval a) -}
+run a = runEnvUnsafeLog (eval a) -}
 
 -- | helper function that runs with the default environment (for example, the stdLib in week 10)
 -- return either the error string or the value, along with everything that was printed
 run :: Ast  -- ^ run this Ast
-      -> Unsafe Val  -- ^ (error message or result value, all the printings)
-run a = runEnvUnsafe (eval a) stdLib
+      -> (Either String Val, [String])  -- ^ (error message or result value, all the printings)
+run a = case runEnvUnsafeLog (eval a) stdLib of
+        (Error s,log) -> (Left s, log) -- FIX THIS NOW!
+        Ok a    -> (Right a, [" "])
 
 

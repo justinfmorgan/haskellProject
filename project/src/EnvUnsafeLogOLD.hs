@@ -5,24 +5,25 @@ import Control.Monad(ap)
 --This monad will form the plumbing for the evaluation function
 
 data Unsafe a = Error String | Ok a deriving (Show, Eq)
-
 data EnvUnsafeLog envType resType = EnvUnsafeLog (envType -> (Unsafe resType, [String]))
 
--- function that just runs the function contained in EnvUnsafe
-runEnvUnsafeLog ::  (EnvUnsafeLog e a) -> e -> (Unsafe a, [String])
-runEnvUnsafeLog (EnvUnsafeLog eu) e = eu e
+-- RE-ADD THE VAL STUFF?!?!
+
+-- function that just runs the function contained in EnvUnsafeLog
+runEnvUnsafeLog ::  (EnvUnsafeLog e Val String) -> e -> (Either String Val, [String])
+runEnvUnsafeLog (EnvUnsafeLog eu) e = case eu e of
+                                ((Error s), log) -> (Left s, log)
+                                ((Ok a), log) -> (Right a, log)
 
 -- a way to easily return an error (for instance in do notation)
-err :: String -> EnvUnsafeLog e a
-err s = EnvUnsafeLog $ \ _ -> (Error s, [])
-
+err :: String -> EnvUnsafeLog e a String
+err s = EnvUnsafeLog $ \ _ -> (Error s, [s])
 
 -- a way to easily get the entire environment (for instance in do notation)
-getEnv :: EnvUnsafeLog e e
+getEnv :: EnvUnsafeLog e e String
 getEnv = EnvUnsafeLog $ \ env -> (Ok env, [])
 
-
-instance Functor (EnvUnsafeLog e) where
+instance Functor (EnvUnsafeLog e a) where
   -- fmap :: (a -> b) -> EnvUnsafeLog a -> EnvUnsafeLog b
   fmap f (EnvUnsafeLog eu) = EnvUnsafeLog $ \ e -> 
     case eu e of
@@ -31,23 +32,19 @@ instance Functor (EnvUnsafeLog e) where
   -- make sure your implementation follows the functor laws
 
 --ignore this for now
-instance Applicative (EnvUnsafeLog e) where
+instance Applicative (EnvUnsafeLog e a) where
   pure = return
   (<*>) = ap
 
-instance Monad (EnvUnsafeLog e) where
+instance Monad (EnvUnsafeLog e a) where
   --return :: a -> EnvUnsafeLog a
   return a = EnvUnsafeLog (\ e -> ((Ok a), []))
 
   --(>>=) :: EnvUnsafeLog a -> (a -> EnvUnsafeLog b) -> EnvUnsafeLog b
-  (EnvUnsafeLog eu) >>= f = EnvUnsafeLog $ \ e ->
+  (EnvUnsafeLog eu) >>= f = EnvUnsafe $ \ e ->
     case eu e of
-      (Error s, log) -> (Error s, log)
-      (Ok a, log) -> let (EnvUnsafeLog g) = f a
-                     in case g e of
-                        (Error s', log2) -> (Error s', log ++ log2)
-                        (Ok a', log2)    -> (Ok a', log ++ log2)
-
+      Error s -> Error s
+      Ok a -> runEnvUnsafe (f a) e
 
   -- make sure your implementation follows the Monad laws
 
