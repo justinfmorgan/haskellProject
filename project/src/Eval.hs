@@ -180,9 +180,13 @@ eval (Separator l r) =
        y <- eval r
        return (y)   
 eval (Concat a b) =
-    do a' <- evalList a
-       b' <- evalList b
-       return $ Ls $ a' ++ b'
+    do a' <- eval a
+       b' <- eval b
+       case (a') of
+             Ls ls1 -> case (b') of
+                        Ls ls2 -> return $ Ls $ ls1 ++ ls2
+                        _      -> err "not given a list!" 
+             _      -> err "not given a list!" 
 eval (IntExp a b) =
   do l' <- evalInt a
      r' <- evalInt b
