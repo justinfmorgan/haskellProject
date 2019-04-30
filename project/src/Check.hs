@@ -127,6 +127,7 @@ f x = UndefinedVarUse ("unbound variable " ++ x)
 
 f2:: String -> WarningMsg 
 f2 x = UnusedVar ("bound but unused variable " ++ x )
+
 freeVars :: Ast -> Set String
 freeVars (Var s) = Set.singleton s
 freeVars (App t1 t2) = Set.union (freeVars t1) (freeVars t2)
