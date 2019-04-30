@@ -120,13 +120,6 @@ evalFloat a =
       F i -> return i
       _   -> err "it's not a float!!!"
 
---evalIntOrFloat :: Ast -> EnvUnsafeLog Env b
---evalIntOrFloat a = 
- -- do a' <- eval a
-   --  case a' of
-    --  F f -> return f
-    --  I i -> return i
-     -- _   -> err "it's not a float or int!!!"    
 evalBool :: Ast -> EnvUnsafeLog Env Bool
 evalBool a = do a' <- eval a
                 case a' of
@@ -215,33 +208,101 @@ eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and
 eval (NotEqual a b) = do a' <- eval a
                          b' <- eval b
                          return (B (a' /= b'))  
-eval (LessThan a b) = do a' <- eval a               --FIXME
-                         b' <- eval b
-                         return (B (a' < b'))
-eval (LessThanOrEqual a b) = do a' <- eval a               --FIXME
-                                b' <- eval b
-                                return (B (a' <= b'))                         
-eval (GreaterThan a b) = do a' <- eval a               --FIXME
-                            b' <- eval b
-                            return (B (a' > b'))                                                
-eval (GreatThanOrEqual a b) = do a' <- eval a               --FIXME
-                                 b' <- eval b
-                                 return (B (a' >= b'))  
+eval (LessThan l r) = 
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ B $ f1 < f2
+                  I i2 -> err "can not compare float with an integer"
+                  _    -> err "can only compare floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not compare an integer with a float" 
+                  I i2 -> return $ B $ i1 < i2
+                  _    -> err "can only compare floats and ints"
+      _    -> err "can only compare floats and ints"    
+eval (LessThanOrEqual l r) = 
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ B $ f1 <= f2
+                  I i2 -> err "can not compare float with an integer"
+                  _    -> err "can only compare floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not compare an integer with a float" 
+                  I i2 -> return $ B $ i1 <= i2
+                  _    -> err "can only compare floats and ints"
+      _    -> err "can only compare floats and ints"                         
+eval (GreaterThan l r) = 
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ B $ f1 > f2
+                  I i2 -> err "can not compare float with an integer"
+                  _    -> err "can only compare floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not compare an integer with a float" 
+                  I i2 -> return $ B $ i1 > i2
+                  _    -> err "can only compare floats and ints"
+      _    -> err "can only compare floats and ints"                                                
+eval (GreatThanOrEqual l r) = 
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ B $ f1 >= f2
+                  I i2 -> err "can not compare float with an integer"
+                  _    -> err "can only compare floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not compare an integer with a float" 
+                  I i2 -> return $ B $ i1 >= i2
+                  _    -> err "can only compare floats and ints"
+      _    -> err "can only compare floats and ints"  
+                            --   return (B (a' >= b'))  
 eval (ValChar i) = return $ C i
 eval (ValInt i) = return $ I i
 eval (Nil) = return $ Ls []
 eval (Mult l r) = --change to work for floats and ints
-  do l' <- evalInt l
-     r' <- evalInt r
-     return $ I $ l' * r'
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ F $ f1 * f2
+                  I i2 -> err "can not multiply a float with an integer" --return $ F $ f1 + i2
+                  _    -> err "can only multiply floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not multiply an integer with a float" --return $ F $ i1 + f2
+                  I i2 -> return $ I $ i1 * i2
+                  _    -> err "can only multiply floats and ints"
+      _    -> err "can only multiply floats and ints"
 eval (Plus l r) =       --change to work for floats and ints
-  do l' <- evalInt l
-     r' <- evalInt r
-     return $ I $ l' + r'
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ F $ f1 + f2
+                  I i2 -> err "can not add a float with an integer"
+                  _    -> err "can only add floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not add an integer with a float" --return $ F $ i1 + f2
+                  I i2 -> return $ I $ i1 + i2
+                  _    -> err "can only add floats and ints"
+      _    -> err "can only add floats and ints"
 eval (Minus l r) =      --change to work for floats and ints
-  do l' <- evalInt l
-     r' <- evalInt r
-     return $ I $ l' - r'
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ F $ f1 - f2
+                  I i2 -> err "can not add a float with an integer"
+                  _    -> err "can only add floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not add an integer with a float" --return $ F $ i1 + f2
+                  I i2 -> return $ I $ i1 - i2
+                  _    -> err "can only add floats and ints"
+      _    -> err "can only add floats and ints"
 eval (Div l r) = do l' <- evalInt l         --should be for ints
                     r' <- evalInt r
                     case r' of
