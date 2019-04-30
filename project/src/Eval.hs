@@ -310,8 +310,8 @@ eval (Let v val bod) = --FIXME
      local (Map.insert v val') (eval bod)
 eval (Letrec v val bod) = undefined --TODO
 eval (DotMixIn a b) =  undefined--(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --TODO
--- eval (Lam x bod) = do env <- getEnv
---                       return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)
+--eval (Lam x bod) = do env <- getEnv
+--                      return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)
 eval (Lam x bod) = undefined --TODO
 eval (App e1 e2) = do e1' <- (evalFun e1)
                       e2' <- eval e2 --apply e1' onto e2', check to see if its broken or not -> return a val
