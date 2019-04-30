@@ -29,8 +29,9 @@ instance Eq LangOut where
 -- | execute the program as a string and get the result
 exec :: Ast -> LangOut
 exec ast = case run ast of
-           (Left a, [b]) -> RuntimeError a [b]
-           (Right val, [b]) -> Ok val [b]
+           (Left a, b) -> RuntimeError a b
+           (Right val, b) -> Ok val b
+           _                -> ParseError
   --Nothing -> ParseError
 
 -- | perform static checking on the program string, may be empty if there is a parse error
