@@ -287,8 +287,8 @@ evalTest = testGroup
               assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 2 =?" (Ok (F (-4.4)) []) (exec (ListIndex list4 two)) 
               assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (Ok (I (-4)) []) (exec (ListIndex list4 three)),
 
-          testCase "Var App Lam Test" $
-            do
+          -- testCase "Var App Lam Test" $
+          --   do
               
 
     ]
