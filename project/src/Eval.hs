@@ -27,7 +27,7 @@ instance Eq Val where
   (F x) == (F y) = (x == y)
   (C x) == (C y) = (x == y)
   (Ls xs) == (Ls ys) = (xs == ys)
-  (Fun x) == (Fun y) = (x == y)
+  _ == _ = False
 
 len' ::[a] -> Integer
 len' []  = 0
@@ -44,9 +44,9 @@ len' (a:b) = 1 + len' b
 toInteger2:: a -> Integer
 toInteger2 = undefined
 
-filter':: [Val] -> (Val -> Unsafe Val) -> [Val]
-filter' [] fcn = []
-filter' (x:xs) fcn | (fcn x) = [x] ++ (filter' xs fcn) 
+-- filter':: [Val] -> (Val -> Unsafe Val) -> [Val]
+-- filter' [] fcn = []
+-- filter' (x:xs) fcn | (fcn x) = [x] ++ (filter' xs fcn) 
 
 stdLib = Map.fromList
   [("tail", Fun $ \ v -> case v of Ls (_:ls) -> Ok $ Ls ls
