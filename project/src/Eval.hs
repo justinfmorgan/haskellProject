@@ -201,10 +201,12 @@ eval (Modulus a b) =   --for ints
      return $ I $ l' `mod` r' 
 eval (ListIndex a b) =
     do a' <- eval a
-       a'' <- evalList a
+       --a'' <- evalList a
        b' <- evalInt b 
-       let length = len' a''
-       if length < b' then err "List is not big enough" else (indexInto (a') b') 
+       case (a') of Ls a -> if (len' a) < b' then err "List is not big enough" else (indexInto (a') b') 
+                    _       -> err "did not give a list!"
+       --let length = len' a''
+ --        if length < b' then err "List is not big enough" else (indexInto (a') b') 
 eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and not evalBool?!?! => u right good job
                       b' <- eval b
                       return (B (a' == b'))

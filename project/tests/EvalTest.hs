@@ -254,7 +254,7 @@ evalTest = testGroup
               assertEqual "Cons 1 Nil =?" (Ok (Ls [I 1])[]) (exec simpleList1)
               assertEqual "Cons 2 Nil =?" (Ok (Ls [I 2])[]) (exec simpleList2)
               assertEqual "Nil =?" (Ok (Ls [])[]) (exec simpleList3)          
-              assertEqual "Cons (-1) Nil =?" (Ok (Ls [I (-2)])[]) (exec simpleList4) 
+              assertEqual "Cons (-2) Nil =?" (Ok (Ls [I (-2)])[]) (exec simpleList4) 
               assertEqual "Cons -4.4 Nil =?" (Ok (Ls [F (-4.4)])[]) (exec simpleList5)
               assertEqual "Cons true Nil =?" (Ok (Ls [B True])[]) (exec simpleList6)                               
               assertEqual "Cons 1 (Cons 1.0 (Cons True Nil)) =?" (Ok (Ls [I 1, F 1.0, B True]) []) (exec list3)
@@ -279,13 +279,13 @@ evalTest = testGroup
           testCase "ListIndex" $
             do
               assertEqual "[1] !! 0 =?" (Ok (I 1) []) (exec (ListIndex simpleList1 zero))
-              assertEqual "[(-1)] !! 0 =?" (Ok (I (-1)) []) (exec (ListIndex simpleList4 zero)) 
-        --      assertEqual "[True, False, True, False] !! 2 =?" (Ok (B True) []) (exec (ListIndex list2 two)) 
-          --    assertEqual "[True, False, True, False] !! 3 =?" (Ok (B False) []) (exec (ListIndex list2 three))
-       --       assertEqual "[1,2,3,4] !! 2 =?" (Ok (I 3) []) (exec (ListIndex list1 two)) 
+              assertEqual "[(-2)] !! 0 =?" (Ok (I (-2)) []) (exec (ListIndex simpleList4 zero)) 
+              assertEqual "[True, False, True, False] !! 2 =?" (Ok (B True) []) (exec (ListIndex list2 two)) 
+              assertEqual "[True, False, True, False] !! 3 =?" (Ok (B False) []) (exec (ListIndex list2 three))
+              assertEqual "[1,2,3,4] !! 2 =?" (Ok (I 3) []) (exec (ListIndex list1 two)) 
               assertEqual "[1,2,3,4] !! 0 =?" (Ok (I 1) []) (exec (ListIndex list1 zero))
-         --     assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 2 =?" (Ok (F (-4.4)) []) (exec (ListIndex list4 two)) 
-           --   assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (Ok (I (-4)) []) (exec (ListIndex list4 three))
+              assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 2 =?" (Ok (F (-4.4)) []) (exec (ListIndex list4 two)) 
+              assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (Ok (I (-4)) []) (exec (ListIndex list4 three))
 {-
           --testCase "Var App Lam Test" $ foldTestCase $
           --[assertEqual testStr res (exec formula) | (Res testStr formula res) <- evalRes]-}
