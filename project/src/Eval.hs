@@ -2,7 +2,6 @@ module Eval where
 
 import Data.Map (Map)
 import qualified Data.Map as Map
---import Prelude (fromEnum, toEnum)
 import HelpShow
 import Ast
 import EnvUnsafeLog
@@ -11,9 +10,9 @@ import EnvUnsafeLog
 
 data Val = I Integer | B Bool | F Float | C Char 
          | Ls [Val]
-         | Fun (Val -> Unsafe Val) --FIXME since this is a functional language, one thing that can be returned is a function
+         | Fun (Val -> Unsafe Val) --Fun (Val -> (Unsafe Val, [String]) ) --FIXME since this is a functional language, one thing that can be returned is a function
                                   -- FIXME This has to incorporate Writer piece, Fun (Val -> (Unsafe Val, [String]))
-
+--int truncate
 instance Show Val where
   show (I i) = show i
   show (B b) = show b
@@ -34,6 +33,9 @@ len' (a:b) = 1 + len' b
 --apply:: [a] -> (a -> b) -> [b]
 --apply (head:tail) f = [(f head)] ++ (apply f tail) 
 
+toInteger2:: a -> Integer
+toInteger2 = undefined
+
 stdLib = Map.fromList
   [("tail", Fun $ \ v -> case v of Ls (_:ls) -> Ok $ Ls ls
                                    _         -> Error "can only call tail on a non empty list"),
@@ -43,19 +45,24 @@ stdLib = Map.fromList
                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> Ok $ I (len' ls)
                                     _ -> Error "not a list"),
-   ("elem", undefined),
+   ("elem", undefined), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
    ("map", undefined --Fun $ \v -> case v of 
              --               Fun (Fun a) -> case a of ->
               --                              Ls (b) -> Ok $ Ls (b)
                             ),
-   ("filter", undefined), --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
+   ("filter", Fun $ \v -> Fun a -> Error "no"
+                          v' -> Ok $ Fun $ \ list -> case list of
+                                                          Ls [ls] -> --helper function here list ls w/ v'
+
+   ), --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
                           --           I a -> Ok $ I $ v a),
-   ("ord", undefined),-- Fun $ \ v -> case v of C a -> Ok $ I $ fromEnum2 a
-            --                      _   -> Error "not a char"), ---char to int
-   ("chr", undefined),  --int to char
+   ("ord", Fun $ \ v -> case v of C a -> Ok $ I (toInteger2 a)
+                                  _   -> Error "not given a char"),    --char to int
+   ("chr", Fun $ \ v -> case v of I a -> Ok $ C (fromIntegral a)
+                                  _   -> Error "not given an int"),    --int to char
    ("float", Fun $ \ v -> case v of I a -> Ok $ F (fromIntegral a)
                                     _   -> Error "not given an int"),    --int to float
-   ("int", Fun $ \ v -> case v of F a -> Ok $ I (round a)
+   ("int", Fun $ \ v -> case v of F a -> Ok $ I (truncate a)
                                   _   -> Error "not given a float")   --float to int
    ]--Fun $ \ v -> case v of Ls [] -> Error "can only call len on a non empty list"
              --                      Ls (ls:l) -> Ok $ Ls [ls] )]

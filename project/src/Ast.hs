@@ -2,6 +2,7 @@ module Ast where
 
 import HelpShow
 
+
 -- | the abstract syntax tree for the language
 data Ast = ValBool Bool -- Added
          | And Ast Ast | Or Ast Ast | Not Ast
@@ -126,7 +127,7 @@ showPretty (DotMixIn a b) i          = parenthesize 1 i $ (showPretty a 1) ++ " 
 showPretty Nil _                     = "[]"
 showPretty (Var s) _                 = s
 showPretty (Not l ) i                = parenthesize 23 i $  " ! " ++ (showPretty l 23)
-showPretty (Print b)          _      = "print(" ++ showPretty b 22 ++ ")"  
+showPretty (Print b)          _      = "print(" ++ showPretty b 23 ++ ")"  
 
 showPretty (ListIndex l r) d         = parenthesize 20 d $ ((showPretty l 20) ++ " !! " ++ (showPretty r 21))
 
