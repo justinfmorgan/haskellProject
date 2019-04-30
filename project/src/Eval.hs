@@ -145,10 +145,11 @@ getVar v = do s <- getEnv
                   Nothing -> return (I 0) 
 
 local :: (r -> r) -> EnvUnsafeLog Env Val-> EnvUnsafeLog Env Val
-local changeEnv comp  = EnvUnsafeLog (\e -> runEnvUnsafeLog comp e ) --check later because who knows
+local changeEnv comp  = EnvUnsafeLog (\e -> runEnvUnsafeLog comp e ) --check later because who knows FIXME
 
 --indexInto [] _ = err "empty list"
 indexInto:: Val -> Integer -> EnvUnsafeLog Env  Val
+indexInto (Ls []) x = return (Ls [])
 indexInto (Ls (head:tail)) 0 = case (head) of 
                                     Ls a -> return (Ls a)
                                     I a -> return (I a)
@@ -199,11 +200,12 @@ eval (Modulus a b) =   --for ints
      r' <- evalInt b
      return $ I $ l' `mod` r' 
 eval (ListIndex a b) =
-    do a' <- evalList a
+    do a' <- eval a
+       a'' <- evalList a
        b' <- evalInt b 
-       let length = len' a'
-       if length < b' then err "List is not big enough" else (indexInto (Ls a') b') 
-eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and not evalBool?!?!
+       let length = len' a''
+       if length < b' then err "List is not big enough" else (indexInto (a') b') 
+eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and not evalBool?!?! => u right good job
                       b' <- eval b
                       return (B (a' == b'))
 eval (NotEqual a b) = do a' <- eval a
@@ -290,18 +292,21 @@ eval (Cons a b) = do l <- eval a
                       Ls a -> return $ Ls $[l] ++ a
                       _    -> err "type mismatch"
 eval (Var str) = getVar str
-eval (If a b c) = do a' <- (evalBool a) 
+eval (If a b c) = do a' <- (eval a) 
                      case (a') of
-                          True -> (eval b)
-                          False -> (eval c)
-eval (Let v val bod) = 
+                          B True -> (eval b)
+                          B False -> (eval c)
+                          I x -> if (x > 0) then (eval b) else (eval c)
+                          F x -> if (x > 0) then (eval b) else (eval c)
+                          _   -> err "if requires a bool, int or float!"
+eval (Let v val bod) = --FIXME
   do val' <- eval val
      local (Map.insert v val') (eval bod)
 eval (Letrec v val bod) = undefined --TODO
-eval (DotMixIn a b) =  undefined--(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --FIXME
+eval (DotMixIn a b) =  undefined--(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --TODO
 -- eval (Lam x bod) = do env <- getEnv
 --                       return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)
-eval (Lam x bod) = undefined
+eval (Lam x bod) = undefined --TODO
 eval (App e1 e2) = do e1' <- (evalFun e1)
                       e2' <- eval e2 --apply e1' onto e2', check to see if its broken or not -> return a val
                       case (e1' e2') of
