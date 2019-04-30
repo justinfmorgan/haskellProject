@@ -1,6 +1,6 @@
 module Check where
 
-import Data.Set (Set, elems, union)
+import Data.Set (Set, elems, union, difference)
 import qualified Data.Set as Set
 
 import Ast
@@ -16,10 +16,10 @@ import EnvUnsafe
 --   * type errors
 
 data WarningMsg = UndefinedVarUse String  -- ^ This is the Warning for use of Undefined variable name => unbound 
-                | UnusedVar String -- => bound but not 
-                | TypeError String --types don't match => Noah
+                | UnusedVar String -- => bound but not used Mixin Alex
+                | TypeError String --types don't match => Mixin Noah
   -- ...
-  deriving (Show,Eq)
+  deriving (Show,Eq, Ord)
 
   {- 
   warning notes
@@ -34,7 +34,7 @@ data WarningMsg = UndefinedVarUse String  -- ^ This is the Warning for use of Un
 -- | perform static checking on the Ast
 -- the output a set of warning on that input Ast/
 check :: Ast -> Set WarningMsg
-check (Var a) = Set.singleton (UndefinedVarUse ("unused variable " ++ a)) --FIXME 
+check (Var a) = Set.map f (freeVars (Var a)) 
 check (ValBool a) = Set.empty
 check (ValInt a) = Set.empty
 check (ValFloat a) = Set.empty
@@ -66,29 +66,72 @@ check (If a b c) = undefined
 check (Let str b c) = undefined
 check (DotMixIn a b) = undefined
 check (Letrec str b c) = undefined
-check (Lam a b) = undefined --test f (freeVars (Lam a b))--undefined
-check (App a b) = undefined
+check (Lam a b) = Set.union ( Set.map f (freeVars (Lam a b)) ) (Set.map  f2 (difference (boundVars (Lam a b)) (used (Lam a b)) ))
+check (App a b) = Set.map f (freeVars (App a b)) 
 --check (Lam str b ) | (isClosed (Lam str b) == False) = UndefinedVarUse "unused variable" --FIXME should say what variable is not used
 --				   | 
 --check (App a b) | (isClosed (App a b) == False) = UndefinedVarUse "unused variable" --FIXME should say what variable is not used
 --				| 
--- collect all the vars that appear in the expression that are not bound
-test f x = Set.map f x
+-- collect all the vars that appear in the expression that are not boun
 
-f:: String -> WarningMsg
-f x = UndefinedVarUse ("Unused variable " ++ x)
---toWarning:: Set String -> Set WarningMsg
---toWarning 
---freeVarsToWarning:: [String] -> Set String
---freeVarsToWarning [] = Set.empty
---freeVarsToWarning (x:xs) = Set.union (freeVarsToWarning [x]) (freeVarsToWarning xs)
---freeVarsToWarning [x] = Set.singleton (x)--UndefinedVarUse ("unused variable ")) --Fixme state the variable name
+finalUnused:: Ast -> Set WarningMsg
+finalUnused x = Set.map  f2 (difference (boundVars x) (used x) )
 
+unusedBoundVars:: Set String -> Set String -> Set String
+unusedBoundVars x y = difference x y
+
+boundVars :: Ast -> Set String --gets all the boundvars now must figure out which of these aren't used
+boundVars (Lam v bod) = Set.insert v $ boundVars bod
+boundVars (Var _) = Set.empty
+boundVars (App f a) = boundVars f `Set.union` boundVars a
+boundVars _ = Set.empty
+
+used:: Ast -> Set String
+used (Var a) = Set.singleton a
+used (Lam a b) = used b
+used (App a b) = Set.union (used a) (used b)
+used (ValBool a) = Set.empty
+used (ValInt a) = Set.empty
+used (ValFloat a) = Set.empty
+used (And a b) =  Set.union (used a) (used b)
+used (Or a b) =  Set.union (used a) (used b)
+used (Not a) = (used a)
+used (ValChar a) = Set.empty --FIXME i think this should be added - figure out how later
+used (Plus a b) =  Set.union (used a) (used b)
+used (Minus a b) =  Set.union (used a) (used b)
+used (Mult a b) =  Set.union (used a) (used b)
+used (Div a b) =  Set.union (used a) (used b)
+used (DivFloat a b) =  Set.union (used a) (used b)
+used (Modulus a b) =  Set.union (used a) (used b)
+used (Equal a b) =  Set.union (used a) (used b)
+used (NotEqual a b) =  Set.union (used a) (used b)
+used (GreatThanOrEqual a b) =  Set.union (used a) (used b)
+used (GreaterThan a b) =  Set.union (used a) (used b)
+used (LessThanOrEqual a b) =  Set.union (used a) (used b)
+used (LessThan a b) =  Set.union (used a) (used b)
+used (Cons a b) =  Set.union (used a) (used b)
+used (Separator a b) =  Set.union (used a) (used b)
+used (Concat a b) =  Set.union (used a) (used b)
+used (IntExp a b) =  Set.union (used a) (used b)
+used (FloatExp a b) =  Set.union (used a) (used b)
+used (ListIndex a b) = (used a)
+used (Print a) = (used a)
+used (Nil) = Set.empty
+used (If a b c) = Set.union (Set.union (used a)(used b)) (used c)
+used (Let str b c) = Set.union (used b) (used c)
+used (DotMixIn a b) = Set.union (used a) (used b)
+used (Letrec str b c) = Set.union (used b) (used c)
+
+f :: String -> WarningMsg -- 0 means undefinedvaruse, 1 means unusedvar
+f x = UndefinedVarUse ("unbound variable " ++ x)
+
+f2:: String -> WarningMsg 
+f2 x = UnusedVar ("bound but unused variable " ++ x )
 freeVars :: Ast -> Set String
 freeVars (Var s) = Set.singleton s
 freeVars (App t1 t2) = Set.union (freeVars t1) (freeVars t2)
 freeVars (Lam s t1) = Set.delete s (freeVars t1)
-freeVars _ = undefined
+freeVars _ = undefined --FIXME do we need all the cases of ast??
 
 -- when are there no free variables in a lambda expression?
 isClosed :: Ast -> Bool
