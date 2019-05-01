@@ -70,12 +70,12 @@ stdLib = Map.fromList
                                     _        -> (Error "can only call head on a non empty list",[])),                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> (Ok $ I (len' ls), [])
                                     _ -> (Error "not a list", [])),
-   ("elem", Fun $ \ v -> case v of 
-                              Fun a -> (Error "not given a value",[])
-                              (v') -> ( Ok $ Fun $ \ list -> case list of
-                                                               Ls a -> (Ok $ B (elem' v' (Ls a)), [])   
+   ("elem", --Fun $ \ v -> case v of 
+              --                Fun a -> (Error "not given a value",[])
+                --              (v') -> ( Ok $ Fun $ \ list -> case list of
+                  --                                             Ls a -> (Ok $ B (elem' v' (Ls a)), [])   
                                                              --helper function here list ls w/ v'
-                                                               _    -> (Error "not given a list", []))), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
+                    undefined ),--                                           _    -> (Error "not given a list", []))), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
    ("map", undefined --Fun $ \v -> case v of 
              --               Fun (Fun a) -> case a of ->
               --                              Ls (b) -> Ok $ Ls (b)
@@ -186,9 +186,13 @@ eval (Separator l r) =
        y <- eval r
        return (y)   
 eval (Concat a b) =
-    do a' <- evalList a
-       b' <- evalList b
-       return $ Ls $ a' ++ b'
+    do a' <- eval a
+       b' <- eval b
+       case (a') of
+             Ls ls1 -> case (b') of
+                        Ls ls2 -> return $ Ls $ ls1 ++ ls2
+                        _      -> err "not given a list!" 
+             _      -> err "not given a list!" 
 eval (IntExp a b) =
   do l' <- evalInt a
      r' <- evalInt b
@@ -206,10 +210,13 @@ eval (Modulus a b) =   --for ints
      r' <- evalInt b
      return $ I $ l' `mod` r' 
 eval (ListIndex a b) =
-    do a' <- evalList a
+    do a' <- eval a
+       --a'' <- evalList a
        b' <- evalInt b 
-       let length = len' a'
-       if length < b' then err "List is not big enough" else (indexInto (Ls a') b') 
+       case (a') of Ls a -> if (len' a) < b' then err "List is not big enough" else (indexInto (a') b') 
+                    _       -> err "did not give a list!"
+       --let length = len' a''
+ --        if length < b' then err "List is not big enough" else (indexInto (a') b') 
 eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and not evalBool?!?!
                       b' <- eval b
                       return (B (a' == b'))
@@ -297,10 +304,13 @@ eval (Cons a b) = do l <- eval a
                       Ls a -> return $ Ls $[l] ++ a
                       _    -> err "type mismatch"
 eval (Var str) = getVar str
-eval (If a b c) = do a' <- (evalBool a) 
+eval (If a b c) = do a' <- (eval a) 
                      case (a') of
-                          True -> (eval b)
-                          False -> (eval c)
+                          B True -> (eval b)
+                          B False -> (eval c)
+                          I x -> if (x > 0) then (eval b) else (eval c)
+                          F x -> if (x > 0) then (eval b) else (eval c)
+                          _   -> err "if requires a bool, int or float!"
 eval (Let v val bod) = 
   do val' <- eval val
      local (Map.insert v val') (eval bod)
