@@ -5,7 +5,7 @@ import qualified Data.Map as Map
 import HelpShow
 import Ast
 import EnvUnsafeLog
-
+import Data.Char (ord, chr)
 -- the goal of the program is to return a value, what values are possible?
 
 data Val = I Integer | B Bool | F Float | C Char 
@@ -84,10 +84,10 @@ stdLib = Map.fromList
                       --       _ -> Error "error"
     --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
                           --           I a -> Ok $ I $ v a),
-   ("ord", Fun $ \ v -> case v of C a -> (Ok $ I (toInteger2 a), [])
+   ("ord", Fun $ \ v -> case v of C a -> (Ok $ I (fromIntegral $ ord a), [])
                                   _   -> (Error "not given a char", [])),    --char to int
-   ("chr", undefined),--Fun $ \ v -> case v of I a -> Ok $ C (fromIntegral a)
-             --                     _   -> Error "not given an int"),    --int to char
+   ("chr", Fun $ \ v -> case v of I a -> (Ok $ C ( chr (fromIntegral a)),[])
+                                  _   -> (Error "not given an int",[])),    --int to char
    ("float", Fun $ \ v -> case v of I a -> (Ok $ F (fromIntegral a), [])
                                     _   -> (Error "not given an int", [])),    --int to float
    ("int", Fun $ \ v -> case v of F a -> (Ok $ I (truncate a), [])
