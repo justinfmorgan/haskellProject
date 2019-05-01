@@ -285,10 +285,20 @@ evalTest = testGroup
               assertEqual "[1,2,3,4] !! 2 =?" (Ok (I 3) []) (exec (ListIndex list1 two)) 
               assertEqual "[1,2,3,4] !! 0 =?" (Ok (I 1) []) (exec (ListIndex list1 zero))
               assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 2 =?" (Ok (F (-4.4)) []) (exec (ListIndex list4 two)) 
-              assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (Ok (I (-4)) []) (exec (ListIndex list4 three))
-  --/        testCase "Var App Lam Test" $
---            do
-              
+              assertEqual "[(-1.0),(1.25),(-4.4),(-4)] !! 3 =?" (Ok (I (-4)) []) (exec (ListIndex list4 three)),
+
+          testCase "Var Lam App" $
+            do
+              assertEqual "(\\x -> x) 5 = ?" (Ok (I 5) []) (exec (App (Lam "x" (Var "x")) (ValInt 5)))
+              assertEqual "(\\xx -> \\yy -> xx * yy - 22) 17 28" (Ok (I 454) []) 
+                          (exec (App (App (Lam "xx" (Lam "yy" (Minus (Mult (Var "xx") (Var "yy")) (ValInt 22)))) (ValInt 17)) (ValInt 28)))
+              assertEqual "(\\aa -> \\bb -> aa) True" (Ok (B True) []) (exec (App (Lam "aa" (Lam "bb" (Var "aa"))) (Var "True")))
+              assertEqual "(\\aa -> \\bb -> \\cc -> aa*bb*cc) 4 5 6" (Ok (I 120) [])
+                          (exec (App (App (App (Lam "aa" (Lam "bb" (Lam "cc" (Mult (Mult (Var "aa") (Var "bb")) (Var "cc"))))) (ValInt 4)) (ValInt 5)) (ValInt 6)))
+              assertEqual "(\\x -> x) 4.5" (Ok (F 4.5)) (exec ((App (Lam "x" (Var "x")) (ValFloat 4.5))))
+              assertEqual "(\\aa -> \\bb -> [aa,bb,5]) True 5" (Ok (Ls [B True, I 5])) 
+                          (exec (App (App (Lam "aa" (Lam "bb" (Cons (Var "aa") (Cons (Var "bb") (Cons (ValInt 5) Nil))))) (Var "True")) (ValInt 5))),
+          
 
     ]
 
