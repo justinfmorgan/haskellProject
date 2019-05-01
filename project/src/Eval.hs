@@ -44,10 +44,8 @@ len' (a:b) = 1 + len' b
 --fromEnum2::Enum a => a -> Integer
 --fromEnum2 x = x
 
---apply:: [Val] -> (Val->Unsafe Val) -> [Unsafe Val]
-
---apply:: [a] -> (a -> b) -> [b]
---apply (head:tail) f = [(f head)] ++ (apply f tail) 
+map' _ (Ls []) = []
+map' f (Ls (x:xs)) = f x : map' f (Ls xs)
 
 toInteger2:: a -> Integer
 toInteger2 = undefined
@@ -58,9 +56,9 @@ elem' a (Ls []) = False
 elem' a (Ls (x:xs)) | (a == x)  = True
                     | otherwise = elem' a (Ls xs)
 
--- filter':: [Val] -> (Val -> Unsafe Val) -> [Val]
--- filter' [] fcn = []
--- filter' (x:xs) fcn | (fcn x) = [x] ++ (filter' xs fcn) 
+--filter':: Val -> (Val->Bool) -> Val
+--filter' (Ls []) fcn = (Ls [])
+--filter' (Ls (x:xs)) fcn | (fcn x) = (Ls [x]) ++ (filter' (Ls xs) fcn) 
 
 stdLib = Map.fromList
   [
@@ -70,23 +68,21 @@ stdLib = Map.fromList
                                     _        -> (Error "can only call head on a non empty list",[])),                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> (Ok $ I (len' ls), [])
                                     _ -> (Error "not a list", [])),
-   ("elem", Fun $ \v -> (Ok (Fun $ \v2 -> (Ok undefined, [])), [])),--Fun $ \ v -> case v of 
-                       --       Fun a -> Error "not given a value"
-                         --     v' -> Ok $ Fun $ \ list -> case list of
-                           --                                 Ls [ls] -> Ok $ B (elem' v' [ls])   
-                                                             --helper function here list ls w/ v'
-                                                             -- _    -> (Error "not given a list", []))), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
-   ("map", undefined --Fun $ \v -> case v of 
+
+                                 --   Fun (Val -> (Unsafe Val, [String]))                             
+   ("elem", Fun $ \v -> (Ok (Fun $ \v2 -> (Ok $ B (elem' v v2), [])), [])),--Fun $ \ v -> case v of 
+                      
+   ("map", Fun $ \ v -> undefined),--(Ok (Fun $ \v2 -> (Ok $ Ls (map' v2 v), [])), [])),--Fun $ \v -> case v of 
              --               Fun (Fun a) -> case a of ->
               --                              Ls (b) -> Ok $ Ls (b)
-                            ),
-   ("filter", undefined-- Fun $ \ v -> case v of 
+                            
+   ("filter", Fun $ \v -> (Ok (Fun $ \v2 -> (Ok undefined, [])), [])),-- Fun $ \ v -> case v of 
                --              Fun a -> Error "no"
                  --            v' -> Ok $ Fun $ \ list -> case list of
                    --                                         Ls [ls] -> Ok $ Ls (filter' v' [ls]) --helper function here list ls w/ v'
                      --                                       _ -> Error "not given a list"
                       --       _ -> Error "error"
-   ), --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
+    --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
                           --           I a -> Ok $ I $ v a),
    ("ord", Fun $ \ v -> case v of C a -> (Ok $ I (toInteger2 a), [])
                                   _   -> (Error "not given a char", [])),    --char to int
