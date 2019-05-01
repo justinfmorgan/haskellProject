@@ -63,19 +63,19 @@ elem' a (Ls (x:xs)) | (a == x)  = True
 -- filter' (x:xs) fcn | (fcn x) = [x] ++ (filter' xs fcn) 
 
 stdLib = Map.fromList
-<<<<<<< HEAD
-  [("tail", Fun $ \ v -> case v of Ls (_:ls) -> (Ok $ Ls ls, [])
-                                   _         -> Error "can only call tail on a non empty list"),
+  [
+   ("tail", Fun $ \ v -> case v of Ls (_:ls) -> (Ok $ Ls ls, [])
+                                   _         -> (Error "can only call tail on a non empty list",[])),
    ("head", Fun $ \ v -> case v of  Ls (a:_) -> (Ok a, [])
-                                    _        -> Error "can only call head on a non empty list"),                                    
+                                    _        -> (Error "can only call head on a non empty list",[])),                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> (Ok $ I (len' ls), [])
-                                    _ -> Error "not a list"),
+                                    _ -> (Error "not a list", [])),
    ("elem", Fun $ \ v -> case v of 
-                              Fun a -> Error "not given a value"
-                              v' -> Ok $ Fun $ \ list -> case list of
-                                                            Ls a -> (Ok $ B (elem' v' (Ls a)), [])   
+                              Fun a -> (Error "not given a value",[])
+                              (v') -> ( Ok $ Fun $ \ list -> case list of
+                                                               Ls a -> (Ok $ B (elem' v' (Ls a)), [])   
                                                              --helper function here list ls w/ v'
-                                                            _ -> Error "not given a list"), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
+                                                               _    -> (Error "not given a list", []))), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
    ("map", undefined --Fun $ \v -> case v of 
              --               Fun (Fun a) -> case a of ->
               --                              Ls (b) -> Ok $ Ls (b)
@@ -232,17 +232,44 @@ eval (ValChar i) = return $ C i
 eval (ValInt i) = return $ I i
 eval (Nil) = return $ Ls []
 eval (Mult l r) = --change to work for floats and ints
-  do l' <- evalInt l
-     r' <- evalInt r
-     return $ I $ l' * r'
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ F $ f1 * f2
+                  I i2 -> err "can not multiply a float with an integer" --return $ F $ f1 + i2
+                  _    -> err "can only multiply floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not multiply an integer with a float" --return $ F $ i1 + f2
+                  I i2 -> return $ I $ i1 * i2
+                  _    -> err "can only multiply floats and ints"
+      _    -> err "can only multiply floats and ints"
 eval (Plus l r) =       --change to work for floats and ints
-  do l' <- evalInt l
-     r' <- evalInt r
-     return $ I $ l' + r'
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ F $ f1 + f2
+                  I i2 -> err "can not add a float with an integer"
+                  _    -> err "can only add floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not add an integer with a float" --return $ F $ i1 + f2
+                  I i2 -> return $ I $ i1 + i2
+                  _    -> err "can only add floats and ints"
+      _    -> err "can only add floats and ints"
 eval (Minus l r) =      --change to work for floats and ints
-  do l' <- evalInt l
-     r' <- evalInt r
-     return $ I $ l' - r'
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ F $ f1 - f2
+                  I i2 -> err "can not add a float with an integer"
+                  _    -> err "can only add floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not add an integer with a float" --return $ F $ i1 + f2
+                  I i2 -> return $ I $ i1 - i2
+                  _    -> err "can only add floats and ints"
+      _    -> err "can only add floats and ints"
 eval (Div l r) = do l' <- evalInt l         --should be for ints
                     r' <- evalInt r
                     case r' of
