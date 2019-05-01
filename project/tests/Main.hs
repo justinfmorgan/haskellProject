@@ -22,7 +22,7 @@ testSuite =
     "allTests"
     [
     CheckTest.checktest,
-    EvalTest.evalTest
-    --ParserTest.parserTest
+    EvalTest.evalTest,
+    ParserTest.parserTest
     -- ...
     ]

@@ -131,8 +131,8 @@ showPretty (Print b)          _      = "print(" ++ showPretty b 23 ++ ")"
 
 showPretty (ListIndex l r) d         = parenthesize 20 d $ ((showPretty l 20) ++ " !! " ++ (showPretty r 21))
 
-showPretty (FloatExp l r) i          = parenthesize 18 i $ (showPretty l 19) ++ " ** " ++ (showPretty r 18) --R
-showPretty (IntExp l r) i            = parenthesize 18 i $ (showPretty l 19) ++ " ^ " ++ (showPretty r 18) --R
+showPretty (FloatExp l r) i          = parenthesize 18 i $ (showPretty l 19) ++ " ^ " ++ (showPretty r 18) --R
+showPretty (IntExp l r) i            = parenthesize 18 i $ (showPretty l 19) ++ " ** " ++ (showPretty r 18) --R
 
 
 showPretty (Mult l r) i              = parenthesize 16 i $ (showPretty l 16) ++ " * " ++ (showPretty r 17)

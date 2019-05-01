@@ -297,7 +297,7 @@ evalTest = testGroup
                           (exec (App (App (App (Lam "aa" (Lam "bb" (Lam "cc" (Mult (Mult (Var "aa") (Var "bb")) (Var "cc"))))) (ValInt 4)) (ValInt 5)) (ValInt 6)))
               assertEqual "(\\x -> x) 4.5" (Ok (F 4.5)) (exec ((App (Lam "x" (Var "x")) (ValFloat 4.5))))
               assertEqual "(\\aa -> \\bb -> [aa,bb,5]) True 5" (Ok (Ls [B True, I 5])) 
-                          (exec (App (App (Lam "aa" (Lam "bb" (Cons (Var "aa") (Cons (Var "bb") (Cons (ValInt 5) Nil))))) (Var "True")) (ValInt 5))),
+                          (exec (App (App (Lam "aa" (Lam "bb" (Cons (Var "aa") (Cons (Var "bb") (Cons (ValInt 5) Nil))))) (Var "True")) (ValInt 5)))
           
 
     ]
