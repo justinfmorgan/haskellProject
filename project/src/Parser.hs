@@ -88,7 +88,10 @@ beforeAnd:: Parser Ast
 beforeAnd = equalities <|> concatEpr <|> bothListTypes <|> addSubExpr <|> multDivExpr --don't mess with what goes into and
 
 equalities:: Parser Ast             
-equalities = withInfix concatEpr [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
+equalities = withInfix addSubExpr [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
+
+beforeeq:: Parser Ast
+beforeeq = concatEpr <|> addSubExpr -- <|> multDivExpr
 
 concatEpr:: Parser Ast
 concatEpr = do a <- bothListTypes 
@@ -103,7 +106,7 @@ consEpr = do a <- token addSubExpr      --TODO doublecheck this
                  return (Cons a c)) <|> (return a)
 
 bothListTypes:: Parser Ast
-bothListTypes = consEpr <|> consCommmas
+bothListTypes = consEpr <|> consCommmas <|> addSubExpr <|> multDivExpr -- <|> beforeMult <|> listIndex <|> beforeLI
 
 commas:: Parser Ast
 commas = do a <- token addSubExpr
@@ -147,7 +150,6 @@ intExpEpr = do a <- listIndex
                    c <- intExpEpr
                    return (IntExp a c)) <|> (return a)      
 
-
 beforeLI:: Parser Ast
 beforeLI = pri <|> notExp <|> atoms
 
@@ -157,7 +159,7 @@ listIndex = withInfix beforeLI [("!!", ListIndex)]
 pri:: Parser Ast
 pri = do token $ literal "print"        --should it get parser or atoms???? FIXME
          token $ literal "("
-         printed <- atoms
+         printed <- parser
          token $ literal ")"
          return printed
          `mapParser` (\ i -> Print i)
@@ -172,13 +174,13 @@ atoms = pri <|> parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens
 
 parseChar:: Parser Ast                      --FIXME needs to work for just a not a space !
 parseChar = do s <- token (literal "'")
-               a <- sat isAlpha
+               a <- item --sat isAlpha
                --b <- literal " "
                b <- token (literal "'")
                return (ValChar a)
 
 parseFloat:: Parser Ast
-parseFloat = do a <- floatParse
+parseFloat = do a <- floatParserActual
                 return (ValFloat a)
 
 vars :: Parser Ast
@@ -193,9 +195,11 @@ ints = do s <- token $ intParser
 
 bools :: Parser Ast
 bools = 
-  do s <- token ((literal "true") <||> (literal "false"))
+  do s <- token ((literal "True") <||> (literal "true") <||> (literal "False") <||> (literal "false"))
      let res = case s of
+                 Left (Right _) -> ValBool False
                  Left _  ->  ValBool True
+
                  Right _ ->  ValBool False
      return res -- keep doing this as much as possible
 

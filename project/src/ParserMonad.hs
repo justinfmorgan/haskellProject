@@ -169,6 +169,12 @@ floatParse = do digits <- some digit
                 let c = numDigits b
                 return $ (read (digits++b)) / (valToMult c)
 
+floatParserActual:: Parser Float
+floatParserActual = do r <- floatParse <||> (literal "-")
+                       case r of
+                          Right _ -> fmap (0-) floatParse
+                          Left n -> return n
+
 
 -- parse natural numbers, like "123", or "000230000"
 natParser :: Parser Integer
