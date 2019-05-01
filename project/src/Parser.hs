@@ -171,10 +171,10 @@ atoms:: Parser Ast
 atoms = pri <|> parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letrecParser <|> letParser <|> {- dotmixinParser <|>-} lambdaParser <|> vars
 
 parseChar:: Parser Ast                      --FIXME needs to work for just a not a space !
-parseChar = do --s <- token (literal "'")
+parseChar = do s <- token (literal "'")
                a <- sat isAlpha
-               b <- literal " "
-               --b <- token (literal "'")
+               --b <- literal " "
+               b <- token (literal "'")
                return (ValChar a)
 
 parseFloat:: Parser Ast

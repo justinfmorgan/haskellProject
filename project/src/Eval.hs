@@ -53,31 +53,30 @@ toInteger2:: a -> Integer
 toInteger2 = undefined
 
 
-{-elem':: Val -> Val -> Bool
+elem':: Val -> Val -> Bool
 elem' a (Ls []) = False
 elem' a (Ls (x:xs)) | (a == x)  = True
-                    | otherwise = elem' a xs
--}
+                    | otherwise = elem' a (Ls xs)
+
 -- filter':: [Val] -> (Val -> Unsafe Val) -> [Val]
 -- filter' [] fcn = []
 -- filter' (x:xs) fcn | (fcn x) = [x] ++ (filter' xs fcn) 
 
 stdLib = Map.fromList
-  [("tail", Fun $ \ v -> case v of Ls (_:ls) -> (Ok $ Ls ls, [])
-                                   _         -> (Error "can only call tail on a non empty list", [])),
+  [
+   ("tail", Fun $ \ v -> case v of Ls (_:ls) -> (Ok $ Ls ls, [])
+                                   _         -> (Error "can only call tail on a non empty list",[])),
    ("head", Fun $ \ v -> case v of  Ls (a:_) -> (Ok a, [])
-                                    _        -> (Error "can only call head on a non empty list", [])),                                    
+                                    _        -> (Error "can only call head on a non empty list",[])),                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> (Ok $ I (len' ls), [])
                                     _ -> (Error "not a list", [])),
    ("elem", Fun $ \v -> (Ok (Fun $ \v2 -> (Ok undefined, [])), [])
-
-
    ),--Fun $ \ v -> case v of 
                        --       Fun a -> Error "not given a value"
                          --     v' -> Ok $ Fun $ \ list -> case list of
                            --                                 Ls [ls] -> Ok $ B (elem' v' [ls])   
                                                              --helper function here list ls w/ v'
-                             --                               _ -> Error "not given a list"), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
+                    undefined ),--                                           _    -> (Error "not given a list", []))), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
    ("map", undefined --Fun $ \v -> case v of 
              --               Fun (Fun a) -> case a of ->
               --                              Ls (b) -> Ok $ Ls (b)
@@ -188,9 +187,13 @@ eval (Separator l r) =
        y <- eval r
        return (y)   
 eval (Concat a b) =
-    do a' <- evalList a
-       b' <- evalList b
-       return $ Ls $ a' ++ b'
+    do a' <- eval a
+       b' <- eval b
+       case (a') of
+             Ls ls1 -> case (b') of
+                        Ls ls2 -> return $ Ls $ ls1 ++ ls2
+                        _      -> err "not given a list!" 
+             _      -> err "not given a list!" 
 eval (IntExp a b) =
   do l' <- evalInt a
      r' <- evalInt b
@@ -208,10 +211,13 @@ eval (Modulus a b) =   --for ints
      r' <- evalInt b
      return $ I $ l' `mod` r' 
 eval (ListIndex a b) =
-    do a' <- evalList a
+    do a' <- eval a
+       --a'' <- evalList a
        b' <- evalInt b 
-       let length = len' a'
-       if length < b' then err "List is not big enough" else (indexInto (Ls a') b') 
+       case (a') of Ls a -> if (len' a) < b' then err "List is not big enough" else (indexInto (a') b') 
+                    _       -> err "did not give a list!"
+       --let length = len' a''
+ --        if length < b' then err "List is not big enough" else (indexInto (a') b') 
 eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and not evalBool?!?!
                       b' <- eval b
                       return (B (a' == b'))
@@ -234,17 +240,44 @@ eval (ValChar i) = return $ C i
 eval (ValInt i) = return $ I i
 eval (Nil) = return $ Ls []
 eval (Mult l r) = --change to work for floats and ints
-  do l' <- evalInt l
-     r' <- evalInt r
-     return $ I $ l' * r'
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ F $ f1 * f2
+                  I i2 -> err "can not multiply a float with an integer" --return $ F $ f1 + i2
+                  _    -> err "can only multiply floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not multiply an integer with a float" --return $ F $ i1 + f2
+                  I i2 -> return $ I $ i1 * i2
+                  _    -> err "can only multiply floats and ints"
+      _    -> err "can only multiply floats and ints"
 eval (Plus l r) =       --change to work for floats and ints
-  do l' <- evalInt l
-     r' <- evalInt r
-     return $ I $ l' + r'
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ F $ f1 + f2
+                  I i2 -> err "can not add a float with an integer"
+                  _    -> err "can only add floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not add an integer with a float" --return $ F $ i1 + f2
+                  I i2 -> return $ I $ i1 + i2
+                  _    -> err "can only add floats and ints"
+      _    -> err "can only add floats and ints"
 eval (Minus l r) =      --change to work for floats and ints
-  do l' <- evalInt l
-     r' <- evalInt r
-     return $ I $ l' - r'
+  do a <- eval l
+     b <- eval r
+     case (a) of
+      F f1 -> case (b) of
+                  F f2 -> return $ F $ f1 - f2
+                  I i2 -> err "can not add a float with an integer"
+                  _    -> err "can only add floats and ints"
+      I i1 -> case (b) of
+                  F f2 -> err "can not add an integer with a float" --return $ F $ i1 + f2
+                  I i2 -> return $ I $ i1 - i2
+                  _    -> err "can only add floats and ints"
+      _    -> err "can only add floats and ints"
 eval (Div l r) = do l' <- evalInt l         --should be for ints
                     r' <- evalInt r
                     case r' of
@@ -272,10 +305,13 @@ eval (Cons a b) = do l <- eval a
                       Ls a -> return $ Ls $[l] ++ a
                       _    -> err "type mismatch"
 eval (Var str) = getVar str
-eval (If a b c) = do a' <- (evalBool a) 
+eval (If a b c) = do a' <- (eval a) 
                      case (a') of
-                          True -> (eval b)
-                          False -> (eval c)
+                          B True -> (eval b)
+                          B False -> (eval c)
+                          I x -> if (x > 0) then (eval b) else (eval c)
+                          F x -> if (x > 0) then (eval b) else (eval c)
+                          _   -> err "if requires a bool, int or float!"
 eval (Let v val bod) = 
   do val' <- eval val
      local (Map.insert v val') (eval bod)
