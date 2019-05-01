@@ -53,11 +53,11 @@ toInteger2:: a -> Integer
 toInteger2 = undefined
 
 
-{-elem':: Val -> Val -> Bool
+elem':: Val -> Val -> Bool
 elem' a (Ls []) = False
 elem' a (Ls (x:xs)) | (a == x)  = True
-                    | otherwise = elem' a xs
--}
+                    | otherwise = elem' a (Ls xs)
+
 -- filter':: [Val] -> (Val -> Unsafe Val) -> [Val]
 -- filter' [] fcn = []
 -- filter' (x:xs) fcn | (fcn x) = [x] ++ (filter' xs fcn) 
@@ -69,12 +69,12 @@ stdLib = Map.fromList
                                     _        -> Error "can only call head on a non empty list"),                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> Ok $ I (len' ls)
                                     _ -> Error "not a list"),
-   ("elem", undefined),--Fun $ \ v -> case v of 
-                       --       Fun a -> Error "not given a value"
-                         --     v' -> Ok $ Fun $ \ list -> case list of
-                           --                                 Ls [ls] -> Ok $ B (elem' v' [ls])   
+   ("elem", Fun $ \ v -> case v of 
+                              Fun a -> Error "not given a value"
+                              v' -> Ok $ Fun $ \ list -> case list of
+                                                            Ls a -> Ok $ B (elem' v' (Ls a))   
                                                              --helper function here list ls w/ v'
-                             --                               _ -> Error "not given a list"), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
+                                                            _ -> Error "not given a list"), -- case v get v' -> ok fun \list case of lst  ls elemval v' lst
    ("map", undefined --Fun $ \v -> case v of 
              --               Fun (Fun a) -> case a of ->
               --                              Ls (b) -> Ok $ Ls (b)
