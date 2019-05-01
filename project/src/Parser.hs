@@ -136,7 +136,7 @@ beforeMult:: Parser Ast
 beforeMult = floatExpEpr <|> intExpEpr
 
 floatExpEpr:: Parser Ast -- symbol ^ R associative
-floatExpEpr = do a <- listIndex              
+floatExpEpr = do a <- intExpEpr              
                  (do token (literal "^")
                      c <- floatExpEpr
                      return (FloatExp a c)) <|> (return a) 
