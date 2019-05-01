@@ -19,7 +19,7 @@ arbitrarySizedAst ::  Int -> Gen Ast
 arbitrarySizedAst m | m < 1 = do i <- elements [0..999]
                                  b <- arbitrary
                                  f <- arbitrary
-                                 c <- arbitrary
+                                 c <- elements ['a'..'z']
                                  node <- elements [ValInt i, ValBool b, ValFloat f, ValChar c, Nil]
                                  return $ node
 arbitrarySizedAst m | otherwise = do l <- arbitrarySizedAst (m `div` 2)
