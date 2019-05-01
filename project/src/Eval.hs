@@ -10,7 +10,7 @@ import EnvUnsafeLog
 
 data Val = I Integer | B Bool | F Float | C Char 
          | Ls [Val]
-         | Fun (Val -> Unsafe Val) --Fun (Val -> (Unsafe Val, [String]) ) --FIXME since this is a functional language, one thing that can be returned is a function
+         | Fun (Val -> (Unsafe Val, [String])) --Fun (Val -> (Unsafe Val, [String]) ) --FIXME since this is a functional language, one thing that can be returned is a function
                                   -- FIXME This has to incorporate Writer piece, Fun (Val -> (Unsafe Val, [String]))
 --int truncate
 instance Show Val where
@@ -63,12 +63,12 @@ elem' a (Ls (x:xs)) | (a == x)  = True
 -- filter' (x:xs) fcn | (fcn x) = [x] ++ (filter' xs fcn) 
 
 stdLib = Map.fromList
-  [("tail", Fun $ \ v -> case v of Ls (_:ls) -> Ok $ Ls ls
-                                   _         -> Error "can only call tail on a non empty list"),
-   ("head", Fun $ \ v -> case v of  Ls (a:_) -> Ok a
-                                    _        -> Error "can only call head on a non empty list"),                                    
-   ("len",  Fun $ \ v -> case v of  Ls (ls) -> Ok $ I (len' ls)
-                                    _ -> Error "not a list"),
+  [("tail", Fun $ \ v -> case v of Ls (_:ls) -> (Ok $ Ls ls, [])
+                                   _         -> (Error "can only call tail on a non empty list", [])),
+   ("head", Fun $ \ v -> case v of  Ls (a:_) -> (Ok a, [])
+                                    _        -> (Error "can only call head on a non empty list", [])),                                    
+   ("len",  Fun $ \ v -> case v of  Ls (ls) -> (Ok $ I (len' ls), [])
+                                    _ -> (Error "not a list", [])),
    ("elem", undefined),--Fun $ \ v -> case v of 
                        --       Fun a -> Error "not given a value"
                          --     v' -> Ok $ Fun $ \ list -> case list of
@@ -87,14 +87,14 @@ stdLib = Map.fromList
                       --       _ -> Error "error"
    ), --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
                           --           I a -> Ok $ I $ v a),
-   ("ord", Fun $ \ v -> case v of C a -> Ok $ I (toInteger2 a)
-                                  _   -> Error "not given a char"),    --char to int
+   ("ord", Fun $ \ v -> case v of C a -> (Ok $ I (toInteger2 a), [])
+                                  _   -> (Error "not given a char", [])),    --char to int
    ("chr", undefined),--Fun $ \ v -> case v of I a -> Ok $ C (fromIntegral a)
              --                     _   -> Error "not given an int"),    --int to char
-   ("float", Fun $ \ v -> case v of I a -> Ok $ F (fromIntegral a)
-                                    _   -> Error "not given an int"),    --int to float
-   ("int", Fun $ \ v -> case v of F a -> Ok $ I (truncate a)
-                                  _   -> Error "not given a float")   --float to int
+   ("float", Fun $ \ v -> case v of I a -> (Ok $ F (fromIntegral a), [])
+                                    _   -> (Error "not given an int", [])),    --int to float
+   ("int", Fun $ \ v -> case v of F a -> (Ok $ I (truncate a), [])
+                                  _   -> (Error "not given a float", []))   --float to int
    ]
 
 type Env = Map String Val
@@ -120,6 +120,13 @@ evalFloat a =
       F i -> return i
       _   -> err "it's not a float!!!"
 
+--evalIntOrFloat :: Ast -> EnvUnsafeLog Env b
+--evalIntOrFloat a = 
+ -- do a' <- eval a
+   --  case a' of
+    --  F f -> return f
+    --  I i -> return i
+     -- _   -> err "it's not a float or int!!!"    
 evalBool :: Ast -> EnvUnsafeLog Env Bool
 evalBool a = do a' <- eval a
                 case a' of
@@ -132,7 +139,7 @@ evalList a = do a' <- eval a
                   Ls [b] -> return [b]
                   _ -> err "It's not a list!"
 
-evalFun :: Ast -> EnvUnsafeLog Env (Val -> Unsafe Val)
+evalFun :: Ast -> EnvUnsafeLog Env (Val -> (Unsafe Val, [String]))
 evalFun a = do a' <- eval a
                case a' of
                 Fun a -> return a
@@ -145,11 +152,10 @@ getVar v = do s <- getEnv
                   Nothing -> return (I 0) 
 
 local :: (r -> r) -> EnvUnsafeLog Env Val-> EnvUnsafeLog Env Val
-local changeEnv comp  = EnvUnsafeLog (\e -> runEnvUnsafeLog comp e ) --check later because who knows FIXME
+local changeEnv comp  = EnvUnsafeLog (\e -> runEnvUnsafeLog comp e ) --check later because who knows
 
 --indexInto [] _ = err "empty list"
 indexInto:: Val -> Integer -> EnvUnsafeLog Env  Val
-indexInto (Ls []) x = return (Ls [])
 indexInto (Ls (head:tail)) 0 = case (head) of 
                                     Ls a -> return (Ls a)
                                     I a -> return (I a)
@@ -160,9 +166,8 @@ indexInto (Ls (head:tail)) 0 = case (head) of
 indexInto (Ls (head:tail)) x = indexInto (Ls tail) (x - 1)
 indexInto _ _ = undefined
 
-printThis :: String -> EnvUnsafeLog Env Val -> EnvUnsafeLog Env Val --TODO
-printThis x = undefined 
-
+printThis :: String -> EnvUnsafeLog Env Val -> EnvUnsafeLog Env Val
+printThis x = undefined
 {-
 case eu e of
       (Error s, log) -> (Error s, log)
@@ -180,13 +185,9 @@ eval (Separator l r) =
        y <- eval r
        return (y)   
 eval (Concat a b) =
-    do a' <- eval a
-       b' <- eval b
-       case (a') of
-             Ls ls1 -> case (b') of
-                        Ls ls2 -> return $ Ls $ ls1 ++ ls2
-                        _      -> err "not given a list!" 
-             _      -> err "not given a list!" 
+    do a' <- evalList a
+       b' <- evalList b
+       return $ Ls $ a' ++ b'
 eval (IntExp a b) =
   do l' <- evalInt a
      r' <- evalInt b
@@ -204,73 +205,43 @@ eval (Modulus a b) =   --for ints
      r' <- evalInt b
      return $ I $ l' `mod` r' 
 eval (ListIndex a b) =
-    do a' <- eval a
-       --a'' <- evalList a
+    do a' <- evalList a
        b' <- evalInt b 
-       case (a') of Ls a -> if (len' a) < b' then err "List is not big enough" else (indexInto (a') b') 
-                    _       -> err "did not give a list!"
-       --let length = len' a''
- --        if length < b' then err "List is not big enough" else (indexInto (a') b') 
-eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and not evalBool?!?! => u right good job
+       let length = len' a'
+       if length < b' then err "List is not big enough" else (indexInto (Ls a') b') 
+eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and not evalBool?!?!
                       b' <- eval b
                       return (B (a' == b'))
 eval (NotEqual a b) = do a' <- eval a
                          b' <- eval b
                          return (B (a' /= b'))  
-eval (LessThan l r) = do a' <- eval l
-                         b' <- eval r
-                         return (B (a' < b')) 
-eval (LessThanOrEqual l r) = do a' <- eval l
-                                b' <- eval r
-                                return (B (a' <= b'))  
-eval (GreaterThan l r) = do a' <- eval l
-                            b' <- eval r
-                            return (B (a' > b'))                                  
-eval (GreatThanOrEqual l r) = do a' <- eval l
-                                 b' <- eval r
-                                 return (B (a' >= b')) 
+eval (LessThan a b) = do a' <- eval a               --FIXME
+                         b' <- eval b
+                         return (B (a' < b'))
+eval (LessThanOrEqual a b) = do a' <- eval a               --FIXME
+                                b' <- eval b
+                                return (B (a' <= b'))                         
+eval (GreaterThan a b) = do a' <- eval a               --FIXME
+                            b' <- eval b
+                            return (B (a' > b'))                                                
+eval (GreatThanOrEqual a b) = do a' <- eval a               --FIXME
+                                 b' <- eval b
+                                 return (B (a' >= b'))  
 eval (ValChar i) = return $ C i
 eval (ValInt i) = return $ I i
 eval (Nil) = return $ Ls []
 eval (Mult l r) = --change to work for floats and ints
-  do a <- eval l
-     b <- eval r
-     case (a) of
-      F f1 -> case (b) of
-                  F f2 -> return $ F $ f1 * f2
-                  I i2 -> err "can not multiply a float with an integer" --return $ F $ f1 + i2
-                  _    -> err "can only multiply floats and ints"
-      I i1 -> case (b) of
-                  F f2 -> err "can not multiply an integer with a float" --return $ F $ i1 + f2
-                  I i2 -> return $ I $ i1 * i2
-                  _    -> err "can only multiply floats and ints"
-      _    -> err "can only multiply floats and ints"
+  do l' <- evalInt l
+     r' <- evalInt r
+     return $ I $ l' * r'
 eval (Plus l r) =       --change to work for floats and ints
-  do a <- eval l
-     b <- eval r
-     case (a) of
-      F f1 -> case (b) of
-                  F f2 -> return $ F $ f1 + f2
-                  I i2 -> err "can not add a float with an integer"
-                  _    -> err "can only add floats and ints"
-      I i1 -> case (b) of
-                  F f2 -> err "can not add an integer with a float" --return $ F $ i1 + f2
-                  I i2 -> return $ I $ i1 + i2
-                  _    -> err "can only add floats and ints"
-      _    -> err "can only add floats and ints"
+  do l' <- evalInt l
+     r' <- evalInt r
+     return $ I $ l' + r'
 eval (Minus l r) =      --change to work for floats and ints
-  do a <- eval l
-     b <- eval r
-     case (a) of
-      F f1 -> case (b) of
-                  F f2 -> return $ F $ f1 - f2
-                  I i2 -> err "can not add a float with an integer"
-                  _    -> err "can only add floats and ints"
-      I i1 -> case (b) of
-                  F f2 -> err "can not add an integer with a float" --return $ F $ i1 + f2
-                  I i2 -> return $ I $ i1 - i2
-                  _    -> err "can only add floats and ints"
-      _    -> err "can only add floats and ints"
+  do l' <- evalInt l
+     r' <- evalInt r
+     return $ I $ l' - r'
 eval (Div l r) = do l' <- evalInt l         --should be for ints
                     r' <- evalInt r
                     case r' of
@@ -298,25 +269,21 @@ eval (Cons a b) = do l <- eval a
                       Ls a -> return $ Ls $[l] ++ a
                       _    -> err "type mismatch"
 eval (Var str) = getVar str
-eval (If a b c) = do a' <- (eval a) 
+eval (If a b c) = do a' <- (evalBool a) 
                      case (a') of
-                          B True -> (eval b)
-                          B False -> (eval c)
-                          I x -> if (x > 0) then (eval b) else (eval c)
-                          F x -> if (x > 0) then (eval b) else (eval c)
-                          _   -> err "if requires a bool, int or float!"
-eval (Let v val bod) = --FIXME
+                          True -> (eval b)
+                          False -> (eval c)
+eval (Let v val bod) = 
   do val' <- eval val
      local (Map.insert v val') (eval bod)
 eval (Letrec v val bod) = undefined --TODO
-eval (DotMixIn a b) =  undefined--(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --TODO
---eval (Lam x bod) = do env <- getEnv
---                      return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)
-eval (Lam x bod) = undefined --TODO
+eval (DotMixIn a b) =  undefined--(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --FIXME
+eval (Lam x bod) = do env <- getEnv
+                      return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)
 eval (App e1 e2) = do e1' <- (evalFun e1)
                       e2' <- eval e2 --apply e1' onto e2', check to see if its broken or not -> return a val
                       case (e1' e2') of
-                         Ok a -> return a
+                         (Ok a, _) -> return a
                          _ -> err "error did not apply"
 {-
 -- THIS NEEDS TO BE FIXED!!!!
