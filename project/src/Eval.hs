@@ -307,9 +307,10 @@ eval (If a b c) = do a' <- (eval a)
                           I x -> if (x > 0) then (eval b) else (eval c)
                           F x -> if (x > 0) then (eval b) else (eval c)
                           _   -> err "if requires a bool, int or float!"
-eval (Let v val bod) = 
-  do val' <- eval val
-     local (Map.insert v val') (eval bod)
+-- eval (Let v val bod) = 
+--   do val' <- eval val
+      
+--      local (Map.insert v val') (eval bod)
 eval (Letrec v val bod) = undefined --TODO
 eval (DotMixIn a b) =  undefined--(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --FIXME
 eval (Lam x bod) = do env <- getEnv
