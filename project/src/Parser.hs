@@ -88,7 +88,7 @@ beforeAnd:: Parser Ast
 beforeAnd = equalities <|> concatEpr <|> bothListTypes <|> addSubExpr <|> multDivExpr --don't mess with what goes into and
 
 equalities:: Parser Ast             
-equalities = withInfix addSubExpr [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
+equalities = withInfix beforeeq [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
 
 beforeeq:: Parser Ast
 beforeeq = concatEpr <|> addSubExpr -- <|> multDivExpr
@@ -122,7 +122,7 @@ consCommmas = do token (literal "[")
                  return a
 
 addSubExpr :: Parser Ast
-addSubExpr = withInfix multDivExpr [("+", Plus), ("-", Minus)] --overloaded for floats and ints
+addSubExpr = withInfix multDivExpr [("+", Plus), ("- ", Minus)] --overloaded for floats and ints
 
 --beforeAddSub:: Parser Ast
 --beforeAddSub = multDivExpr <|> beforeMult -- <|> divFloatEpr
