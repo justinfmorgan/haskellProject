@@ -69,7 +69,10 @@ stdLib = Map.fromList
                                     _        -> (Error "can only call head on a non empty list", [])),                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> (Ok $ I (len' ls), [])
                                     _ -> (Error "not a list", [])),
-   ("elem", undefined),--Fun $ \ v -> case v of 
+   ("elem", Fun $ \v -> (Ok (Fun $ \v2 -> (Ok undefined, [])), [])
+
+
+   ),--Fun $ \ v -> case v of 
                        --       Fun a -> Error "not given a value"
                          --     v' -> Ok $ Fun $ \ list -> case list of
                            --                                 Ls [ls] -> Ok $ B (elem' v' [ls])   
