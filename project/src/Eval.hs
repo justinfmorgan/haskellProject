@@ -152,8 +152,8 @@ getVar v = do s <- getEnv
                   Just i -> return i
                   Nothing -> return (I 0) 
 
-local :: (r -> r) -> EnvUnsafeLog Env Val-> EnvUnsafeLog Env Val
-local changeEnv comp  = EnvUnsafeLog (\e -> runEnvUnsafeLog comp e ) --check later because who knows
+local ::(r-> r)  -> EnvUnsafeLog Env Val-> EnvUnsafeLog Env Val
+local changeEnv comp  = EnvUnsafeLog (\e -> runEnvUnsafeLog comp e) --check later because who knows
 
 --indexInto [] _ = err "empty list"
 indexInto:: Val -> Integer -> EnvUnsafeLog Env  Val
@@ -166,9 +166,6 @@ indexInto (Ls (head:tail)) 0 = case (head) of
                                     Fun a -> return (Fun a) -- unnecessary? probably who knows
 indexInto (Ls (head:tail)) x = indexInto (Ls tail) (x - 1)
 indexInto _ _ = undefined
-
-printThis :: String -> EnvUnsafeLog Env Val -> EnvUnsafeLog Env Val
-printThis x = undefined
 {-
 case eu e of
       (Error s, log) -> (Error s, log)
@@ -201,10 +198,8 @@ eval (FloatExp a b) =
   do l' <- evalFloat a
      r' <- evalFloat b
      return $ F $ l' ** r'
-eval (Print x) = undefined --do
---    x' <- eval x
---    printThis x'
---    return (x')
+eval (Print x) = do x' <- eval x
+                    EnvUnsafeLog (\e -> (Ok x', [show x']))
 eval (Modulus a b) =   --for ints
   do l' <- evalInt a
      r' <- evalInt b
@@ -311,12 +306,9 @@ eval (If a b c) = do a' <- (eval a)
                           I x -> if (x > 0) then (eval b) else (eval c)
                           F x -> if (x > 0) then (eval b) else (eval c)
                           _   -> err "if requires a bool, int or float!"
--- eval (Let v val bod) = 
---   do val' <- eval val
-      
---      local (Map.insert v val') (eval bod)
+eval (Let v val bod) = eval (App (Lam v bod) val)
 eval (Letrec v val bod) = undefined --TODO
-eval (DotMixIn a b) =  undefined--(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --FIXME
+--eval (DotMixIn a b) = --(\x -> eval (Lam ((evalFun a) (Lam (evalFun b) x)))) --FIXME
 eval (Lam x bod) = do env <- getEnv
                       return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)
 eval (App e1 e2) = do e1' <- (evalFun e1)
