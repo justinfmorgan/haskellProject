@@ -20,6 +20,7 @@ three = (ValInt 3)
 nthree = (ValInt (-3))
 four = (ValInt 4)
 nfour = (ValInt (-4))
+five = (ValInt 5)
 
 zerof = (ValFloat 0.0)
 onef = (ValFloat 1.0)
@@ -122,8 +123,9 @@ evalTest = testGroup
               assertEqual "if 0 then 1 else 4"           (Ok (I 4) [])  (exec (If zero one four))
               assertEqual "if 3 * 0 then 1 else 2  =? "  (Ok (I 2) [])  (exec (If (Mult three zero) one two))
               assertEqual "if 3 * 2 then 1 else 2  =? "  (Ok (I 1) [])  (exec (If (Mult three two) one two))
-              assertEqual "if 3 < 22 then true else false = ?" (Ok (B True) []) (execute "if 3 < 22 then true else false ")
-              assertEqual "if (let x = 10 in x*5) == 50 then 5 else 17 = ?" (Ok (I 5) []) (execute "if (let x = 10 in x*5) == 50 then 5 else 17"),
+              assertEqual "if 3 < 4 then true else false = ?" (Ok (B True) []) (exec (If (LessThan three four) true false))
+              assertEqual "if (let y = 5 in y*5) == 25 then 5 else 17 = ?" (Ok (I 5) []) 
+                          (exec (If (Equal (Let "y" five (Mult (Var "y") five)) (ValInt 25)) (ValInt 5) (ValInt 17))),
 
          testCase "Let Statements" $
             do 

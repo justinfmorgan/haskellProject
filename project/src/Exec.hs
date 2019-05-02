@@ -17,6 +17,7 @@ data LangOut =
   -- first String is the error message
   -- this list of Strings is what is printed before the error was encountered 
   | Ok Val [String]
+  | TypeError String
   | UndefinedVarError String
   -- ^ retuned when the program runs successfully and return a value
   -- The Val is the evaluation result of the program
