@@ -121,7 +121,9 @@ evalTest = testGroup
               assertEqual "if 3 then 4 else 2 =? "       (Ok (I 4) [])  (exec (If three four two))
               assertEqual "if 0 then 1 else 4"           (Ok (I 4) [])  (exec (If zero one four))
               assertEqual "if 3 * 0 then 1 else 2  =? "  (Ok (I 2) [])  (exec (If (Mult three zero) one two))
-              assertEqual "if 3 * 2 then 1 else 2  =? "  (Ok (I 1) [])  (exec (If (Mult three two) one two)),
+              assertEqual "if 3 * 2 then 1 else 2  =? "  (Ok (I 1) [])  (exec (If (Mult three two) one two))
+              assertEqual "if 3 < 22 then true else false = ?" (Ok (B True) []) (execute "if 3 < 22 then true else false ")
+              assertEqual "if (let x = 10 in x*5) == 50 then 5 else 17 = ?" (Ok (I 5) []) (execute "if (let x = 10 in x*5) == 50 then 5 else 17"),
 
          testCase "Let Statements" $
             do 
@@ -307,6 +309,9 @@ evalTest = testGroup
                           (exec (App (DotMixIn (Lam "xx" (Var "xx")) (Lam "yy" (Var "yy"))) (ValInt 10)))
               assertEqual "(\\bb -> bb^5) . (\\cc -> cc*3-19) 7.5 = ?" (Ok (F (525.21875)) [])
                           (exec (App (DotMixIn (Lam "bb" (FloatExp (Var "bb") (ValInt 5))) (Lam "cc" (Minus (Mult (Var "cc") (ValInt 3)) (ValInt 19)))) (ValFloat 7.5)))
+          --testCase "StdLib Tests" $
+            --do
+
 
     ]
 
