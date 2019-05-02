@@ -4,7 +4,7 @@ import Data.Set (Set, elems, union, difference)
 import qualified Data.Set as Set
 
 import Ast
-import EnvUnsafe
+import EnvUnsafeLog
 
 -- here you can preform static checks
 

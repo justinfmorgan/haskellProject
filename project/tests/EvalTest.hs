@@ -7,7 +7,7 @@ import Test.Tasty.HUnit (assertEqual, assertBool, testCase)
 import Ast
 import Eval
 import Exec
-import Examples (evalRes, Res(..))
+--import Examples (evalRes, Res(..))
 
 -- provide tests that show your run/eval works
 

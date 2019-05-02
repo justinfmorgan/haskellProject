@@ -91,7 +91,7 @@ equalities:: Parser Ast
 equalities = withInfix beforeeq [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
 
 beforeeq:: Parser Ast
-beforeeq = concatEpr <|> addSubExpr -- <|> multDivExpr
+beforeeq = concatEpr <|> bothListTypes <|> addSubExpr  -- <|> multDivExpr
 
 concatEpr:: Parser Ast
 concatEpr = do a <- bothListTypes 
@@ -136,7 +136,7 @@ multDivExpr :: Parser Ast
 multDivExpr = withInfix beforeMult [("*", Mult), ("//", Div), ("%", Modulus), ("/", DivFloat)]    --div for ints
 
 beforeMult:: Parser Ast
-beforeMult = floatExpEpr <|> intExpEpr
+beforeMult = floatExpEpr <|> intExpEpr <|> listIndex
 
 floatExpEpr:: Parser Ast -- symbol ^ R associative
 floatExpEpr = do a <- intExpEpr              
@@ -252,6 +252,8 @@ dotmixinParser = do a <- parser
                     b <- parser
                     return (DotMixIn a b
                       )
+dotmixinParser = withInfix parser [(".", DotMixIn)]
+
 -}
 parens :: Parser Ast
 parens = do token $ literal "("
@@ -260,4 +262,4 @@ parens = do token $ literal "("
             return a
 
 parser :: Parser Ast
-parser = sepEpr <|> apps <|> orExpr <|> andExpr <|> equalities <|> concatEpr <|> bothListTypes
+parser = sepEpr <|> apps <|> orExpr <|> andExpr <|> equalities <|> concatEpr <|> bothListTypes <|> beforeMult <|> listIndex <|> beforeLI
