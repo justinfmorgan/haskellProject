@@ -41,26 +41,27 @@ len' ::[a] -> Integer
 len' []  = 0
 len' (a:b) = 1 + len' b
 
-map' _ (Ls []) = []
-map' f (Ls (x:xs)) = f x : map' f (Ls xs)
-
 elem':: Val -> Val -> Bool
 elem' a (Ls []) = False
 elem' a (Ls (x:xs)) | (a == x)  = True
                     | otherwise = elem' a (Ls xs)
-
+elem' _ _ = undefined
 (+++):: (Unsafe Val, [String]) -> (Unsafe Val, [String]) -> (Unsafe Val, [String])
 (+++) (Ok (Ls x), log) (Ok (Ls y), log2) = (Ok (Ls (x ++ y)), (log ++ log2))
+(+++) _ _ = undefined
 
 filter':: (Val ->(Unsafe Val, [String])) -> Val -> (Unsafe Val, [String])
-filter _ (Ls []) = (Ls [])
+filter' _ (Ls []) = (Ok(Ls []),[])
 filter' f (Ls (x:xs)) = case (f x) of
                           (Ok (B True),log)  -> (Ok (Ls [x]), log) +++ (filter' f (Ls xs))
                           (Ok (B False),log) -> filter' f (Ls xs)
                           _                  -> (Error "filter has not been given a function and list", [])
+filter' _ _ = undefined
 
---map':: (Val ->(Unsafe Val, [String])) -> Val -> (Unsafe Val, [String])
---map'
+map':: (Val ->(Unsafe Val, [String])) -> Val -> (Unsafe Val, [String])
+map' f (Ls (x:xs)) = f x +++ map' f (Ls xs)
+map' _ _ = undefined
+
 
 stdLib = Map.fromList
   [
@@ -69,25 +70,14 @@ stdLib = Map.fromList
    ("head", Fun $ \ v -> case v of  Ls (a:_) -> (Ok a, [])
                                     _        -> (Error "can only call head on a non empty list",[])),                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> (Ok $ I (len' ls), [])
-                                    _ -> (Error "not a list", [])),
-
-                                 --   Fun (Val -> (Unsafe Val, [String]))                             
+                                    _ -> (Error "not a list", [])),                           
    ("elem", Fun $ \v -> (Ok (Fun $ \v2 -> (Ok $ B (elem' v v2), [])), [])),--Fun $ \ v -> case v of 
-                      
-   ("map", Fun $ \ v -> undefined),--(Ok (Fun $ \v2 -> (Ok $ Ls (map' v2 v), [])), [])),--Fun $ \v -> case v of 
-             --               Fun (Fun a) -> case a of ->
-              --                              Ls (b) -> Ok $ Ls (b)
-                            
-   ("filter", Fun $ \v ->case v of --(Ok (Fun $ \v2 -> (filter' v v2)), [])),-- Fun $ \ v -> case v of 
+   ("map", Fun $ \v ->case v of 
+                              Fun a -> (Ok $ Fun $ \list -> case list of
+                                                                  Ls [ls] ->(map' a (Ls[ls])), [])),
+   ("filter", Fun $ \v ->case v of 
                               Fun a -> (Ok $ Fun $ \list -> case list of
                                                                   Ls [ls] ->(filter' a (Ls[ls])), [])),
-               --              Fun a -> Error "no"
-                 --            v' -> Ok $ Fun $ \ list -> case list of
-                   --                                         Ls [ls] -> Ok $ Ls (filter' v' [ls]) --helper function here list ls w/ v'
-                     --                                       _ -> Error "not given a list"
-                      --       _ -> Error "error"
-    --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
-                          --           I a -> Ok $ I $ v a),
    ("ord", Fun $ \ v -> case v of C a -> (Ok $ I (fromIntegral $ ord a), [])
                                   _   -> (Error "not given a char", [])),    --char to int
    ("chr", Fun $ \ v -> case v of I a -> (Ok $ C ( chr (fromIntegral a)),[])
