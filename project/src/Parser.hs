@@ -55,10 +55,6 @@ bracket = ["["]
 apps :: Parser Ast
 apps = withInfix beforeApps [("",App)] -- must get beforeapps before or it'll break
 
---apps:: Parser Ast
---apps = do l <- beforeApps
-  --        parseApp l
-
 parseApp:: Ast -> Parser Ast --like multiplication 
 parseApp left = do s <- token (literal "")
                    right <- beforeApps
@@ -91,53 +87,65 @@ equalities:: Parser Ast
 equalities = withInfix beforeeq [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
 
 beforeeq:: Parser Ast
-beforeeq = concatEpr <|> bothListTypes <|> addSubExpr  -- <|> multDivExpr
+beforeeq = concatEpr <|> bothListTypes <|> addSubExpr <|> beforeAdd -- <|> multDivExpr
 
 concatEpr:: Parser Ast
-concatEpr = do a <- bothListTypes 
+concatEpr = do a <- both 
                b <- token (literal "++")
-               c <- bothListTypes
+               c <- both
                return (Concat a c)
-
-consEpr:: Parser Ast            --2 ways: a:b:[] [a,b]
-consEpr = do a <- token addSubExpr      --TODO doublecheck this
-             (do token (literal ":")
-                 c <- consEpr
-                 return (Cons a c)) <|> (return a)
-
+      
 bothListTypes:: Parser Ast
-bothListTypes = consEpr <|> consCommmas <|> addSubExpr <|> multDivExpr -- <|> beforeMult <|> listIndex <|> beforeLI
+bothListTypes = both <|> addSubExpr <|> multDivExpr -- <|> beforeMult <|> listIndex <|> beforeLI
+
+both:: Parser Ast
+both = do a <- token (literal "[") <||> token addAndMore 
+          case a of
+            Left _ -> do b <- token commas
+                         return b
+            Right d -> (do token (literal ":")
+                           c <- andMore
+                           return (Cons d c)) <|> (return d)
+andMore:: Parser Ast
+andMore = both <|> addSubExpr <|> multDivExpr <|> expEpr <|> listIndex <|> pri <|> notExp <|> atoms
 
 commas:: Parser Ast
-commas = do a <- token addSubExpr
+commas = do a <- token addSubExpr       --FIXME issues parsing!
             b <- token ((literal ",") <||>  (literal "]"))
             case b of
                 Left _ -> do b <- commas
                              return (Cons a b)
                 Right _-> return (Cons a Nil)
-            
+{-            
 consCommmas:: Parser Ast 
 consCommmas = do token (literal "[")
                  a <- token commas
                  return a
-
+-}
+addAndMore:: Parser Ast
+addAndMore = addSubExpr <|> beforeAdd
 addSubExpr :: Parser Ast
 addSubExpr = withInfix multDivExpr [("+", Plus), ("- ", Minus)] --overloaded for floats and ints
 
---beforeAddSub:: Parser Ast
---beforeAddSub = multDivExpr <|> beforeMult -- <|> divFloatEpr
-
--- *LangParser> parse addSubExpr "1+2+3+4"
--- Just (1 + 2 + 3 + 4,"")
--- *LangParser> parse addSubExpr "1-2-3-4"
--- Just (1 - 2 - 3 - 4,"")
+beforeAdd:: Parser Ast
+beforeAdd = multDivExpr <|> beforeMult
 
 multDivExpr :: Parser Ast
 multDivExpr = withInfix beforeMult [("*", Mult), ("//", Div), ("%", Modulus), ("/", DivFloat)]    --div for ints
 
 beforeMult:: Parser Ast
-beforeMult = floatExpEpr <|> intExpEpr <|> listIndex
+beforeMult = expEpr <|> listIndex
 
+expEpr:: Parser Ast
+expEpr = do a <- listIndex
+            (do b <- token $ (literal "^") <||> (literal "**") 
+                c <- expEpr
+                case b of
+                  Left _  -> return (FloatExp a c)
+                  Right _ -> return (IntExp a c)
+                  ) <|> (return a)
+
+{-
 floatExpEpr:: Parser Ast -- symbol ^ R associative
 floatExpEpr = do a <- intExpEpr              
                  (do token (literal "^")
@@ -149,7 +157,7 @@ intExpEpr = do a <- listIndex
                (do token (literal "**")
                    c <- intExpEpr
                    return (IntExp a c)) <|> (return a)      
-
+-}
 beforeLI:: Parser Ast
 beforeLI = pri <|> notExp <|> atoms
 

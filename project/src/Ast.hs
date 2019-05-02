@@ -155,10 +155,10 @@ showPretty (l `LessThanOrEqual` r) i = parenthesize 10 i $ (showPretty l 11) ++ 
 showPretty (l `GreatThanOrEqual` r)i = parenthesize 10 i $ (showPretty l 11) ++ " <= " ++ (showPretty r 11)
 
 
-showPretty (And l r) i               = parenthesize 8 i $ (showPretty l 9) ++ " && " ++ (showPretty r 9)
+showPretty (And l r) i               = parenthesize 8 i $ (showPretty l 8) ++ " && " ++ (showPretty r 9)
 
 --check list index
-showPretty (Or l r) i                = parenthesize 6 i $ (showPretty l 7) ++ " || " ++ (showPretty r 7)
+showPretty (Or l r) i                = parenthesize 6 i $ (showPretty l 6) ++ " || " ++ (showPretty r 7)
 
 showPretty (App l r) i               = parenthesize 4 i $ (showPretty l 4) ++ " " ++ (showPretty r 5)
 
