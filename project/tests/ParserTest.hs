@@ -15,10 +15,13 @@ import Parser (parser)
 instance Arbitrary Ast where
     arbitrary = sized arbitrarySizedAst
 
+--    shrink (Plus l r) = [l, r] ++ [(Plus l' r') | (l', r') <- shrink (l, r)]
+    shrink _ = []
+
 arbitrarySizedAst ::  Int -> Gen Ast
 arbitrarySizedAst m | m < 1 = do i <- elements [0..999]
                                  b <- arbitrary
-                                 f <- elements [0.000..999.999]
+                                 f <- elements [1.00003,4.5151, 10.5516166, 0.00000, (-4.4), (-17.2511), (-1455.1515), 15.515]--arbitrary
                                  c <- elements ['a'..'z']
                                  node <- elements [ValInt i, ValBool b, ValFloat f, ValChar c, Nil]
                                  return $ node
