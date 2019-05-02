@@ -193,7 +193,7 @@ notExp = do s <- token $ (literal "!")
             a <- yeah
             return (Not a)
 yeah:: Parser Ast
-yeah = dotmixinParser <|> atoms
+yeah = notExp <|> dotmixinParser <|> atoms
 
 dotmixinParser:: Parser Ast
 dotmixinParser = withInfix atoms [(".", DotMixIn)]
