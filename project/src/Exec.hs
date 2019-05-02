@@ -32,9 +32,16 @@ exec :: Ast -> LangOut
 exec ast = case run ast of
            (Left a, b) -> RuntimeError a b
            (Right val, b) -> Ok val b
-          -- _                -> ParseError
-  --Nothing -> ParseError
+
+execute :: String -> LangOut
+execute s = case (parse parser) s of
+  Just (ast,"") -> case run ast of
+                     (Left a, b) -> RuntimeError a b
+                     (Right val, b) -> Ok val b
+  _  -> ParseError
 
 -- | perform static checking on the program string, may be empty if there is a parse error
 warn :: String -> (Set WarningMsg) 
-warn s = undefined
+warn s = case (parse parser) s of
+  Just (ast,"") -> check ast
+  _             -> Set.empty

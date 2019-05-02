@@ -152,9 +152,6 @@ getVar v = do s <- getEnv
                   Just i -> return i
                   Nothing -> return (I 0) 
 
-local ::(r-> r)  -> EnvUnsafeLog Env Val-> EnvUnsafeLog Env Val
-local changeEnv comp  = EnvUnsafeLog (\e -> runEnvUnsafeLog comp e) --check later because who knows
-
 --indexInto [] _ = err "empty list"
 indexInto:: Val -> Integer -> EnvUnsafeLog Env  Val
 indexInto (Ls (head:tail)) 0 = case (head) of 
