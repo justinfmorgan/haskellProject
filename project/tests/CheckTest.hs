@@ -15,10 +15,12 @@ checktest = testGroup "CheckTest"
  -- error "no tests yet!"
   		testCase "UndefinedVarUse" $
   			do
-                assertEqual "\\x -> x y" (Set.singleton (UndefinedVarUse ("unbound variable y"))) (check (Lam "x" (App (ValChar 'x') (ValChar 'y'))))
-                assertEqual "\\xa -> xa ya" (Set.singleton (UndefinedVarUse ("unbound variable ya"))) (check(Lam "xa" (App (Var "xa") (Var "yb"))))
-                assertEqual "\\xa -> 4 + xa * ya" (Set.singleton (UndefinedVarUse ("unbound variable ya"))) (check (Lam "xa" (Plus (Mult (ValInt 4) (Var "xa")) (Var "ya"))))
-                assertEqual "\\xx -> \\yy -> \\zz -> xx - yy * zz + ww" (Set.singleton (UndefinedVarUse ("unbound variable ww"))) (check (Lam "xx" (Lam "yy" (Lam "zz" (Plus (Minus (Var "xx") (Mult (Var "yy") (Var "zz"))) (Var "ww")))))),
+                assertEqual "\\x -> x y" (Set.singleton (UndefinedVarUse ("unbound variable y"))) (check (Lam "x" (App (Var "x") (Var "y"))))
+                assertEqual "\\xa -> xa ya" (Set.singleton (UndefinedVarUse ("unbound variable ya"))) (check(Lam "xa" (App (Var "xa") (Var "ya"))))
+                --assertEqual "\\xa -> xa * ya + 4" (Set.singleton (UndefinedVarUse ("unbound variable ya"))) 
+                            --(check (Lam "xa" (Plus (Mult (Var "xa") (Var "ya")) (ValInt 4))))
+                assertEqual "\\xx -> \\yy -> \\zz -> xx - yy * zz + ww" (Set.singleton (UndefinedVarUse ("unbound variable ww"))) 
+                            (check (Lam "xx" (Lam "yy" (Lam "zz" (Plus (Minus (Var "xx") (Mult (Var "yy") (Var "zz"))) (Var "ww")))))),
   		
         testCase "UnusedVar" $
             do

@@ -66,7 +66,7 @@ check (DotMixIn a b) = undefined
 check (Letrec str b c) = undefined -}
 check (Lam a b) = Set.union ( Set.map f (freeVars (Lam a b)) ) (Set.map  f2 (difference (boundVars (Lam a b)) (used (Lam a b)) ))
 check (App a b) = Set.union ( Set.map f (freeVars (App a b)) ) (Set.map  f2 (difference (boundVars (App a b)) (used (App a b)) ))
-check x = (Set.map f2 (difference (boundVars x) (used x )))
+check x = Set.union ( Set.map f (freeVars (x)) ) (Set.map  f2 (difference (boundVars (x) )(used (x)) ))-- (Set.map f2 (difference (boundVars x) (used x )))
 
 {- unused
 finalUnused:: Ast -> Set WarningMsg
@@ -128,7 +128,7 @@ freeVars :: Ast -> Set String
 freeVars (Var s) = Set.singleton s
 freeVars (App t1 t2) = Set.union (freeVars t1) (freeVars t2)
 freeVars (Lam s t1) = Set.delete s (freeVars t1)
-freeVars _ = undefined --FIXME do we need all the cases of ast??
+freeVars _ = Set.empty --FIXME do we need all the cases of ast??
 
 -- when are there no free variables in a lambda expression?
 isClosed :: Ast -> Bool
