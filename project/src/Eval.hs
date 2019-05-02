@@ -41,26 +41,27 @@ len' ::[a] -> Integer
 len' []  = 0
 len' (a:b) = 1 + len' b
 
-map' _ (Ls []) = []
-map' f (Ls (x:xs)) = f x : map' f (Ls xs)
-
 elem':: Val -> Val -> Bool
 elem' a (Ls []) = False
 elem' a (Ls (x:xs)) | (a == x)  = True
                     | otherwise = elem' a (Ls xs)
-
+elem' _ _ = undefined
 (+++):: (Unsafe Val, [String]) -> (Unsafe Val, [String]) -> (Unsafe Val, [String])
 (+++) (Ok (Ls x), log) (Ok (Ls y), log2) = (Ok (Ls (x ++ y)), (log ++ log2))
+(+++) _ _ = undefined
 
 filter':: (Val ->(Unsafe Val, [String])) -> Val -> (Unsafe Val, [String])
-filter _ (Ls []) = (Ls [])
+filter' _ (Ls []) = (Ok(Ls []),[])
 filter' f (Ls (x:xs)) = case (f x) of
                           (Ok (B True),log)  -> (Ok (Ls [x]), log) +++ (filter' f (Ls xs))
                           (Ok (B False),log) -> filter' f (Ls xs)
                           _                  -> (Error "filter has not been given a function and list", [])
+filter' _ _ = undefined
 
---map':: (Val ->(Unsafe Val, [String])) -> Val -> (Unsafe Val, [String])
---map'
+map':: (Val ->(Unsafe Val, [String])) -> Val -> (Unsafe Val, [String])
+map' f (Ls (x:xs)) = f x +++ map' f (Ls xs)
+map' _ _ = undefined
+
 
 stdLib = Map.fromList
   [
@@ -69,25 +70,14 @@ stdLib = Map.fromList
    ("head", Fun $ \ v -> case v of  Ls (a:_) -> (Ok a, [])
                                     _        -> (Error "can only call head on a non empty list",[])),                                    
    ("len",  Fun $ \ v -> case v of  Ls (ls) -> (Ok $ I (len' ls), [])
-                                    _ -> (Error "not a list", [])),
-
-                                 --   Fun (Val -> (Unsafe Val, [String]))                             
+                                    _ -> (Error "not a list", [])),                           
    ("elem", Fun $ \v -> (Ok (Fun $ \v2 -> (Ok $ B (elem' v v2), [])), [])),--Fun $ \ v -> case v of 
-                      
-   ("map", Fun $ \ v -> undefined),--(Ok (Fun $ \v2 -> (Ok $ Ls (map' v2 v), [])), [])),--Fun $ \v -> case v of 
-             --               Fun (Fun a) -> case a of ->
-              --                              Ls (b) -> Ok $ Ls (b)
-                            
-   ("filter", Fun $ \v ->case v of --(Ok (Fun $ \v2 -> (filter' v v2)), [])),-- Fun $ \ v -> case v of 
+   ("map", Fun $ \v ->case v of 
+                              Fun a -> (Ok $ Fun $ \list -> case list of
+                                                                  Ls [ls] ->(map' a (Ls[ls])), [])),
+   ("filter", Fun $ \v ->case v of 
                               Fun a -> (Ok $ Fun $ \list -> case list of
                                                                   Ls [ls] ->(filter' a (Ls[ls])), [])),
-               --              Fun a -> Error "no"
-                 --            v' -> Ok $ Fun $ \ list -> case list of
-                   --                                         Ls [ls] -> Ok $ Ls (filter' v' [ls]) --helper function here list ls w/ v'
-                     --                                       _ -> Error "not given a list"
-                      --       _ -> Error "error"
-    --Fun $ \ v -> case v of Ls (ls) -> Ok $ Ls ls
-                          --           I a -> Ok $ I $ v a),
    ("ord", Fun $ \ v -> case v of C a -> (Ok $ I (fromIntegral $ ord a), [])
                                   _   -> (Error "not given a char", [])),    --char to int
    ("chr", Fun $ \ v -> case v of I a -> (Ok $ C ( chr (fromIntegral a)),[])
@@ -120,14 +110,7 @@ evalFloat a =
      case a' of
       F i -> return i
       _   -> err "it's not a float!!!"
-
---evalIntOrFloat :: Ast -> EnvUnsafeLog Env b
---evalIntOrFloat a = 
- -- do a' <- eval a
-   --  case a' of
-    --  F f -> return f
-    --  I i -> return i
-     -- _   -> err "it's not a float or int!!!"    
+  
 evalBool :: Ast -> EnvUnsafeLog Env Bool
 evalBool a = do a' <- eval a
                 case a' of
@@ -163,16 +146,7 @@ indexInto (Ls (head:tail)) 0 = case (head) of
                                     Fun a -> return (Fun a) -- unnecessary? probably who knows
 indexInto (Ls (head:tail)) x = indexInto (Ls tail) (x - 1)
 indexInto _ _ = undefined
-{-
-case eu e of
-      (Error s, log) -> (Error s, log)
-      (Ok a, log) ->
 
-  EnvUnsafeLog $ \ e -> 
-    case e of
-      ((Ok a), log) -> ((Ok $ a), log ++ x)
-      ((Error s), log) -> ((Error s), log ++ x)
--}
 eval :: Ast -> EnvUnsafeLog Env Val
 eval (ValFloat i) = return $ F i
 eval (Separator l r) = 
@@ -203,12 +177,10 @@ eval (Modulus a b) =   --for ints
      return $ I $ l' `mod` r' 
 eval (ListIndex a b) =
     do a' <- eval a
-       --a'' <- evalList a
        b' <- evalInt b 
        case (a') of Ls a -> if (len' a) < b' then err "List is not big enough" else (indexInto (a') b') 
                     _       -> err "did not give a list!"
-       --let length = len' a''
- --        if length < b' then err "List is not big enough" else (indexInto (a') b') 
+
 eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and not evalBool?!?!
                       b' <- eval b
                       return (B (a' == b'))
@@ -313,14 +285,7 @@ eval (App e1 e2) = do e1' <- (evalFun e1)
                       case (e1' e2') of
                          (Ok a, _) -> return a
                          _ -> err "error did not apply"
-{-
--- THIS NEEDS TO BE FIXED!!!!
--- | helper function that runs with the default environment (for example, the stdLib in week 10)
--- return either the error string or the value, along with everything that was printed
-run :: Ast  -- ^ run this Ast
-      -> (Either String Val, [String])  -- ^ (error message or result value, all the printings)
-run a = runEnvUnsafeLog (eval a) -}
-
+                         
 -- | helper function that runs with the default environment (for example, the stdLib in week 10)
 -- return either the error string or the value, along with everything that was printed
 run :: Ast  -- ^ run this Ast
