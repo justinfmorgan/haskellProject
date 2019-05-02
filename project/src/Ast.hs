@@ -122,11 +122,11 @@ showPretty (Let v a bod) i           = parenthesize 1 i  $  "let " ++ v ++ " = "
 showPretty (If b t e) i              = parenthesize 1 i $  "if " ++ (showPretty b 1) ++ " then " ++ (showPretty t 1) ++ " else " ++ (showPretty e 1)
 showPretty (Lam v bod) i             = parenthesize 1 i  $ "\\ " ++ v ++ " -> " ++ (showPretty bod 100)
 --showPretty (Letrec v a bod) i        = parenthesize 1 i  $  "let " ++ v ++ " = " ++ (showPretty a 1) ++ " in " ++ (showPretty bod 1)
-showPretty (DotMixIn a b) i          = parenthesize 1 i $ (showPretty a 1) ++ " . " ++ (showPretty b 1) 
+showPretty (DotMixIn a b) i          = parenthesize 20 i $ (showPretty a 20) ++ " . " ++ (showPretty b 21)  -- L same level as list indexx
 
 showPretty Nil _                     = "[]"
 showPretty (Var s) _                 = s
-showPretty (Not l ) i                = parenthesize 23 i $  " ! " ++ (showPretty l 23)
+showPretty (Not l ) i                = parenthesize 23 i $  " ! " ++ (showPretty l 24)
 showPretty (Print b)          _      = "print(" ++ showPretty b 23 ++ ")"  
 
 showPretty (ListIndex l r) d         = parenthesize 20 d $ ((showPretty l 20) ++ " !! " ++ (showPretty r 21))

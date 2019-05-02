@@ -58,7 +58,7 @@ arbitrarySizedAst m | otherwise = do l <- arbitrarySizedAst (m `div` 2)
                                                        Plus l r, Minus l r, Mult l r, Div l r,
                                                        Separator l r, Equal l r, NotEqual l r, LessThan l r, LessThanOrEqual l r,
                                                        GreaterThan l r, GreatThanOrEqual l r, Concat l r, DivFloat l r,
-                                                       Modulus l r, FloatExp l r, IntExp l r, ListIndex l r, Print l,
+                                                       Modulus l r, FloatExp l r, IntExp l r, ListIndex l r, Print l, DotMixIn l r,
                                                        Cons l r,
                                                        ifast,
                                                        Let str l r,

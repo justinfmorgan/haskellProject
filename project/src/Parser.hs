@@ -175,10 +175,10 @@ intExpEpr = do a <- listIndex
                    return (IntExp a c)) <|> (return a)      
 -}
 beforeLI:: Parser Ast
-beforeLI = pri <|> notExp <|> atoms
+beforeLI = pri <|>  notExp <|> atoms
 
 listIndex:: Parser Ast         
-listIndex = withInfix beforeLI [("!!", ListIndex)]
+listIndex = withInfix beforeLI [("!!", ListIndex), (".", DotMixIn)]
 
 pri:: Parser Ast
 pri = do token $ literal "print"        --should it get parser or atoms???? FIXME
@@ -188,15 +188,16 @@ pri = do token $ literal "print"        --should it get parser or atoms???? FIXM
          return printed
          `mapParser` (\ i -> Print i)
 
+--dotmixinParser:: Parser Ast
+--dotmixinParser = withInfix notExp [(".", DotMixIn)]
+
 notExp :: Parser Ast
 notExp = do s <- token $ (literal "!")
             a <- yeah
             return (Not a)
 yeah:: Parser Ast
-yeah = notExp <|> dotmixinParser <|> atoms
+yeah = notExp <|> atoms
 
-dotmixinParser:: Parser Ast
-dotmixinParser = withInfix atoms [(".", DotMixIn)]
 
 atoms:: Parser Ast
 atoms = pri <|> parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser {-<|> letrecParser -} <|> letParser <|> lambdaParser <|> vars
