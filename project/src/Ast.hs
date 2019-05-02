@@ -38,8 +38,8 @@ data Ast = ValBool Bool -- Added
          | Lam String Ast  --Justin
          | App Ast Ast  --Justin
             --mixins
+         | Letrec String Ast Ast
          | DotMixIn Ast Ast -- f . g instead of \x -> f (g x) TODO add to evaltest, eval
-         | Letrec String Ast Ast --TODO add to evaltest, eval
 
            deriving (Show,Eq) -- helpful to use this during testing
 

@@ -174,11 +174,16 @@ pri = do token $ literal "print"        --should it get parser or atoms???? FIXM
 
 notExp :: Parser Ast
 notExp = do s <- token $ (literal "!")
-            a <- atoms
+            a <- yeah
             return (Not a)
+yeah:: Parser Ast
+yeah = dotmixinParser <|> atoms
+
+dotmixinParser:: Parser Ast
+dotmixinParser = withInfix atoms [(".", DotMixIn)]
 
 atoms:: Parser Ast
-atoms = pri <|> parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letrecParser <|> letParser <|> {- dotmixinParser <|>-} lambdaParser <|> vars
+atoms = pri <|> parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letrecParser <|> letParser <|>  dotmixinParser <|> lambdaParser <|> vars
 
 parseChar:: Parser Ast                      --FIXME needs to work for just a not a space !
 parseChar = do s <- token (literal "'")
@@ -253,6 +258,8 @@ lambdaParser = do token $ (literal "\\")
                   token $ (literal "->")
                   t <- parser
                   return (Lam s t) 
+
+
 {-
 dotmixinParser:: Parser Ast
 dotmixinParser = do a <- parser
