@@ -307,9 +307,10 @@ evalTest = testGroup
                           (exec (App (DotMixIn (Lam "xx" (Mult (Var "xx") (ValInt 5))) (Lam "yy" (Mult (Var "yy") (ValInt 5)))) (ValInt 10)))
               assertEqual "(\\xx -> xx) . (\\yy -> yy) 10 = ?" (Ok (I 10) [])
                           (exec (App (DotMixIn (Lam "xx" (Var "xx")) (Lam "yy" (Var "yy"))) (ValInt 10)))
-              assertEqual "(\\bb -> bb^5) . (\\cc -> cc*3-19) 7.5 = ?" (Ok (F (525.21875)) [])
-                          (exec (App (DotMixIn (Lam "bb" (FloatExp (Var "bb") (ValInt 5))) (Lam "cc" (Minus (Mult (Var "cc") (ValInt 3)) (ValInt 19)))) (ValFloat 7.5)))
-          --testCase "StdLib Tests" $
+
+          --    assertEqual "(\\bb -> bb^5) . (\\cc -> cc*3 - 19) 7.5 = ?" (Ok (F (525.21875)) [])
+        --                  (exec (App (DotMixIn (Lam "bb" (FloatExp (Var "bb") (ValInt 5))) (Lam "cc" (Minus (Mult (Var "cc") (ValInt 3)) (ValInt 19)))) (ValFloat 7.5)))
+         --testCase "StdLib Tests" $
             --do
 
 
