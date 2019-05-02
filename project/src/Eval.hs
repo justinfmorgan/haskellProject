@@ -110,14 +110,7 @@ evalFloat a =
      case a' of
       F i -> return i
       _   -> err "it's not a float!!!"
-
---evalIntOrFloat :: Ast -> EnvUnsafeLog Env b
---evalIntOrFloat a = 
- -- do a' <- eval a
-   --  case a' of
-    --  F f -> return f
-    --  I i -> return i
-     -- _   -> err "it's not a float or int!!!"    
+  
 evalBool :: Ast -> EnvUnsafeLog Env Bool
 evalBool a = do a' <- eval a
                 case a' of
@@ -156,16 +149,7 @@ indexInto (Ls (head:tail)) 0 = case (head) of
                                     Fun a -> return (Fun a) -- unnecessary? probably who knows
 indexInto (Ls (head:tail)) x = indexInto (Ls tail) (x - 1)
 indexInto _ _ = undefined
-{-
-case eu e of
-      (Error s, log) -> (Error s, log)
-      (Ok a, log) ->
 
-  EnvUnsafeLog $ \ e -> 
-    case e of
-      ((Ok a), log) -> ((Ok $ a), log ++ x)
-      ((Error s), log) -> ((Error s), log ++ x)
--}
 eval :: Ast -> EnvUnsafeLog Env Val
 eval (ValFloat i) = return $ F i
 eval (Separator l r) = 
@@ -196,12 +180,10 @@ eval (Modulus a b) =   --for ints
      return $ I $ l' `mod` r' 
 eval (ListIndex a b) =
     do a' <- eval a
-       --a'' <- evalList a
        b' <- evalInt b 
        case (a') of Ls a -> if (len' a) < b' then err "List is not big enough" else (indexInto (a') b') 
                     _       -> err "did not give a list!"
-       --let length = len' a''
- --        if length < b' then err "List is not big enough" else (indexInto (a') b') 
+
 eval (Equal a b) = do a' <- eval a -- I'm like 95% sure these should be eval and not evalBool?!?!
                       b' <- eval b
                       return (B (a' == b'))
@@ -306,14 +288,7 @@ eval (App e1 e2) = do e1' <- (evalFun e1)
                       case (e1' e2') of
                          (Ok a, _) -> return a
                          _ -> err "error did not apply"
-{-
--- THIS NEEDS TO BE FIXED!!!!
--- | helper function that runs with the default environment (for example, the stdLib in week 10)
--- return either the error string or the value, along with everything that was printed
-run :: Ast  -- ^ run this Ast
-      -> (Either String Val, [String])  -- ^ (error message or result value, all the printings)
-run a = runEnvUnsafeLog (eval a) -}
-
+                         
 -- | helper function that runs with the default environment (for example, the stdLib in week 10)
 -- return either the error string or the value, along with everything that was printed
 run :: Ast  -- ^ run this Ast
