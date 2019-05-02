@@ -15,7 +15,7 @@ import Parser (parser)
 instance Arbitrary Ast where
     arbitrary = sized arbitrarySizedAst
 
---    shrink (Plus l r) = [l, r] ++ [(Plus l' r') | (l', r') <- shrink (l, r)]
+    shrink (Plus l r) = [l, r] ++ [(Plus l' r') | (l', r') <- shrink (l, r)]
     shrink _ = []
 
 arbitrarySizedAst ::  Int -> Gen Ast

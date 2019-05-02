@@ -141,7 +141,7 @@ getVar :: String -> EnvUnsafeLog Env Val
 getVar v = do s <- getEnv
               case (Map.lookup v s) of 
                   Just i -> return i
-                  Nothing -> return (I 0) 
+                  Nothing -> return (I 0)
 
 --indexInto [] _ = err "empty list"
 indexInto:: Val -> Integer -> EnvUnsafeLog Env  Val
@@ -286,7 +286,6 @@ eval (If a b c) = do a' <- (eval a)
 eval (Let v val bod) = eval (App (Lam v bod) val)
 --eval (Letrec v val bod) = let f = Fun $ \e -> withVal v f (do f' <- eval val; f' e)
                           --in withVal v f (eval bod)
--- eval (App (Lam "f" (Lam "x" ((Var "x") (Var "x")))) (Lam "x2" (App ())))
 eval (DotMixIn f g) = eval (Lam "x" (App f (App g (Var "x"))))
 eval (Lam x bod) = do env <- getEnv
                       return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)

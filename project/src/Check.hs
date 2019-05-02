@@ -16,7 +16,7 @@ import EnvUnsafeLog
 
 data WarningMsg = UndefinedVarUse String  -- ^ This is the Warning for use of Undefined variable name => unbound *** should be an error
                 | UnusedVar String -- => bound but not used Mixin Alex
-                | TypeError String --types don't match => Mixin Noah
+                | TypeError String
   -- ...
   deriving (Show,Eq, Ord)
 
