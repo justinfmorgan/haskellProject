@@ -12,16 +12,21 @@ import Data.Char --added
      ignoring comments!!!!!
 -}
 
+sepEpr =    do a <- apps      
+               (do token (literal ";")
+                   c <- sepEpr
+                   return (Separator a c)) <|> (return a)  
+
 sep:: Ast -> Parser Ast --lowest in precedence          
 sep left  = do s <- (token $ literal ";")
                exp <- apps
                let res = left `Separator` exp
                (sep res) <|> return res
-
+{-
 sepEpr:: Parser Ast
 sepEpr = do l <- apps
             sep l
-
+-}
 ignoreComments:: Parser ()
 ignoreComments = do token $ literal "--" 
                     return ()
@@ -62,7 +67,7 @@ parseApp left = do s <- token (literal "")
                    parseApp res <|> return res  
 
 beforeApps:: Parser Ast
-beforeApps = orExpr <|> andExpr <|> equalities <|> concatEpr <|> bothListTypes -- don't mess with this!!
+beforeApps = orExpr <|> andExpr <|> equalities <|> bothListTypes -- don't mess with this!!
 
 -- *LangParser> parse cons "1 : 4: true"
 -- Just (1 : 4 : true,"")
@@ -81,23 +86,33 @@ andExpr :: Parser Ast
 andExpr = withInfix beforeAnd [("&&", And)]
 
 beforeAnd:: Parser Ast
-beforeAnd = equalities <|> concatEpr <|> bothListTypes -- <|> addSubExpr <|> multDivExpr --don't mess with what goes into and
+beforeAnd = equalities <|>  bothListTypes -- <|> addSubExpr <|> multDivExpr --don't mess with what goes into and
 
 equalities:: Parser Ast             
-equalities = withInfix beforeeq [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
+equalities = withInfix bothListTypes [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
 
-beforeeq:: Parser Ast
-beforeeq = concatEpr <|> bothListTypes -- <|> addSubExpr <|> beforeAdd -- <|> multDivExpr
-
+--beforeeq:: Parser Ast
+--beforeeq = concatEpr <|> bothListTypes -- <|> addSubExpr <|> beforeAdd -- <|> multDivExpr
+{-
 concatEpr:: Parser Ast
 concatEpr = do a <- bothListTypes 
                b <- token (literal "++")
                c <- bothListTypes
                return (Concat a c)
-      
+  -}    
 bothListTypes:: Parser Ast
 bothListTypes = both <|> addSubExpr <|> multDivExpr -- <|> beforeMult <|> listIndex <|> beforeLI
 
+
+both:: Parser Ast            --2 ways: a:b:[] [a,b]
+both =    do a <- token addAndMore       --TODO doublecheck this
+             (do b <- token (literal ":") <||> token (literal "++") 
+                 c <- both
+                 case (b) of
+                  Left _ -> return (Cons a c)
+                  Right _ -> return (Concat a c) ) <|> (return a)
+--                 return (Cons a c)) <|> (return a)
+{-
 both:: Parser Ast
 both = do a <- token (literal "[") <||> token addAndMore 
           case a of
@@ -105,12 +120,13 @@ both = do a <- token (literal "[") <||> token addAndMore
                          return b
             Right d -> (do token (literal ":")
                            c <- andMore
-                           return (Cons d c)) <|> (return d)
+                           return (Cons d c)) <|> (return d) -}
 andMore:: Parser Ast
 andMore = both <|> addSubExpr <|> multDivExpr <|> expEpr <|> listIndex <|> pri <|> notExp <|> atoms
 
+
 commas:: Parser Ast
-commas = do a <- token addSubExpr       --FIXME issues parsing!
+commas = do a <- token addAndMore       --FIXME issues parsing!
             b <- token ((literal ",") <||>  (literal "]"))
             case b of
                 Left _ -> do b <- commas
@@ -123,7 +139,7 @@ consCommmas = do token (literal "[")
                  return a
 -}
 addAndMore:: Parser Ast
-addAndMore = addSubExpr <|> beforeAdd
+addAndMore = addSubExpr <|> multDivExpr <|> expEpr <|> listIndex <|> pri <|> notExp <|> atoms
 addSubExpr :: Parser Ast
 addSubExpr = withInfix multDivExpr [("+", Plus), ("- ", Minus)] --overloaded for floats and ints
 
@@ -183,7 +199,7 @@ dotmixinParser:: Parser Ast
 dotmixinParser = withInfix atoms [(".", DotMixIn)]
 
 atoms:: Parser Ast
-atoms = pri <|> parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser <|> letrecParser <|> letParser <|>  dotmixinParser <|> lambdaParser <|> vars
+atoms = pri <|> parseChar <|> parseFloat <|> ints <|> bools  <|>  nil <|> parens <|> ifParser {-<|> letrecParser -} <|> letParser <|> lambdaParser <|> vars
 
 parseChar:: Parser Ast                      --FIXME needs to work for just a not a space !
 parseChar = do s <- token (literal "'")
@@ -241,7 +257,7 @@ letParser = do token $ literal "let"
                body <- parser --in real life this would be an Ast parser
                --let final = (name, nat, body)
                return (Let name yee body)
-
+{-
 letrecParser:: Parser Ast
 letrecParser = do token $ literal "letrec"
                   name <- varParser
@@ -251,7 +267,7 @@ letrecParser = do token $ literal "letrec"
                   body <- parser --in real life this would be an Ast parser
                --let final = (name, nat, body)
                   return (Letrec name yee body)
-
+-}
 lambdaParser:: Parser Ast --working correctly!
 lambdaParser = do token $ (literal "\\")
                   s <- varParser
@@ -277,4 +293,4 @@ parens = do token $ literal "("
             return a
 
 parser :: Parser Ast
-parser = sepEpr <|> apps <|> orExpr <|> andExpr <|> equalities <|> concatEpr <|> bothListTypes <|> beforeMult <|> listIndex <|> beforeLI
+parser = sepEpr <|> apps <|> orExpr <|> andExpr <|> equalities <|> bothListTypes <|> beforeMult <|> listIndex <|> beforeLI

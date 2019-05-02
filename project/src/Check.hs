@@ -116,7 +116,7 @@ used (Nil) = Set.empty
 used (If a b c) = Set.union (Set.union (used a)(used b)) (used c)
 used (Let str b c) = Set.union (used b) (used c)
 used (DotMixIn a b) = Set.union (used a) (used b)
-used (Letrec str b c) = Set.union (used b) (used c)
+--used (Letrec str b c) = Set.union (used b) (used c)
 
 f :: String -> WarningMsg -- 0 means undefinedvaruse, 1 means unusedvar
 f x = UndefinedVarUse ("unbound variable " ++ x)

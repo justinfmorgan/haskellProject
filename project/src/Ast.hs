@@ -38,7 +38,7 @@ data Ast = ValBool Bool -- Added
          | Lam String Ast  --Justin
          | App Ast Ast  --Justin
             --mixins
-         | Letrec String Ast Ast
+--         | Letrec String Ast Ast
          | DotMixIn Ast Ast -- f . g instead of \x -> f (g x) TODO add to evaltest, eval
 
            deriving (Show,Eq) -- helpful to use this during testing
@@ -68,7 +68,7 @@ showFullyParen :: Ast  -- ^ The Ast to show
                 -> String  -- ^ the fully parenthesized string representing the input Ast
 showFullyParen (ValInt i) = "(" ++ show i ++ ")"
 showFullyParen (DotMixIn a b) = "(" ++ (showFullyParen a) ++ " . " ++ (showFullyParen b) ++ ")"
-showFullyParen (Letrec a b c) = "(letrec" ++ a ++ " = " ++ (showFullyParen b) ++ " in " ++ (showFullyParen c) ++ ")"  
+--showFullyParen (Letrec a b c) = "(letrec" ++ a ++ " = " ++ (showFullyParen b) ++ " in " ++ (showFullyParen c) ++ ")"  
 showFullyParen (Concat a b) = "(" ++ (showFullyParen a) ++ " ++ " ++ (showFullyParen b) ++ ")"
 showFullyParen (DivFloat a b) = "(" ++ (showFullyParen a) ++ " / " ++ (showFullyParen b) ++ ")"
 showFullyParen (Modulus a b) = "(" ++ (showFullyParen a) ++ " % " ++ (showFullyParen b) ++ ")"
@@ -121,7 +121,7 @@ showPretty (ValChar c) _             = show c
 showPretty (Let v a bod) i           = parenthesize 1 i  $  "let " ++ v ++ " = " ++ (showPretty a 1) ++ " in " ++ (showPretty bod 1)
 showPretty (If b t e) i              = parenthesize 1 i $  "if " ++ (showPretty b 1) ++ " then " ++ (showPretty t 1) ++ " else " ++ (showPretty e 1)
 showPretty (Lam v bod) i             = parenthesize 1 i  $ "\\ " ++ v ++ " -> " ++ (showPretty bod 100)
-showPretty (Letrec v a bod) i        = parenthesize 1 i  $  "let " ++ v ++ " = " ++ (showPretty a 1) ++ " in " ++ (showPretty bod 1)
+--showPretty (Letrec v a bod) i        = parenthesize 1 i  $  "let " ++ v ++ " = " ++ (showPretty a 1) ++ " in " ++ (showPretty bod 1)
 showPretty (DotMixIn a b) i          = parenthesize 1 i $ (showPretty a 1) ++ " . " ++ (showPretty b 1) 
 
 showPretty Nil _                     = "[]"
@@ -147,12 +147,12 @@ showPretty (Plus l r) i              = parenthesize 14 i $ (showPretty l 14) ++ 
 showPretty (l `Concat` r) d          = parenthesize 12 d $ (showPretty l 13) ++ " ++ " ++ (showPretty r 12) --R
 showPretty (Cons l r) i              = parenthesize 12 i $ (showPretty l 13) ++ " : " ++ (showPretty r 12) --R
 
-showPretty (l `LessThan` r) i        = parenthesize 10 i $ (showPretty l 11) ++ " < " ++ (showPretty r 11)
-showPretty (l `Equal` r) i           = parenthesize 10 i $ (showPretty l 11) ++ " == " ++ (showPretty r 11)
-showPretty (l `NotEqual` r) i        = parenthesize 10 i $ (showPretty l 11) ++ " /= " ++ (showPretty r 11)
-showPretty (l `GreaterThan` r) i     = parenthesize 10 i $ (showPretty l 11) ++ " > " ++ (showPretty r 11)
-showPretty (l `LessThanOrEqual` r) i = parenthesize 10 i $ (showPretty l 11) ++ " >= " ++ (showPretty r 11)
-showPretty (l `GreatThanOrEqual` r)i = parenthesize 10 i $ (showPretty l 11) ++ " <= " ++ (showPretty r 11)
+showPretty (l `LessThan` r) i        = parenthesize 10 i $ (showPretty l 10) ++ " < " ++ (showPretty r 11)
+showPretty (l `Equal` r) i           = parenthesize 10 i $ (showPretty l 10) ++ " == " ++ (showPretty r 11)
+showPretty (l `NotEqual` r) i        = parenthesize 10 i $ (showPretty l 10) ++ " /= " ++ (showPretty r 11)
+showPretty (l `GreaterThan` r) i     = parenthesize 10 i $ (showPretty l 10) ++ " > " ++ (showPretty r 11)
+showPretty (l `LessThanOrEqual` r) i = parenthesize 10 i $ (showPretty l 10) ++ " <= " ++ (showPretty r 11)
+showPretty (l `GreatThanOrEqual` r)i = parenthesize 10 i $ (showPretty l 10) ++ " >= " ++ (showPretty r 11)
 
 
 showPretty (And l r) i               = parenthesize 8 i $ (showPretty l 8) ++ " && " ++ (showPretty r 9)
