@@ -37,6 +37,14 @@ instance Ord Val where
   (Ls xs) <= (Ls ys) = (xs <= ys)
   _ <= _ = False
 
+-- rename a free var, in a term
+rename :: Ast -> String -> String -> Ast
+rename (App f a)      from to             = App (rename f from to) (rename a from to)
+rename (Lam v bod)    from to | v == from = Lam v bod
+rename (Lam v bod)    from to | otherwise = Lam v $ rename bod from to
+rename (Var v)        from to | v == from = Var to
+                              | otherwise = Var v
+
 len' ::[a] -> Integer
 len' []  = 0
 len' (a:b) = 1 + len' b
@@ -277,7 +285,7 @@ eval (If a b c) = do a' <- (eval a)
                           _   -> err "if requires a bool, int or float!"
 eval (Let v val bod) = eval (App (Lam v bod) val)
 eval (Letrec v val bod) = undefined --TODO
---eval (DotMixIn f g) = eval (Lam "x" (App f (App g (Var "x"))))
+eval (DotMixIn f g) = eval (Lam "x" (App f (App g (Var "x"))))
 eval (Lam x bod) = do env <- getEnv
                       return $ Fun $ \ v -> runEnvUnsafeLog (eval bod) (Map.insert x v env)
 eval (App e1 e2) = do e1' <- (evalFun e1)
