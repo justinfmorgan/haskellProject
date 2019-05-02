@@ -8,7 +8,7 @@ import EnvUnsafeLog
 import Data.Char (ord, chr)
 -- the goal of the program is to return a value, what values are possible?
 
-data Val = I Integer | B Bool | F Float | C Char 
+data Val = I Integer | B Bool | F Double | C Char 
          | Ls [Val]
          | Fun (Val -> (Unsafe Val, [String])) --Fun (Val -> (Unsafe Val, [String]) ) --FIXME since this is a functional language, one thing that can be returned is a function
                                   -- FIXME This has to incorporate Writer piece, Fun (Val -> (Unsafe Val, [String]))
@@ -112,7 +112,7 @@ evalChar a =
       C i -> return i
       _   -> err "it's not a char!!!"
 
-evalFloat:: Ast -> EnvUnsafeLog Env Float
+evalFloat:: Ast -> EnvUnsafeLog Env Double
 evalFloat a =
   do a' <- eval a
      case a' of

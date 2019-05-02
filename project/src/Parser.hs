@@ -90,9 +90,9 @@ beforeeq:: Parser Ast
 beforeeq = concatEpr <|> bothListTypes <|> addSubExpr <|> beforeAdd -- <|> multDivExpr
 
 concatEpr:: Parser Ast
-concatEpr = do a <- both 
+concatEpr = do a <- bothListTypes 
                b <- token (literal "++")
-               c <- both
+               c <- bothListTypes
                return (Concat a c)
       
 bothListTypes:: Parser Ast

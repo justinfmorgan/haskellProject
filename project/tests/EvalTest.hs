@@ -102,8 +102,8 @@ evalTest = testGroup
               assertEqual "3 % 1 =?"      (Ok (I 0) []) (exec (Modulus three one))
               assertEqual "1.0 + 4.4 =? "    (Ok (F 5.4) [])    (exec (Plus onef fourfextra))
               assertEqual "-1.25 + 1.0 =? "   (Ok (F (-0.25)) [])    (exec (Plus nonefextra onef))
-              assertEqual "1.0 - 4.4 =? "    (Ok (F (-3.4)) []) (exec (Minus onef fourfextra))
-              assertEqual "(-1.0) - (-4.4) =? " (Ok (F 3.4) [])    (exec (Minus nonef nfourfextra))
+              assertEqual "1.0 - 4.4 =? "    (Ok (F (-3.4000000000000004)) []) (exec (Minus onef fourfextra))
+              assertEqual "(-1.0) - (-4.4) =? " (Ok (F 3.4000000000000004) [])    (exec (Minus nonef nfourfextra))
               assertEqual "2.0 * 3.0 =? "    (Ok (F 6.0) [])   (exec (Mult twof threef))
               assertEqual "(1.0) / (-1.0) =? " (Ok (F (-1.0)) [])   (exec (DivFloat onef nonef))
               assertEqual "(-3.0) / (2.0) =? "    (Ok (F (-1.5)) [])    (exec (DivFloat nthreef twof)),
@@ -269,7 +269,7 @@ evalTest = testGroup
             assertEqual "2 ** 4 =?" (Ok (I 16) []) (exec (IntExp two four))
             assertEqual "4 ** 1 =?"  (Ok (I 4) []) (exec (IntExp four one))
             assertEqual "3.0 ^ 1.0 =?" (Ok (F 3.0) []) (exec (FloatExp threef onef))
-            assertEqual "1.2 ^ 3.0 =?" (Ok (F (1.7280002)) []) (exec (FloatExp onetwof threef)),
+            assertEqual "1.2 ^ 3.0 =?" (Ok (F (1.728)) []) (exec (FloatExp onetwof threef)),
             
 
           testCase "Separator Statements" $

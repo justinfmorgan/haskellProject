@@ -152,24 +152,24 @@ isDot _ = False
 dot:: Parser Char
 dot = sat isDot 
 
-numDigits:: [Char] -> Float
+numDigits:: [Char] -> Double
 numDigits [] = 0
 numDigits (x:xs) = 1 + numDigits xs
 
-valToMult:: Float -> Float
+valToMult:: Double -> Double
 valToMult 1 = 10
 valToMult 2 = 100
 valToMult 3 = 1000
 valToMult x = 10 * (valToMult (x-1))
 
-floatParse:: Parser Float
+floatParse:: Parser Double
 floatParse = do digits <- some digit
                 dot
                 b <- some digit
                 let c = numDigits b
                 return $ (read (digits++b)) / (valToMult c)
 
-floatParserActual:: Parser Float
+floatParserActual:: Parser Double
 floatParserActual = do r <- floatParse <||> (literal "-")
                        case r of
                           Right _ -> fmap (0-) floatParse

@@ -7,7 +7,7 @@ import HelpShow
 data Ast = ValBool Bool -- Added
          | And Ast Ast | Or Ast Ast | Not Ast
          
-         | ValFloat Float -- added
+         | ValFloat Double -- added
          | ValChar Char -- added
 --         | List [Ast] -- added
 
