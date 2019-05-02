@@ -81,13 +81,13 @@ andExpr :: Parser Ast
 andExpr = withInfix beforeAnd [("&&", And)]
 
 beforeAnd:: Parser Ast
-beforeAnd = equalities <|> concatEpr <|> bothListTypes <|> addSubExpr <|> multDivExpr --don't mess with what goes into and
+beforeAnd = equalities <|> concatEpr <|> bothListTypes -- <|> addSubExpr <|> multDivExpr --don't mess with what goes into and
 
 equalities:: Parser Ast             
 equalities = withInfix beforeeq [("<=", LessThanOrEqual), ("<", LessThan), (">=", GreatThanOrEqual), (">", GreaterThan), ("/=", NotEqual), ("==", Equal)] 
 
 beforeeq:: Parser Ast
-beforeeq = concatEpr <|> bothListTypes <|> addSubExpr <|> beforeAdd -- <|> multDivExpr
+beforeeq = concatEpr <|> bothListTypes -- <|> addSubExpr <|> beforeAdd -- <|> multDivExpr
 
 concatEpr:: Parser Ast
 concatEpr = do a <- bothListTypes 
