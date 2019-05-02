@@ -41,24 +41,26 @@ len' ::[a] -> Integer
 len' []  = 0
 len' (a:b) = 1 + len' b
 
---fromEnum2::Enum a => a -> Integer
---fromEnum2 x = x
-
 map' _ (Ls []) = []
 map' f (Ls (x:xs)) = f x : map' f (Ls xs)
-
-toInteger2:: a -> Integer
-toInteger2 = undefined
-
 
 elem':: Val -> Val -> Bool
 elem' a (Ls []) = False
 elem' a (Ls (x:xs)) | (a == x)  = True
                     | otherwise = elem' a (Ls xs)
 
---filter':: Val -> (Val->Bool) -> Val
---filter' (Ls []) fcn = (Ls [])
---filter' (Ls (x:xs)) fcn | (fcn x) = (Ls [x]) ++ (filter' (Ls xs) fcn) 
+(+++):: (Unsafe Val, [String]) -> (Unsafe Val, [String]) -> (Unsafe Val, [String])
+(+++) (Ok (Ls x), log) (Ok (Ls y), log2) = (Ok (Ls (x ++ y)), (log ++ log2))
+
+filter':: (Val ->(Unsafe Val, [String])) -> Val -> (Unsafe Val, [String])
+filter _ (Ls []) = (Ls [])
+filter' f (Ls (x:xs)) = case (f x) of
+                          (Ok (B True),log)  -> (Ok (Ls [x]), log) +++ (filter' f (Ls xs))
+                          (Ok (B False),log) -> filter' f (Ls xs)
+                          _                  -> (Error "filter has not been given a function and list", [])
+
+--map':: (Val ->(Unsafe Val, [String])) -> Val -> (Unsafe Val, [String])
+--map'
 
 stdLib = Map.fromList
   [
@@ -76,7 +78,9 @@ stdLib = Map.fromList
              --               Fun (Fun a) -> case a of ->
               --                              Ls (b) -> Ok $ Ls (b)
                             
-   ("filter", Fun $ \v -> (Ok (Fun $ \v2 -> (Ok undefined, [])), [])),-- Fun $ \ v -> case v of 
+   ("filter", Fun $ \v ->case v of --(Ok (Fun $ \v2 -> (filter' v v2)), [])),-- Fun $ \ v -> case v of 
+                              Fun a -> (Ok $ Fun $ \list -> case list of
+                                                                  Ls [ls] ->(filter' a (Ls[ls])), [])),
                --              Fun a -> Error "no"
                  --            v' -> Ok $ Fun $ \ list -> case list of
                    --                                         Ls [ls] -> Ok $ Ls (filter' v' [ls]) --helper function here list ls w/ v'
