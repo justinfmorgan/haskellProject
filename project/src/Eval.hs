@@ -10,8 +10,8 @@ import Data.Char (ord, chr)
 
 data Val = I Integer | B Bool | F Double | C Char 
          | Ls [Val]
-         | Fun (Val -> (Unsafe Val, [String])) 
-         
+         | Fun (Val -> (Unsafe Val, [String]))
+
 instance Show Val where
   show (I i) = show i
   show (B b) = show b
@@ -53,9 +53,11 @@ elem' a (Ls []) = False
 elem' a (Ls (x:xs)) | (a == x)  = True
                     | otherwise = elem' a (Ls xs)
 elem' _ _ = undefined
+
 (+++):: (Unsafe Val, [String]) -> (Unsafe Val, [String]) -> (Unsafe Val, [String])
+(+++) (Ok (Ls []), log) (Ok (Ls []), log2) = (Ok (Ls []), log++log2)
 (+++) (Ok (Ls x), log) (Ok (Ls y), log2) = (Ok (Ls (x ++ y)), (log ++ log2))
-(+++) _ _ = undefined
+(+++) _ _ = (Ok (Ls []), [])
 
 filter':: (Val ->(Unsafe Val, [String])) -> Val -> (Unsafe Val, [String])
 filter' _ (Ls []) = (Ok(Ls []),[])
@@ -66,7 +68,8 @@ filter' f (Ls (x:xs)) = case (f x) of
 filter' _ _ = undefined
 
 map':: (Val ->(Unsafe Val, [String])) -> Val -> (Unsafe Val, [String])
-map' f (Ls (x:xs)) = f x +++ map' f (Ls xs)
+map' _ (Ls []) = (Ok (Ls []), [])
+map' f (Ls (x:xs)) = (f (Ls [x])) +++ (map' f (Ls xs))
 map' _ _ = undefined
 
 
@@ -81,10 +84,10 @@ stdLib = Map.fromList
    ("elem", Fun $ \v -> (Ok (Fun $ \v2 -> (Ok $ B (elem' v v2), [])), [])),--Fun $ \ v -> case v of 
    ("map", Fun $ \v ->case v of 
                               Fun a -> (Ok $ Fun $ \list -> case list of
-                                                                  Ls [ls] ->(map' a (Ls[ls])), [])),
+                                                                  Ls ls ->(map' a (Ls ls)), [])),
    ("filter", Fun $ \v ->case v of 
                               Fun a -> (Ok $ Fun $ \list -> case list of
-                                                                  Ls [ls] ->(filter' a (Ls[ls])), [])),
+                                                                  Ls ls ->(filter' a (Ls ls)), [])),
    ("ord", Fun $ \ v -> case v of C a -> (Ok $ I (fromIntegral $ ord a), [])
                                   _   -> (Error "not given a char", [])),    --char to int
    ("chr", Fun $ \ v -> case v of I a -> (Ok $ C ( chr (fromIntegral a)),[])

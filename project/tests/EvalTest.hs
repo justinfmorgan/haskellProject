@@ -331,6 +331,8 @@ evalTest = testGroup
               assertBool "ord c should be 99" $ exec (App (Var "ord") (ValChar 'c')) == (Ok (I 99) [])
               assertBool "float 55 should be 55.0" $ exec (App (Var "float") (ValInt 55)) == (Ok (F 55.0) [])
               assertBool "int 57.567 should be 57" $ exec (App (Var "int") (ValFloat 57.567)) == (Ok (I 57) [])
+              assertBool "map (\\x -> x) [1,2,3] should be [1,2,3]" $
+                         exec (App (App (Var "map") (Lam "x" (Var "x"))) (Cons (ValInt 1) (Cons (ValInt 2) (Cons (ValInt 3) Nil)))) == (Ok (Ls [I 1,I 2,I 3]) [])
 
     ]
 
