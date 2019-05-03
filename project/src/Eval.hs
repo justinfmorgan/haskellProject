@@ -47,7 +47,7 @@ rename (Var v)        from to | v == from = Var to
 
 len' ::[a] -> Integer
 len' []  = 0
-len' (a:b) = 1 + len' b
+len' (a:b) = 1 + (len' b)
 
 elem':: Val -> Val -> Bool
 elem' a (Ls []) = False

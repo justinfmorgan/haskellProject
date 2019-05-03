@@ -31,6 +31,10 @@ instance Eq LangOut where
    RuntimeError x xs == RuntimeError y ys = (x == y) && (xs == ys)
    _ == _ = False -- FIX THIS!!!
           
+
+--getType :: Ast -> LangOut
+
+
 ---run output => (Either String Val, [String]) 
 -- | execute the program as a string and get the result
 exec :: Ast -> LangOut
