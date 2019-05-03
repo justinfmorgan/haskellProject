@@ -316,9 +316,15 @@ evalTest = testGroup
           testCase "stdLib Tests" $ 
             do 
               assertBool "for a empty list, the head should return an error" $ isError (exec (Var "head" `App` Nil))
-              assertBool "head of [1, \\x -> x] should be 1" $ (exec (Var "head" `App` (ValInt 1 `Cons` Lam "x" (Var "x") `Cons` Nil))) == (Ok (I 1) [])
+              assertBool "head of [1, \\x -> x, 5, []] should be 1" $ (exec (App (Var "head") (Cons (ValInt 1) (Cons (Lam "x" (Var "x")) (Cons (ValInt 5) Nil))))) == (Ok (I 1) [])
               assertBool "for a empty list, the length shold be 0" $ (exec (Var "len" `App` Nil)) == (Ok (I 0) [])
-              assertBool "length of [True, 1, \\x -> x, False] should be 4" $  
-                exec (Var "len" `App` (ValBool True `Cons` ValInt 1 `Cons` Lam "x" (Var "x") `Cons` ValBool False `Cons` Nil)) == (Ok (I 4) [])
+              assertBool "length of [True, 1, \\x -> x, False, []] should be 4" $  
+                exec ((App (Var "len") (Cons (ValBool True) (Cons (ValInt 1) (Cons (Lam "x" (Var "x")) (Cons (ValBool False) Nil)))))) == (Ok (I 4) [])
+              assertBool "Tail of [1, 3, True, (\\x -> x), 9] should be [3, True, (\\x -> x), 9]" $
+                exec ((App (Var "tail") (Cons (ValInt 1) (Cons (ValInt 3) (Cons (ValBool True) (Cons (ValFloat 3.5) (Cons (ValInt 9) Nil))))))) == (Ok (Ls [I 3,B True,F 3.5,I 9]) [])
+              assertBool "elem 1 [3, 4, 1] should be True" $ exec (App (App (Var "elem") (ValInt 1)) (Cons (ValInt 3) (Cons (ValInt 4) (Cons (ValInt 1) Nil)))) == (Ok (B True) [])
+              assertBool "elem 1 [3, 4, 5, 6] should be False" $ 
+                exec (App (App (Var "elem") (ValInt 1)) (Cons (ValInt 3) (Cons (ValInt 4) (Cons (ValInt 5) (Cons (ValInt 6) Nil))))) == (Ok (B False) [])
+
     ]
 
