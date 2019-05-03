@@ -132,6 +132,7 @@ evalTest = testGroup
             do 
               assertEqual "let x = 4 in x * 2 =? "                   (Ok (I 8) [])  (exec (Let "x" four (Mult (Var "x") two)))
               assertEqual "let x = 4 * -2 in x - 2 =? "              (Ok (I (-10)) [])  (exec (Let "x" (Mult four ntwo) (Minus (Var "x") two)))
+              assertEqual "let x = 3 in let y = x * x in y + 2 =?"   (Ok (I 11) []) (exec (Let "x" three (Let "y" (Mult (Var "x") (Var "x")) (Plus (Var "y") two))))
               assertEqual "let x = 2 in let y = x + 1 in y * 2 =? "  (Ok (I 6) [])  (exec (Let "x" two (Let "y" (Plus (Var "x") one)  (Mult (Var "y") two)))),
 
           testCase "Equal Statements" $
