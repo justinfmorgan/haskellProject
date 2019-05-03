@@ -81,6 +81,9 @@ evalTest = testGroup
             do
               assertEqual "T && (T && (!F))"      (Ok (B True) [])     (exec (And true (And true (Not false))))
               assertEqual "T || (F || (!T))"      (Ok (B True) [])     (exec (Or true (Or false (Not true))))
+              assertEqual "(!F) || T || F"        (Ok (B True) [])     (exec (Or (Or (Not false) true) false))
+              assertEqual "(!T)"                  (Ok (B False) [])    (exec (Not true))
+              assertEqual "T && T && (!T) && (!T)" (Ok (B False) [])   (exec (And true (And true (And (Not true) (Not true)))))
               assertEqual "F && (!T) && (!F)"     (Ok (B False) [])    (exec (And false (And (Not true) (Not false))))
               assertEqual "F || ((!T) && T)"      (Ok (B False) [])    (exec (Or false (And (Not true) true)))
               assertEqual "T && (F || T) && (!F) && (T &&  (!F))"
@@ -113,7 +116,10 @@ evalTest = testGroup
          testCase "Compound Arithmetic" $ ---TODO add compound with division and floats
             do 
               assertEqual "2 + 4 * 3  =? "             (Ok (I 14) [])  (exec (Plus two (Mult four three)))
+              assertEqual "(4 / 2) * 3 =? "            (Ok (I 6) []) (exec (Mult (Div four two) three))
+              assertEqual "1 + 3 * 5 * 2 / 2 =? "      (Ok (I 16) []) (exec (Plus one (Mult three (Mult five (Div two two)))))
               assertEqual "(2 + -4) * 3 =? "          (Ok (I (-6)) []) (exec (Mult (Plus two nfour) three))
+              assertEqual "(2 * (2 + 2)) - 3"         (Ok (I 5) [])   (exec (Minus (Mult (Plus two two) two) three))
               assertEqual "2 * 3 + 3 * 2 - 4 =? "     (Ok (I 8) [])   (exec (Minus (Plus (Mult two three) (Mult three two)) four))
               assertEqual "2 * (3 + 3) * (2 - 4) =? " (Ok (I (-24)) []) (exec (Mult (Mult two (Plus three three)) (Minus two four)))
               assertEqual "2 % (3 + 2)=?"             (Ok (I 2) []) (exec (Modulus two (Plus three two))),
@@ -121,7 +127,8 @@ evalTest = testGroup
          testCase "If Statements" $
             do 
               assertEqual "if 3 then 4 else 2 =? "       (Ok (I 4) [])  (exec (If three four two))
-              assertEqual "if 0 then 1 else 4"           (Ok (I 4) [])  (exec (If zero one four))
+              assertEqual "if 0 then 1 else 4 =?"           (Ok (I 4) [])  (exec (If zero one four))
+              assertEqual "if 1 then 2 else 3 =?"         (Ok (I 2) [])   (exec (If one two three))
               assertEqual "if 3 * 0 then 1 else 2  =? "  (Ok (I 2) [])  (exec (If (Mult three zero) one two))
               assertEqual "if 3 * 2 then 1 else 2  =? "  (Ok (I 1) [])  (exec (If (Mult three two) one two))
               assertEqual "if 3 < 4 then true else false = ?" (Ok (B True) []) (exec (If (LessThan three four) true false))
@@ -131,7 +138,9 @@ evalTest = testGroup
          testCase "Let Statements" $
             do 
               assertEqual "let x = 4 in x * 2 =? "                   (Ok (I 8) [])  (exec (Let "x" four (Mult (Var "x") two)))
+              assertEqual "let x = 1 in 2 + 2=?"                     (Ok (I 4) [])  (exec (Let "x" one (Plus two two)))
               assertEqual "let q = 2 - 1 in 4 / q=? "                (Ok (I 4) [])  (exec (Let "q" (Minus two one) (Div four (Var "q"))))
+              assertEqual "let k = 1 in 4 * k - 1=?"             (Ok (I 3) [])  (exec (Let "k" one (Minus (Mult four (Var "k") )one)))
               assertEqual "let x = 4 * -2 in x - 2 =? "              (Ok (I (-10)) [])  (exec (Let "x" (Mult four ntwo) (Minus (Var "x") two)))
               assertEqual "let x = 3 in let y = x * x in y + 2 =?"   (Ok (I 11) []) (exec (Let "x" three (Let "y" (Mult (Var "x") (Var "x")) (Plus (Var "y") two))))
               assertEqual "let x = 2 in let y = x + 1 in y * 2 =? "  (Ok (I 6) [])  (exec (Let "x" two (Let "y" (Plus (Var "x") one)  (Mult (Var "y") two)))),
