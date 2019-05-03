@@ -328,6 +328,10 @@ evalTest = testGroup
               assertBool "elem 1 [3, 4, 1] should be True" $ exec (App (App (Var "elem") (ValInt 1)) (Cons (ValInt 3) (Cons (ValInt 4) (Cons (ValInt 1) Nil)))) == (Ok (B True) [])
               assertBool "elem 1 [3, 4, 5, 6] should be False" $ 
                 exec (App (App (Var "elem") (ValInt 1)) (Cons (ValInt 3) (Cons (ValInt 4) (Cons (ValInt 5) (Cons (ValInt 6) Nil))))) == (Ok (B False) [])
+              assertBool "chr 1 should be SOH" $ exec (App (Var "chr") (ValInt 7)) == (Ok (C '\a') [])
+              assertBool "ord c should be 99" $ exec (App (Var "ord") (ValChar 'c')) == (Ok (I 99) [])
+              assertBool "float 55 should be 55.0" $ exec (App (Var "float") (ValInt 55)) == (Ok (F 55.0) [])
+              assertBool "int 57.567 should be 57" $ exec (App (Var "int") (ValFloat 57.567)) == (Ok (I 57) [])
 
     ]
 
