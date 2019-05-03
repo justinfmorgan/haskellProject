@@ -17,10 +17,8 @@ checktest = testGroup "CheckTest"
             do
                 assertEqual "\\x -> x y" (Set.singleton (ErrorMsg ("Undefined variable use of an unbound variable y"))) (check (Lam "x" (App (Var "x") (Var "y"))))
                 assertEqual "\\xa -> xa ya" (Set.singleton (ErrorMsg ("Undefined variable use of an unbound variable ya"))) (check(Lam "xa" (App (Var "xa") (Var "ya"))))
-                --assertEqual "\\xa -> xa * ya + 4" (Set.singleton (ErrorMsg ("Undefined variable use of an unbound variable ya"))) 
-                            --(check (Lam "xa" (Plus (Mult (Var "xa") (Var "ya")) (ValInt 4))))
-                assertEqual "\\xx -> \\yy -> \\zz -> xx - yy * zz + ww" (Set.singleton (ErrorMsg ("Undefined variable use of an unbound variable ww"))) 
-                            (check (Lam "xx" (Lam "yy" (Lam "zz" (Plus (Minus (Var "xx") (Mult (Var "yy") (Var "zz"))) (Var "ww")))))),
+                assertEqual "\\xa -> xa * ya + 4" (Set.singleton (ErrorMsg ("Undefined variable use of an unbound variable ya"))) (check (Lam "xa" (Plus (Mult (Var "xa") (Var "ya")) (ValInt 4))))
+                assertEqual "\\xx -> \\yy -> \\zz -> xx - yy * zz + ww" (Set.singleton (ErrorMsg ("Undefined variable use of an unbound variable ww"))) (check (Lam "xx" (Lam "yy" (Lam "zz" (Plus (Minus (Var "xx") (Mult (Var "yy") (Var "zz"))) (Var "ww")))))),
   		
         testCase "UnusedVar" $
             do

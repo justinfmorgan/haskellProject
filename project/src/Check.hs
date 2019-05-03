@@ -128,7 +128,37 @@ freeVars :: Ast -> Set String
 freeVars (Var s) = Set.singleton s
 freeVars (App t1 t2) = Set.union (freeVars t1) (freeVars t2)
 freeVars (Lam s t1) = Set.delete s (freeVars t1)
-freeVars _ = Set.empty --FIXME do we need all the cases of ast??
+freeVars (ValBool a) = Set.empty
+freeVars (ValInt a) = Set.empty
+freeVars (ValFloat a) = Set.empty
+freeVars (And a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (Or a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (Not a) = (freeVars a)
+freeVars (ValChar a) = Set.empty 
+freeVars (Plus a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (Minus a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (Mult a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (Div a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (DivFloat a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (Modulus a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (Equal a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (NotEqual a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (GreatThanOrEqual a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (GreaterThan a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (LessThanOrEqual a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (LessThan a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (Cons a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (Separator a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (Concat a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (IntExp a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (FloatExp a b) =  Set.union (freeVars a) (freeVars b)
+freeVars (ListIndex a b) = (freeVars a)
+freeVars (Print a) = (freeVars a)
+freeVars (Nil) = Set.empty
+freeVars (If a b c) = Set.union (Set.union (freeVars a)(freeVars b)) (freeVars c)
+freeVars (Let str b c) = Set.union (used b) (freeVars c)
+freeVars (DotMixIn a b) = Set.union (freeVars a) (freeVars b)
+--freeVars _ = Set.empty --FIXME do we need all the cases of ast??
 
 -- when are there no free variables in a lambda expression?
 isClosed :: Ast -> Bool
