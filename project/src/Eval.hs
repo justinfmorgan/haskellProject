@@ -10,9 +10,8 @@ import Data.Char (ord, chr)
 
 data Val = I Integer | B Bool | F Double | C Char 
          | Ls [Val]
-         | Fun (Val -> (Unsafe Val, [String])) --Fun (Val -> (Unsafe Val, [String]) ) --FIXME since this is a functional language, one thing that can be returned is a function
-                                  -- FIXME This has to incorporate Writer piece, Fun (Val -> (Unsafe Val, [String]))
---int truncate
+         | Fun (Val -> (Unsafe Val, [String])) 
+         
 instance Show Val where
   show (I i) = show i
   show (B b) = show b
