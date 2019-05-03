@@ -42,6 +42,7 @@ exec ast = case run ast of
            (Left a, b) -> RuntimeError a b
            (Right val, b) -> Ok val b
 
+-- Does not work with stdLib Functions
 execute :: String -> LangOut --will stop if there is an undefined variable being use because this is an error!
 execute s = case (parse parser) s of
   Just (ast,"") -> if (errorMsg ast == Set.empty) then case run ast of 
@@ -49,6 +50,15 @@ execute s = case (parse parser) s of
                                                           (Right val, b) -> Ok val b
                                                   else UndefinedVarError "undefined variable in usage"
   _  -> ParseError
+
+-- Works with stdLib functions but does not produce UndefinedVarError
+execute' :: String -> LangOut
+execute' s = case (parse parser) s of
+  Just (ast,"") ->case run ast of 
+                       (Left a, b) -> RuntimeError a b
+                       (Right val, b) -> Ok val b
+  _  -> ParseError
+
 
 -- | perform static checking on the program string, may be empty if there is a parse error
 warn :: String -> (Set WarningMsg) 
