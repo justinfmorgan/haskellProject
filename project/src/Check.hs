@@ -29,6 +29,9 @@ data WarningMsg = ErrorMsg String  -- ^ This is the Warning for use of Undefined
 
   -}
 
+errorMsg:: Ast -> Set WarningMsg --only gets errormsg warnings so that this can stop execution because if there is an undefined variable name execution should stop!!
+errorMsg x =  Set.map f (freeVars x)
+
 -- | perform static checking on the Ast
 -- the output a set of warning on that input Ast/
 check :: Ast -> Set WarningMsg

@@ -271,16 +271,17 @@ evalTest = testGroup
            do 
             assertEqual "2 ** 4 =?" (Ok (I 16) []) (exec (IntExp two four))
             assertEqual "4 ** 1 =?"  (Ok (I 4) []) (exec (IntExp four one))
-            assertEqual "3.0 ^ 1.0 =?" (Ok (F 3.0) []) (exec (FloatExp threef onef))
-            assertEqual "1.2 ^ 3.0 =?" (Ok (F (1.7279999999999998)) []) (exec (FloatExp onetwof threef)),
+            assertEqual "3.0 ^ 1.0 =?" (Ok (F 3.0) []) (exec (FloatExp threef onef)),
             
-
-          testCase "Separator Statements" $
+          testCase "Separator and Print Statements" $
           do
            assertEqual "(3 + 2);(2 + 1) = ?" (Ok (I 3) []) (exec (Separator (Plus three two) (Plus two one)))
-           assertEqual "(4 - 1);(4 + (2 * 3)) =?" (Ok (I 10) []) (exec (Separator (Minus four one)(Plus four (Mult two three)))),
-        
-          
+           assertEqual "(4 - 1);(4 + (2 * 3)) =?" (Ok (I 10) []) (exec (Separator (Minus four one)(Plus four (Mult two three))))
+           assertEqual "print(1); print(2)" (Ok (I 2) ["1", "2"]) (exec (Separator (Print one) (Print two)))
+           assertEqual "print(3); print(2); print(1); print(1)" (Ok (I 1) ["3", "2", "1","1"]) (exec (Separator (Print (ValInt 3)) (Separator (Print (ValInt 2)) (Separator (Print (ValInt 1)) (Print (ValInt 1))))))
+           assertEqual "print(1); print(2); 2 * 2" (Ok (I 4) ["1", "2"]) (exec (Separator (Print (ValInt 1)) (Separator (Print (ValInt 2)) (Mult (ValInt 2) (ValInt 2)))))
+           assertEqual "print(1.0); print(2*8); 4.0 + 1.0" (Ok (F 5.0) ["1.0", "16"]) (exec (Separator (Print (ValFloat 1.0)) (Separator (Print (Mult (ValInt 2) (ValInt 8))) (Plus (ValFloat 4.0) (ValFloat 1.0))))),
+
           testCase "ListIndex" $
             do
               assertEqual "[1] !! 0 =?" (Ok (I 1) []) (exec (ListIndex simpleList1 zero))
