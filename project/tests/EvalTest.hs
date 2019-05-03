@@ -55,9 +55,10 @@ list2 = (Cons true (Cons false (Cons true (Cons false Nil))))
 list3 = (Cons one (Cons onef (Cons true Nil)))
 list4 = (Cons nonef (Cons onefextra (Cons nfourfextra (Cons nfour Nil))))
 
-foldTestCase [] = return ()
-foldTestCase (test1:testRest) = do test1
-                                   foldTestCase testRest
+-- | test if an unsafe is error
+isError :: LangOut -> Bool 
+isError (Ok _ _) = False 
+isError _ = True 
 
 evalTest = testGroup
       "Eval Test"
@@ -271,7 +272,7 @@ evalTest = testGroup
             assertEqual "2 ** 4 =?" (Ok (I 16) []) (exec (IntExp two four))
             assertEqual "4 ** 1 =?"  (Ok (I 4) []) (exec (IntExp four one))
             assertEqual "3.0 ^ 1.0 =?" (Ok (F 3.0) []) (exec (FloatExp threef onef))
-            assertEqual "1.2 ^ 3.0 =?" (Ok (F (1.728)) []) (exec (FloatExp onetwof threef)),
+            assertEqual "1.2 ^ 3.0 =?" (Ok (F (1.7279999999999998)) []) (exec (FloatExp onetwof threef)),
             
 
           testCase "Separator Statements" $
@@ -308,13 +309,16 @@ evalTest = testGroup
               assertEqual "(\\xx -> xx*5) . (\\yy -> yy*5) 10 = ?" (Ok (I 250) []) 
                           (exec (App (DotMixIn (Lam "xx" (Mult (Var "xx") (ValInt 5))) (Lam "yy" (Mult (Var "yy") (ValInt 5)))) (ValInt 10)))
               assertEqual "(\\xx -> xx) . (\\yy -> yy) 10 = ?" (Ok (I 10) [])
-                          (exec (App (DotMixIn (Lam "xx" (Var "xx")) (Lam "yy" (Var "yy"))) (ValInt 10)))
+                          (exec (App (DotMixIn (Lam "xx" (Var "xx")) (Lam "yy" (Var "yy"))) (ValInt 10))),
 
           --    assertEqual "(\\bb -> bb^5) . (\\cc -> cc*3 - 19) 7.5 = ?" (Ok (F (525.21875)) [])
         --                  (exec (App (DotMixIn (Lam "bb" (FloatExp (Var "bb") (ValInt 5))) (Lam "cc" (Minus (Mult (Var "cc") (ValInt 3)) (ValInt 19)))) (ValFloat 7.5)))
-         --testCase "StdLib Tests" $
-            --do
-
-
+          testCase "stdLib Tests" $ 
+            do 
+              assertBool "for a empty list, the head should return an error" $ isError (exec (Var "head" `App` Nil))
+              assertBool "head of [1, \\x -> x] should be 1" $ (exec (Var "head" `App` (ValInt 1 `Cons` Lam "x" (Var "x") `Cons` Nil))) == (Ok (I 1) [])
+              assertBool "for a empty list, the length shold be 0" $ (exec (Var "len" `App` Nil)) == (Ok (I 0) [])
+              assertBool "length of [True, 1, \\x -> x, False] should be 4" $  
+                exec (Var "len" `App` (ValBool True `Cons` ValInt 1 `Cons` Lam "x" (Var "x") `Cons` ValBool False `Cons` Nil)) == (Ok (I 4) [])
     ]
 
