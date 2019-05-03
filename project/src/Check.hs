@@ -14,7 +14,7 @@ import EnvUnsafeLog
 --   * defined but unused variable
 --   * type errors
 
-data WarningMsg = UndefinedVarUse String  -- ^ This is the Warning for use of Undefined variable name => unbound *** should be an error
+data WarningMsg = ErrorMsg String  -- ^ This is the Warning for use of Undefined variable name => unbound *** should be an error
                 | UnusedVar String -- => bound but not used Mixin Alex
                 | TypeError String
   -- ...
@@ -119,7 +119,7 @@ used (DotMixIn a b) = Set.union (used a) (used b)
 --used (Letrec str b c) = Set.union (used b) (used c)
 
 f :: String -> WarningMsg -- 0 means undefinedvaruse, 1 means unusedvar
-f x = UndefinedVarUse ("unbound variable " ++ x)
+f x = ErrorMsg ("Undefined variable use of an unbound variable " ++ x)
 
 f2:: String -> WarningMsg 
 f2 x = UnusedVar ("bound but unused variable " ++ x )
