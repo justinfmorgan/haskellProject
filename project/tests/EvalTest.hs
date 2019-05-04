@@ -374,7 +374,20 @@ evalTest = testGroup
                          exec (App (App (Var "map") (Lam "x" (Var "x"))) (Cons (ValInt 1) (Cons (ValInt 2) (Cons (ValInt 3) Nil)))) == (Ok (Ls [I 1,I 2,I 3]) [])
               assertBool "filter (\\x -> x >= 1) (-1 : 0 : 1 : 2 : 3 : []) should be [1,2,3]" $
                          exec (App (App (Var "filter") (Lam "x" (GreatThanOrEqual (Var "x") (ValInt 1)))) (Cons (ValInt (-1)) (Cons (ValInt 0) (Cons (ValInt 1) (Cons (ValInt 2) (Cons (ValInt 3) Nil))))))
-                         == (Ok (Ls [I 1, I 2, I 3]) [])
+                         == (Ok (Ls [I 1, I 2, I 3]) []),
+
+          testCase "RuntimeError Tests" $
+            do
+              assertBool "5 ++ true" $ isError (exec (Concat (ValInt 5) (ValInt 5)))
+              assertEqual "(1 : 0 : 3 : 4 : []) !! 10" (RuntimeError "List is not big enough" [])
+                (exec (ListIndex (Cons (ValInt 1) (Cons (ValInt 0) (Cons (ValInt 3) (Cons (ValInt 4) Nil)))) (ValInt 10)))
+              assertEqual "(1 // 0)" (RuntimeError "Dividing by zero error" []) (exec (Div (ValInt 1) (ValInt 0)))
+              assertEqual "(1.0 / 0.00)" (RuntimeError "Dividing by zero error" []) (exec (DivFloat (ValFloat 1.0) (ValFloat 0.00)))
+              assertEqual "1 : 2 : 3 : 4" (RuntimeError "type mismatch" []) (exec (Cons (ValInt 1) (Cons (ValInt 2) (Cons (ValInt 3) (ValInt 4)))))
+              assertEqual "if 'c' then 1 else 0" (RuntimeError "if requires a bool, int or float!" []) (exec (If (ValChar 'c') (ValInt 1) (ValInt 0)))
+              assertEqual "(\\x -> x // 'c') 5" (RuntimeError "error did not apply" []) (exec (App (Lam "x" (Div (Var "x") (ValChar 'c'))) (ValInt 5)))
+              assertEqual "1 && 'c' && no" (RuntimeError "It's not bool!" []) (exec (And (And (ValInt 1) (ValChar 'c')) (Var "no")))
+              assertEqual "2551 !! 5" (RuntimeError "did not give a list!" []) (exec (ListIndex (ValInt 2551) (ValInt 5)))
 
     ]
 
