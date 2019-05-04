@@ -282,11 +282,16 @@ evalTest = testGroup
            do 
             assertEqual "2 ** 4 =?" (Ok (I 16) []) (exec (IntExp two four))
             assertEqual "4 ** 1 =?"  (Ok (I 4) []) (exec (IntExp four one))
+            assertEqual "4 ** 2 =?"   (Ok (I 16) []) (exec (IntExp four two))
+            assertEqual "3 ** 3 =?"   (Ok (I 27) []) (exec (IntExp three three))
+            assertEqual "2.0 ^ 2.0 =?" (Ok (F 4.0) []) (exec (FloatExp twof twof))
+            assertEqual "3.0 ^ 2.0 -?" (Ok (F 9.0) []) (exec (FloatExp threef twof))
             assertEqual "3.0 ^ 1.0 =?" (Ok (F 3.0) []) (exec (FloatExp threef onef)),
             
           testCase "Separator and Print Statements" $
           do
            assertEqual "(3 + 2);(2 + 1) = ?" (Ok (I 3) []) (exec (Separator (Plus three two) (Plus two one)))
+           assertEqual "print(3);(2+3) =?" (Ok (I 5)["3"] )   (exec (Separator (Print (ValInt 3)) (Plus two three)))
            assertEqual "(4 - 1);(4 + (2 * 3)) =?" (Ok (I 10) []) (exec (Separator (Minus four one)(Plus four (Mult two three))))
            assertEqual "print(1); print(2)" (Ok (I 2) ["1", "2"]) (exec (Separator (Print one) (Print two)))
            assertEqual "print(3); print(2); print(1); print(1)" (Ok (I 1) ["3", "2", "1","1"]) (exec (Separator (Print (ValInt 3)) (Separator (Print (ValInt 2)) (Separator (Print (ValInt 1)) (Print (ValInt 1))))))
@@ -322,6 +327,14 @@ evalTest = testGroup
                           (exec (App (DotMixIn (Lam "xx" (Mult (Var "xx") (ValInt 5))) (Lam "yy" (Mult (Var "yy") (ValInt 5)))) (ValInt 10)))
               assertEqual "(\\xx -> xx) . (\\yy -> yy) 10 = ?" (Ok (I 10) [])
                           (exec (App (DotMixIn (Lam "xx" (Var "xx")) (Lam "yy" (Var "yy"))) (ValInt 10))),
+       
+           testCase "Print Tests" $
+            do
+              assertEqual "print(6) =?" (Ok (I 6) ["6"]) (exec (Print (ValInt 6)))
+              assertEqual "print((1 : 2 : 3 :[])) =?" (Ok (Ls [I 1,I 2,I 3]) ["[1,2,3]"])
+                         (exec (Print (Cons (ValInt 1) (Cons (ValInt 2) (Cons (ValInt 3) Nil)))))
+              assertEqual "print('i') =?"  (Ok (C 'i') ["'i'"]) (exec (Print (ValChar 'i'))),
+
 
           --    assertEqual "(\\bb -> bb^5) . (\\cc -> cc*3 - 19) 7.5 = ?" (Ok (F (525.21875)) [])
         --                  (exec (App (DotMixIn (Lam "bb" (FloatExp (Var "bb") (ValInt 5))) (Lam "cc" (Minus (Mult (Var "cc") (ValInt 3)) (ValInt 19)))) (ValFloat 7.5)))
