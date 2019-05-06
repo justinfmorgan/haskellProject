@@ -344,6 +344,9 @@ evalTest = testGroup
           testCase "Print Tests" $
             do
               assertEqual "print(6) =?" (Ok (I 6) ["6"]) (exec (Print (ValInt 6)))
+              assertEqual "print(1); print(2)" (Ok (I 2) ["1", "2"]) (exec (Separator (Print one) (Print two)))
+              assertEqual "print(('h' : 'i' : [])) =?" (Ok (Ls [C 'h',C 'i']) ["['h','i']"])
+                          (exec(Print (Cons (ValChar 'h') (Cons (ValChar 'i') Nil))))
               assertEqual "print((1 : 2 : 3 :[])) =?" (Ok (Ls [I 1,I 2,I 3]) ["[1,2,3]"])
                           (exec (Print (Cons (ValInt 1) (Cons (ValInt 2) (Cons (ValInt 3) Nil)))))
               assertEqual "print('i') =?"  (Ok (C 'i') ["'i'"]) (exec (Print (ValChar 'i')))
