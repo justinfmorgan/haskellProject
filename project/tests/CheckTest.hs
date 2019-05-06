@@ -122,11 +122,11 @@ checktest = testGroup "CheckTest"
                 assertEqual "\\x -> \\y -> \\z -> \\w -> x*y*z*w" (Set.empty) (check (Lam "xx" (Lam "yy" (Lam "zz" (Lam "ww" (Mult (Mult (Mult (Var "xx") (Var "yy")) (Var "zz")) (Var "ww")))))))
                 assertEqual "(\\LastOne -> print(LastOne)) 58" (Set.empty)
                     (check (App (Lam "LastOne" (Print (Var "LastOne"))) (ValInt 58)))
---                assertEqual "\\x -> \\y -> 2 * 8 + x - y" (Set.empty) (check (Lam "x" (Lam "y" (Minus (Plus (Mult (ValInt 2) (ValInt 8)) (Var "x")) (Var "y")))))
-           --     assertEqual "\\x -> \\y -> \\z -> \\a -> y + z - a + x" (Set.empty) (check (Lam "x" (Lam "y" (Lam "z" (Lam "a" (Plus (Minus (Plus (Var "y") (Var "z")) (Var "a")) (Var "x")))))))
-          --      assertEqual "\\x -> 2:x" (Set.empty) (check (Lam "x" (Cons (ValInt 2) (Var "x"))) )
-          --      assertEqual "\\x -> x ++ 8:9" (Set.empty) (check (Lam "x" (Concat (Var "x") (Cons (ValInt 8) (ValInt 9)))))
---                assertEqual "\\x -> !x" (Set.empty) (check (Lam "x" (Not (Var "x"))))
-             --   assertEqual "\\x -> !x && x" (Set.empty) (check (Lam "x" (And (Not (Var "x")) (Var "x"))))
+                assertEqual "\\x -> \\y -> 2 * 8 + x - y" (Set.empty) (check (Lam "x" (Lam "y" (Minus (Plus (Mult (ValInt 2) (ValInt 8)) (Var "x")) (Var "y")))))
+                assertEqual "\\x -> \\y -> \\z -> \\a -> y + z - a + x" (Set.empty) (check (Lam "x" (Lam "y" (Lam "z" (Lam "a" (Plus (Minus (Plus (Var "y") (Var "z")) (Var "a")) (Var "x")))))))
+                assertEqual "\\x -> 2:x" (Set.empty) (check (Lam "x" (Cons (ValInt 2) (Var "x"))) )
+                assertEqual "\\x -> x ++ 8:9" (Set.empty) (check (Lam "x" (Concat (Var "x") (Cons (ValInt 8) (ValInt 9)))))
+                assertEqual "\\x -> !x" (Set.empty) (check (Lam "x" (Not (Var "x"))))
+                assertEqual "\\x -> !x && x" (Set.empty) (check (Lam "x" (And (Not (Var "x")) (Var "x"))))
   ]
 
